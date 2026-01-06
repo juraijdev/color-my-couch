@@ -42,49 +42,75 @@ const Index = () => {
     }
 
     setIsGenerating(true);
-    toast.info("Generating your customized furniture...");
+    toast.info("AI is analyzing your furniture and applying the new color...");
 
-    // Simulate AI generation for now (will be replaced with Replicate API)
     try {
-      // For demo purposes, we'll use the original image with a color overlay simulation
-      // This will be replaced with actual Replicate API call
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      
-      // Create a canvas to apply a simple color tint for demo
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = uploadedImage;
-      });
+      // Call the Replicate edge function
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recolor-furniture`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            image: uploadedImage,
+            colorName: selectedColor.name,
+            colorHex: selectedColor.hex,
+          }),
+        }
+      );
 
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to start generation");
+      }
+
+      const prediction = await response.json();
+      console.log("Prediction started:", prediction.id);
+
+      // Poll for completion
+      let result = prediction;
+      while (result.status !== "succeeded" && result.status !== "failed") {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        
+        const statusResponse = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recolor-furniture`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ predictionId: prediction.id }),
+          }
+        );
+
+        if (!statusResponse.ok) {
+          throw new Error("Failed to check generation status");
+        }
+
+        result = await statusResponse.json();
+        console.log("Prediction status:", result.status);
+      }
+
+      if (result.status === "failed") {
+        throw new Error(result.error || "Generation failed");
+      }
+
+      // Get the output image URL
+      const outputUrl = Array.isArray(result.output) ? result.output[0] : result.output;
       
-      if (!ctx) throw new Error("Could not get canvas context");
-      
-      canvas.width = img.width;
-      canvas.height = img.height;
-      
-      // Draw original image
-      ctx.drawImage(img, 0, 0);
-      
-      // Apply color overlay with multiply blend mode
-      ctx.globalCompositeOperation = "color";
-      ctx.fillStyle = selectedColor.hex;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Reset composite operation
-      ctx.globalCompositeOperation = "source-over";
-      
-      const resultDataUrl = canvas.toDataURL("image/png");
-      setGeneratedImage(resultDataUrl);
-      toast.success("Furniture customization complete!");
+      if (!outputUrl) {
+        throw new Error("No output image received");
+      }
+
+      setGeneratedImage(outputUrl);
+      toast.success("Furniture recoloring complete!");
     } catch (error) {
       console.error("Generation error:", error);
-      toast.error("Failed to generate. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to generate. Please try again.");
     } finally {
       setIsGenerating(false);
     }
