@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Save, Loader2, ImageIcon, Sparkles } from "lucide-react";
+import { Download, Save, Loader2, ImageIcon, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,6 +16,7 @@ interface PreviewPanelProps {
   isGenerating: boolean;
   onGenerate: () => void;
   canGenerate: boolean;
+  onClearImage?: () => void;
 }
 
 export function PreviewPanel({
@@ -24,6 +25,7 @@ export function PreviewPanel({
   isGenerating,
   onGenerate,
   canGenerate,
+  onClearImage,
 }: PreviewPanelProps) {
   const [fileName, setFileName] = useState("customized-furniture");
   const [format, setFormat] = useState("png");
@@ -176,6 +178,17 @@ export function PreviewPanel({
               <Save className="w-4 h-4 mr-2" />
               Save to Gallery
             </Button>
+
+            {onClearImage && originalImage && (
+              <Button
+                className="w-full"
+                variant="ghost"
+                onClick={onClearImage}
+              >
+                <X className="w-4 h-4 mr-2" />
+                New Image
+              </Button>
+            )}
           </div>
         </div>
       </div>

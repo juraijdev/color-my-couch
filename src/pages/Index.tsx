@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { ColorPalette, ColorOption } from "@/components/ColorPalette";
 import { ImageUploader } from "@/components/ImageUploader";
+import { MaskPainter, MaskPainterRef } from "@/components/MaskPainter";
 import { PreviewPanel } from "@/components/PreviewPanel";
 import { WorkflowSteps } from "@/components/WorkflowSteps";
 
@@ -11,6 +12,7 @@ const Index = () => {
   const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const maskPainterRef = useRef<MaskPainterRef>(null);
 
   const getCurrentStep = (): 1 | 2 | 3 => {
     if (!uploadedImage) return 1;
@@ -41,11 +43,20 @@ const Index = () => {
       return;
     }
 
+    // Get the mask from the painter
+    const maskDataUrl = maskPainterRef.current?.getMaskDataUrl();
+    const hasMask = maskPainterRef.current?.hasMask();
+
+    if (!hasMask || !maskDataUrl) {
+      toast.error("Please paint over the furniture parts you want to recolor");
+      return;
+    }
+
     setIsGenerating(true);
-    toast.info("AI is analyzing your furniture and applying the new color...");
+    toast.info("AI is recoloring the selected areas...");
 
     try {
-      // Call the Replicate edge function
+      // Call the Replicate edge function with image and mask
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recolor-furniture`,
         {
@@ -56,6 +67,7 @@ const Index = () => {
           },
           body: JSON.stringify({
             image: uploadedImage,
+            mask: maskDataUrl,
             colorName: selectedColor.name,
             colorHex: selectedColor.hex,
           }),
@@ -131,17 +143,25 @@ const Index = () => {
           />
         </aside>
 
-        {/* Main Content - Upload Area */}
+        {/* Main Content - Upload Area or Mask Painter */}
         <div className="flex-1 flex flex-col min-h-0">
           <WorkflowSteps currentStep={getCurrentStep()} />
 
           <div className="flex-1 p-4 lg:p-8 overflow-auto">
             <div className="h-full panel p-6">
-              <ImageUploader
-                uploadedImage={uploadedImage}
-                onImageUpload={handleImageUpload}
-                onImageClear={handleImageClear}
-              />
+              {uploadedImage ? (
+                <MaskPainter
+                  ref={maskPainterRef}
+                  imageUrl={uploadedImage}
+                  selectedColor={selectedColor?.name || null}
+                />
+              ) : (
+                <ImageUploader
+                  uploadedImage={uploadedImage}
+                  onImageUpload={handleImageUpload}
+                  onImageClear={handleImageClear}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -154,6 +174,7 @@ const Index = () => {
             isGenerating={isGenerating}
             onGenerate={handleGenerate}
             canGenerate={canGenerate}
+            onClearImage={handleImageClear}
           />
         </aside>
       </main>
