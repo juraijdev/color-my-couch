@@ -22,7 +22,13 @@ serve(async (req) => {
     })
 
     const body = await req.json()
-    console.log("Request body:", { colorName: body.colorName, colorHex: body.colorHex, hasImage: !!body.image })
+    console.log("Request body:", { 
+      colorName: body.colorName, 
+      colorHex: body.colorHex, 
+      hasImage: !!body.image,
+      hasMask: !!body.mask,
+      predictionId: body.predictionId
+    })
 
     // Check prediction status
     if (body.predictionId) {
@@ -35,10 +41,10 @@ serve(async (req) => {
     }
 
     // Validate required fields
-    if (!body.image || !body.colorName || !body.colorHex) {
+    if (!body.image || !body.mask || !body.colorName || !body.colorHex) {
       return new Response(
         JSON.stringify({ 
-          error: "Missing required fields: image, colorName, and colorHex are required" 
+          error: "Missing required fields: image, mask, colorName, and colorHex are required" 
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
@@ -46,22 +52,24 @@ serve(async (req) => {
       )
     }
 
-    // Create a detailed prompt for furniture recoloring
-    const prompt = `Change the color of the furniture in this image to ${body.colorName} (${body.colorHex}). Only change the furniture color, keep the background, shadows, textures, and all other elements exactly the same. Maintain the realistic lighting and material properties of the furniture. The furniture should have the new ${body.colorName} color applied naturally.`
+    // Create a prompt for inpainting - only the masked area will be affected
+    const prompt = `${body.colorName} colored furniture fabric, same material texture, ${body.colorHex} color, realistic lighting, high quality, professional product photo`
 
-    console.log("Starting furniture recolor with prompt:", prompt)
+    console.log("Starting furniture inpainting with FLUX Fill Pro")
+    console.log("Prompt:", prompt)
 
-    // Use flux-kontext-pro for intelligent image editing
-    // This model understands context and can selectively edit parts of an image
+    // Use FLUX Fill Pro for inpainting - this model takes image + mask
+    // and only modifies the masked area, leaving the rest completely untouched
     const prediction = await replicate.predictions.create({
-      model: "black-forest-labs/flux-kontext-pro",
+      model: "black-forest-labs/flux-fill-pro",
       input: {
+        image: body.image,
+        mask: body.mask,
         prompt: prompt,
-        image_url: body.image,
-        aspect_ratio: "match_input_image",
+        steps: 50,
+        guidance: 30,
         output_format: "png",
-        safety_tolerance: 5,
-        prompt_upsampling: false
+        safety_tolerance: 5
       }
     })
 
