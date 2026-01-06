@@ -9,3 +9,6 @@ max_rows = 1000
 
 [functions.recolor-furniture]
 verify_jwt = false
+
+[functions.segment-furniture]
+verify_jwt = false

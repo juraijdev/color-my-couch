@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { ColorPalette, ColorOption } from "@/components/ColorPalette";
 import { ImageUploader } from "@/components/ImageUploader";
-import { MaskPainter, MaskPainterRef } from "@/components/MaskPainter";
+import { ClickSelector, ClickSelectorRef } from "@/components/ClickSelector";
 import { PreviewPanel } from "@/components/PreviewPanel";
 import { WorkflowSteps } from "@/components/WorkflowSteps";
 
@@ -12,29 +12,36 @@ const Index = () => {
   const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const maskPainterRef = useRef<MaskPainterRef>(null);
+  const [hasSelection, setHasSelection] = useState(false);
+  const clickSelectorRef = useRef<ClickSelectorRef>(null);
 
   const getCurrentStep = (): 1 | 2 | 3 => {
     if (!uploadedImage) return 1;
-    if (!selectedColor) return 2;
+    if (!hasSelection || !selectedColor) return 2;
     return 3;
   };
 
   const handleImageUpload = useCallback((imageDataUrl: string) => {
     setUploadedImage(imageDataUrl);
     setGeneratedImage(null);
-    toast.success("Image uploaded successfully!");
+    setHasSelection(false);
+    toast.success("Image uploaded! Click on furniture parts to select them.");
   }, []);
 
   const handleImageClear = useCallback(() => {
     setUploadedImage(null);
     setGeneratedImage(null);
     setSelectedColor(null);
+    setHasSelection(false);
   }, []);
 
   const handleColorSelect = useCallback((color: ColorOption) => {
     setSelectedColor(color);
     toast.info(`Selected: ${color.name}`);
+  }, []);
+
+  const handleSelectionChange = useCallback((hasSelection: boolean) => {
+    setHasSelection(hasSelection);
   }, []);
 
   const handleGenerate = useCallback(async () => {
@@ -43,12 +50,12 @@ const Index = () => {
       return;
     }
 
-    // Get the mask from the painter
-    const maskDataUrl = maskPainterRef.current?.getMaskDataUrl();
-    const hasMask = maskPainterRef.current?.hasMask();
+    // Get the mask from the click selector
+    const maskUrl = clickSelectorRef.current?.getMaskDataUrl();
+    const hasMask = clickSelectorRef.current?.hasMask();
 
-    if (!hasMask || !maskDataUrl) {
-      toast.error("Please paint over the furniture parts you want to recolor");
+    if (!hasMask || !maskUrl) {
+      toast.error("Please click on the furniture parts you want to recolor");
       return;
     }
 
@@ -56,6 +63,21 @@ const Index = () => {
     toast.info("AI is recoloring the selected areas...");
 
     try {
+      // The mask from SAM-2 is a URL, we need to fetch it and convert to base64
+      // Or pass it directly if the recolor function accepts URLs
+      let maskDataUrl = maskUrl;
+      
+      // If the mask is a URL (not base64), fetch and convert it
+      if (maskUrl.startsWith("http")) {
+        const maskResponse = await fetch(maskUrl);
+        const maskBlob = await maskResponse.blob();
+        maskDataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(maskBlob);
+        });
+      }
+
       // Call the Replicate edge function with image and mask
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recolor-furniture`,
@@ -128,7 +150,7 @@ const Index = () => {
     }
   }, [uploadedImage, selectedColor]);
 
-  const canGenerate = Boolean(uploadedImage && selectedColor && !isGenerating);
+  const canGenerate = Boolean(uploadedImage && selectedColor && hasSelection && !isGenerating);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -143,17 +165,18 @@ const Index = () => {
           />
         </aside>
 
-        {/* Main Content - Upload Area or Mask Painter */}
+        {/* Main Content - Upload Area or Click Selector */}
         <div className="flex-1 flex flex-col min-h-0">
           <WorkflowSteps currentStep={getCurrentStep()} />
 
           <div className="flex-1 p-4 lg:p-8 overflow-auto">
             <div className="h-full panel p-6">
               {uploadedImage ? (
-                <MaskPainter
-                  ref={maskPainterRef}
+                <ClickSelector
+                  ref={clickSelectorRef}
                   imageUrl={uploadedImage}
-                  selectedColor={selectedColor?.name || null}
+                  selectedColor={selectedColor?.hex || null}
+                  onSelectionChange={handleSelectionChange}
                 />
               ) : (
                 <ImageUploader
