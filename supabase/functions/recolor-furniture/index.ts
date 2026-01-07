@@ -56,7 +56,7 @@ Professional product photography quality.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
+        model: "google/gemini-2.5-flash-image-preview",
         messages: [
           {
             role: "user",
@@ -74,6 +74,7 @@ Professional product photography quality.`;
             ]
           }
         ],
+        modalities: ["image", "text"]
       }),
     });
 
@@ -98,48 +99,30 @@ Professional product photography quality.`;
     }
 
     const aiResult = await response.json();
-    console.log("AI response received");
+    console.log("AI response structure:", JSON.stringify({
+      hasChoices: !!aiResult.choices,
+      choicesLength: aiResult.choices?.length,
+      hasImages: !!aiResult.choices?.[0]?.message?.images,
+      imagesLength: aiResult.choices?.[0]?.message?.images?.length
+    }));
 
-    // Extract the generated image from the response
-    // Gemini image generation returns the image in the content
-    const content = aiResult.choices?.[0]?.message?.content;
-    
-    // Check if there's an image in the response
+    // Extract the generated image from the response - images are in message.images array
+    const message = aiResult.choices?.[0]?.message;
     let imageUrl = null;
-    if (typeof content === 'string') {
-      // Try to find a base64 image or URL in the response
-      const base64Match = content.match(/data:image\/[^;]+;base64,[A-Za-z0-9+/=]+/);
-      if (base64Match) {
-        imageUrl = base64Match[0];
-      }
-    } else if (Array.isArray(content)) {
-      // Look for image content in array format
-      for (const item of content) {
-        if (item.type === 'image_url' || item.type === 'image') {
-          imageUrl = item.image_url?.url || item.url;
-          break;
-        }
-      }
-    }
-
-    // Check if the response has inline_data (Gemini format)
-    const parts = aiResult.choices?.[0]?.message?.content;
-    if (Array.isArray(parts)) {
-      for (const part of parts) {
-        if (part.inline_data?.data) {
-          imageUrl = `data:${part.inline_data.mime_type || 'image/png'};base64,${part.inline_data.data}`;
-          break;
-        }
-      }
+    
+    // Check for images array (correct format for Lovable AI)
+    if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
+      const firstImage = message.images[0];
+      imageUrl = firstImage.image_url?.url || firstImage.url;
+      console.log("Found image in images array");
     }
 
     if (!imageUrl) {
-      console.log("Full AI response:", JSON.stringify(aiResult, null, 2));
+      console.log("No image found in response. Full response:", JSON.stringify(aiResult, null, 2).substring(0, 2000));
       
-      // Return a descriptive response if no image was generated
       return new Response(JSON.stringify({ 
-        error: "Image generation not available. The AI analyzed your request but couldn't generate an image. Try using an external image editing tool.",
-        analysis: content 
+        error: "Image generation failed. The AI couldn't generate a recolored image. Please try again.",
+        details: message?.content || "No content returned"
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
