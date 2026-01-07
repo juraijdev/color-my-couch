@@ -53,13 +53,13 @@ serve(async (req) => {
     console.log("Starting segmentation with SAM-2")
     console.log("Points:", body.points)
 
-    // Use lucataco/segment-anything-2 which supports point prompts
+    // Use facebook/sam2 which supports point prompts
     // Format: points as [[x1,y1], [x2,y2], ...] and labels as [1, 1, ...] (1 = foreground)
     const pointCoords = body.points.map((p: { x: number, y: number }) => [p.x, p.y])
     const pointLabels = body.points.map(() => 1) // All foreground points
 
     const prediction = await replicate.predictions.create({
-      model: "meta/sam-2",
+      model: "facebook/sam-2",
       input: {
         image: body.image,
         point_coords: pointCoords,
