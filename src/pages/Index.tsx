@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { ColorPalette, ColorOption } from "@/components/ColorPalette";
 import { ImageUploader } from "@/components/ImageUploader";
-import { ClickSelector, ClickSelectorRef } from "@/components/ClickSelector";
+import { PartSelector, PartSelectorRef } from "@/components/PartSelector";
 import { PreviewPanel } from "@/components/PreviewPanel";
 import { WorkflowSteps } from "@/components/WorkflowSteps";
 
@@ -13,7 +13,7 @@ const Index = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasSelection, setHasSelection] = useState(false);
-  const clickSelectorRef = useRef<ClickSelectorRef>(null);
+  const partSelectorRef = useRef<PartSelectorRef>(null);
 
   const getCurrentStep = (): 1 | 2 | 3 => {
     if (!uploadedImage) return 1;
@@ -25,7 +25,7 @@ const Index = () => {
     setUploadedImage(imageDataUrl);
     setGeneratedImage(null);
     setHasSelection(false);
-    toast.success("Image uploaded! Click on furniture parts to select them.");
+    toast.success("Image uploaded! AI is analyzing the furniture parts...");
   }, []);
 
   const handleImageClear = useCallback(() => {
@@ -50,35 +50,18 @@ const Index = () => {
       return;
     }
 
-    // Get the mask from the click selector
-    const maskUrl = clickSelectorRef.current?.getMaskDataUrl();
-    const hasMask = clickSelectorRef.current?.hasMask();
+    const selectedParts = partSelectorRef.current?.getSelectedParts();
+    const hasParts = partSelectorRef.current?.hasSelection();
 
-    if (!hasMask || !maskUrl) {
-      toast.error("Please click on the furniture parts you want to recolor");
+    if (!hasParts || !selectedParts || selectedParts.length === 0) {
+      toast.error("Please select which furniture parts to recolor");
       return;
     }
 
     setIsGenerating(true);
-    toast.info("AI is recoloring the selected areas...");
+    toast.info("AI is recoloring the selected parts...");
 
     try {
-      // The mask from SAM-2 is a URL, we need to fetch it and convert to base64
-      // Or pass it directly if the recolor function accepts URLs
-      let maskDataUrl = maskUrl;
-      
-      // If the mask is a URL (not base64), fetch and convert it
-      if (maskUrl.startsWith("http")) {
-        const maskResponse = await fetch(maskUrl);
-        const maskBlob = await maskResponse.blob();
-        maskDataUrl = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(maskBlob);
-        });
-      }
-
-      // Call the Replicate edge function with image and mask
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recolor-furniture`,
         {
@@ -89,7 +72,7 @@ const Index = () => {
           },
           body: JSON.stringify({
             image: uploadedImage,
-            mask: maskDataUrl,
+            selectedParts: selectedParts,
             colorName: selectedColor.name,
             colorHex: selectedColor.hex,
           }),
@@ -98,50 +81,26 @@ const Index = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to start generation");
+        throw new Error(errorData.error || "Failed to generate");
       }
 
-      const prediction = await response.json();
-      console.log("Prediction started:", prediction.id);
-
-      // Poll for completion
-      let result = prediction;
-      while (result.status !== "succeeded" && result.status !== "failed") {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        
-        const statusResponse = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recolor-furniture`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({ predictionId: prediction.id }),
-          }
-        );
-
-        if (!statusResponse.ok) {
-          throw new Error("Failed to check generation status");
-        }
-
-        result = await statusResponse.json();
-        console.log("Prediction status:", result.status);
-      }
-
-      if (result.status === "failed") {
-        throw new Error(result.error || "Generation failed");
-      }
-
-      // Get the output image URL
-      const outputUrl = Array.isArray(result.output) ? result.output[0] : result.output;
+      const result = await response.json();
       
-      if (!outputUrl) {
+      if (result.error) {
+        // If there's an analysis but no image, show it
+        if (result.analysis) {
+          toast.info("AI analyzed your request but couldn't generate an image directly.");
+          console.log("AI Analysis:", result.analysis);
+        }
+        throw new Error(result.error);
+      }
+
+      if (result.output) {
+        setGeneratedImage(result.output);
+        toast.success("Furniture recoloring complete!");
+      } else {
         throw new Error("No output image received");
       }
-
-      setGeneratedImage(outputUrl);
-      toast.success("Furniture recoloring complete!");
     } catch (error) {
       console.error("Generation error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to generate. Please try again.");
@@ -165,15 +124,15 @@ const Index = () => {
           />
         </aside>
 
-        {/* Main Content - Upload Area or Click Selector */}
+        {/* Main Content - Upload Area or Part Selector */}
         <div className="flex-1 flex flex-col min-h-0">
           <WorkflowSteps currentStep={getCurrentStep()} />
 
           <div className="flex-1 p-4 lg:p-8 overflow-auto">
             <div className="h-full panel p-6">
               {uploadedImage ? (
-                <ClickSelector
-                  ref={clickSelectorRef}
+                <PartSelector
+                  ref={partSelectorRef}
                   imageUrl={uploadedImage}
                   selectedColor={selectedColor?.hex || null}
                   onSelectionChange={handleSelectionChange}
