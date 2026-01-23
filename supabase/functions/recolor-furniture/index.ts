@@ -5,6 +5,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface ColorAssignment {
+  partName: string;
+  partMaterial: string;
+  colorName: string;
+  colorHex: string;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -18,17 +25,15 @@ serve(async (req) => {
 
     const body = await req.json()
     console.log("Recolor request:", { 
-      colorName: body.colorName, 
-      colorHex: body.colorHex, 
       hasImage: !!body.image,
-      selectedParts: body.selectedParts?.map((p: { name: string }) => p.name),
+      colorAssignments: body.colorAssignments,
     })
 
     // Validate required fields
-    if (!body.image || !body.colorName || !body.selectedParts || body.selectedParts.length === 0) {
+    if (!body.image || !body.colorAssignments || body.colorAssignments.length === 0) {
       return new Response(
         JSON.stringify({ 
-          error: "Missing required fields: image, colorName, and selectedParts are required" 
+          error: "Missing required fields: image and colorAssignments are required" 
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
@@ -36,19 +41,28 @@ serve(async (req) => {
       )
     }
 
-    // Create a detailed prompt for image generation
-    const partsList = body.selectedParts.map((p: { name: string; material: string }) => 
-      `${p.name} (${p.material})`
-    ).join(", ");
+    // Build detailed prompt for multi-color recoloring
+    const assignments: ColorAssignment[] = body.colorAssignments;
     
-    const prompt = `Edit this furniture image: Change the color of ONLY these parts to ${body.colorName} (${body.colorHex}): ${partsList}. 
-Keep everything else EXACTLY the same - same lighting, same angle, same background, same proportions.
-The new color should look natural and realistic on the material.
-Professional product photography quality.`;
+    const colorChangesList = assignments.map((a: ColorAssignment) => 
+      `- Change the "${a.partName}" (${a.partMaterial}) to ${a.colorName} (${a.colorHex})`
+    ).join("\n");
+    
+    const prompt = `Edit this furniture image with the following color changes:
+
+${colorChangesList}
+
+IMPORTANT INSTRUCTIONS:
+- Apply EACH color change to its specific part as listed above
+- Keep everything else EXACTLY the same - same lighting, same angle, same background, same proportions
+- Each part should have its own distinct new color as specified
+- The new colors should look natural and realistic on each material type
+- Maintain professional product photography quality
+- Do NOT change any parts that are not listed above`;
 
     console.log("Generating recolored image with prompt:", prompt)
 
-    // Use Lovable AI with image editing capabilities (Gemini with image generation)
+    // Use Lovable AI with image editing capabilities
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -106,11 +120,10 @@ Professional product photography quality.`;
       imagesLength: aiResult.choices?.[0]?.message?.images?.length
     }));
 
-    // Extract the generated image from the response - images are in message.images array
+    // Extract the generated image from the response
     const message = aiResult.choices?.[0]?.message;
     let imageUrl = null;
     
-    // Check for images array (correct format for Lovable AI)
     if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
       const firstImage = message.images[0];
       imageUrl = firstImage.image_url?.url || firstImage.url;

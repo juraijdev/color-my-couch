@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { Header } from "@/components/Header";
 import { ColorPalette, ColorOption } from "@/components/ColorPalette";
 import { ImageUploader } from "@/components/ImageUploader";
-import { PartSelector, PartSelectorRef } from "@/components/PartSelector";
+import { PartSelector, PartSelectorRef, PartColorAssignment } from "@/components/PartSelector";
 import { PreviewPanel } from "@/components/PreviewPanel";
 import { WorkflowSteps } from "@/components/WorkflowSteps";
 
@@ -17,7 +17,7 @@ const Index = () => {
 
   const getCurrentStep = (): 1 | 2 | 3 => {
     if (!uploadedImage) return 1;
-    if (!hasSelection || !selectedColor) return 2;
+    if (!hasSelection) return 2;
     return 3;
   };
 
@@ -37,7 +37,7 @@ const Index = () => {
 
   const handleColorSelect = useCallback((color: ColorOption) => {
     setSelectedColor(color);
-    toast.info(`Selected: ${color.name}`);
+    toast.info(`Selected: ${color.name} - Click on a part to apply`);
   }, []);
 
   const handleSelectionChange = useCallback((hasSelection: boolean) => {
@@ -45,21 +45,21 @@ const Index = () => {
   }, []);
 
   const handleGenerate = useCallback(async () => {
-    if (!uploadedImage || !selectedColor) {
-      toast.error("Please upload an image and select a color first");
+    if (!uploadedImage) {
+      toast.error("Please upload an image first");
       return;
     }
 
-    const selectedParts = partSelectorRef.current?.getSelectedParts();
+    const colorAssignments = partSelectorRef.current?.getColorAssignments();
     const hasParts = partSelectorRef.current?.hasSelection();
 
-    if (!hasParts || !selectedParts || selectedParts.length === 0) {
-      toast.error("Please select which furniture parts to recolor");
+    if (!hasParts || !colorAssignments || colorAssignments.length === 0) {
+      toast.error("Please assign colors to at least one furniture part");
       return;
     }
 
     setIsGenerating(true);
-    toast.info("AI is recoloring the selected parts...");
+    toast.info("AI is recoloring the selected parts with their assigned colors...");
 
     try {
       const response = await fetch(
@@ -72,9 +72,12 @@ const Index = () => {
           },
           body: JSON.stringify({
             image: uploadedImage,
-            selectedParts: selectedParts,
-            colorName: selectedColor.name,
-            colorHex: selectedColor.hex,
+            colorAssignments: colorAssignments.map((ca: PartColorAssignment) => ({
+              partName: ca.part.name,
+              partMaterial: ca.part.material,
+              colorName: ca.targetColor.name,
+              colorHex: ca.targetColor.hex,
+            })),
           }),
         }
       );
@@ -87,7 +90,6 @@ const Index = () => {
       const result = await response.json();
       
       if (result.error) {
-        // If there's an analysis but no image, show it
         if (result.analysis) {
           toast.info("AI analyzed your request but couldn't generate an image directly.");
           console.log("AI Analysis:", result.analysis);
@@ -107,9 +109,9 @@ const Index = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [uploadedImage, selectedColor]);
+  }, [uploadedImage]);
 
-  const canGenerate = Boolean(uploadedImage && selectedColor && hasSelection && !isGenerating);
+  const canGenerate = Boolean(uploadedImage && hasSelection && !isGenerating);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -134,7 +136,7 @@ const Index = () => {
                 <PartSelector
                   ref={partSelectorRef}
                   imageUrl={uploadedImage}
-                  selectedColor={selectedColor?.hex || null}
+                  selectedColor={selectedColor}
                   onSelectionChange={handleSelectionChange}
                 />
               ) : (
