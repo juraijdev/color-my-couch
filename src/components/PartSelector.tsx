@@ -1,13 +1,14 @@
 import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
-import { Loader2, Check, RefreshCw } from "lucide-react";
+import { Loader2, Check, RefreshCw, Palette, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Checkbox } from "@/components/ui/checkbox";
+import { ColorOption } from "@/components/ColorPalette";
 
 export interface PartSelectorRef {
-  getSelectedParts: () => FurniturePart[];
+  getColorAssignments: () => PartColorAssignment[];
   hasSelection: () => boolean;
   clearSelection: () => void;
+  assignColorToPart: (partId: string, color: ColorOption) => void;
 }
 
 export interface FurniturePart {
@@ -24,18 +25,24 @@ export interface FurniturePart {
   };
 }
 
+export interface PartColorAssignment {
+  part: FurniturePart;
+  targetColor: ColorOption;
+}
+
 interface PartSelectorProps {
   imageUrl: string;
-  selectedColor: string | null;
+  selectedColor: ColorOption | null;
   onSelectionChange?: (hasSelection: boolean) => void;
 }
 
 export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
   ({ imageUrl, selectedColor, onSelectionChange }, ref) => {
     const [parts, setParts] = useState<FurniturePart[]>([]);
-    const [selectedPartIds, setSelectedPartIds] = useState<Set<string>>(new Set());
+    const [colorAssignments, setColorAssignments] = useState<Map<string, ColorOption>>(new Map());
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
+    const [activePartId, setActivePartId] = useState<string | null>(null);
 
     // Analyze image when it changes
     useEffect(() => {
@@ -47,10 +54,19 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
     // Reset on new image
     useEffect(() => {
       setParts([]);
-      setSelectedPartIds(new Set());
+      setColorAssignments(new Map());
       setHasAnalyzed(false);
+      setActivePartId(null);
       onSelectionChange?.(false);
     }, [imageUrl]);
+
+    // When a color is selected and there's an active part, assign it
+    useEffect(() => {
+      if (selectedColor && activePartId) {
+        assignColor(activePartId, selectedColor);
+        setActivePartId(null);
+      }
+    }, [selectedColor]);
 
     const analyzeImage = async () => {
       setIsAnalyzing(true);
@@ -78,7 +94,7 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
         if (data.parts && data.parts.length > 0) {
           setParts(data.parts);
           setHasAnalyzed(true);
-          toast.success(`Found ${data.parts.length} furniture parts. Select which ones to recolor.`);
+          toast.success(`Found ${data.parts.length} furniture parts. Click on a part, then select a color.`);
         } else {
           toast.error("No distinct parts found. Try a clearer image.");
         }
@@ -90,33 +106,59 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
       }
     };
 
-    const togglePartSelection = (partId: string) => {
-      const newSelection = new Set(selectedPartIds);
-      if (newSelection.has(partId)) {
-        newSelection.delete(partId);
-      } else {
-        newSelection.add(partId);
+    const assignColor = (partId: string, color: ColorOption) => {
+      const newAssignments = new Map(colorAssignments);
+      newAssignments.set(partId, color);
+      setColorAssignments(newAssignments);
+      onSelectionChange?.(newAssignments.size > 0);
+      
+      const part = parts.find(p => p.id === partId);
+      if (part) {
+        toast.success(`Assigned ${color.name} to ${part.name}`);
       }
-      setSelectedPartIds(newSelection);
-      onSelectionChange?.(newSelection.size > 0);
     };
 
-    const selectAll = () => {
-      const allIds = new Set(parts.map(p => p.id));
-      setSelectedPartIds(allIds);
-      onSelectionChange?.(true);
+    const removeAssignment = (partId: string) => {
+      const newAssignments = new Map(colorAssignments);
+      newAssignments.delete(partId);
+      setColorAssignments(newAssignments);
+      onSelectionChange?.(newAssignments.size > 0);
     };
 
-    const clearSelection = () => {
-      setSelectedPartIds(new Set());
+    const clearAllAssignments = () => {
+      setColorAssignments(new Map());
+      setActivePartId(null);
       onSelectionChange?.(false);
+    };
+
+    const handlePartClick = (partId: string) => {
+      if (selectedColor) {
+        // If a color is already selected, assign it directly
+        assignColor(partId, selectedColor);
+      } else {
+        // Otherwise, mark this part as active (waiting for color selection)
+        setActivePartId(partId === activePartId ? null : partId);
+        if (partId !== activePartId) {
+          toast.info("Now select a color from the palette");
+        }
+      }
     };
 
     // Expose methods to parent
     useImperativeHandle(ref, () => ({
-      getSelectedParts: () => parts.filter(p => selectedPartIds.has(p.id)),
-      hasSelection: () => selectedPartIds.size > 0,
-      clearSelection,
+      getColorAssignments: () => {
+        const assignments: PartColorAssignment[] = [];
+        colorAssignments.forEach((color, partId) => {
+          const part = parts.find(p => p.id === partId);
+          if (part) {
+            assignments.push({ part, targetColor: color });
+          }
+        });
+        return assignments;
+      },
+      hasSelection: () => colorAssignments.size > 0,
+      clearSelection: clearAllAssignments,
+      assignColorToPart: assignColor,
     }));
 
     return (
@@ -131,25 +173,40 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
               draggable={false}
             />
 
-            {/* Overlay for location markers */}
-            {parts.map((part) => 
-              part.location && selectedPartIds.has(part.id) && (
+            {/* Overlay for location markers - show assigned colors */}
+            {parts.map((part) => {
+              const assignedColor = colorAssignments.get(part.id);
+              const isActive = activePartId === part.id;
+              
+              return part.location && (assignedColor || isActive) && (
                 <div
                   key={part.id}
-                  className="absolute border-2 border-primary bg-primary/20 rounded pointer-events-none"
+                  className={`absolute border-2 rounded pointer-events-none transition-all ${
+                    isActive 
+                      ? 'border-yellow-400 bg-yellow-400/20 animate-pulse' 
+                      : 'border-primary'
+                  }`}
                   style={{
                     top: `${part.location.top}%`,
                     left: `${part.location.left}%`,
                     width: `${part.location.width}%`,
                     height: `${part.location.height}%`,
+                    backgroundColor: assignedColor ? `${assignedColor.hex}33` : undefined,
                   }}
                 >
-                  <span className="absolute -top-6 left-0 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded whitespace-nowrap">
+                  <span 
+                    className="absolute -top-6 left-0 text-xs px-2 py-0.5 rounded whitespace-nowrap flex items-center gap-1"
+                    style={{ 
+                      backgroundColor: assignedColor?.hex || 'hsl(var(--primary))',
+                      color: assignedColor ? (isLightColor(assignedColor.hex) ? '#000' : '#fff') : 'hsl(var(--primary-foreground))'
+                    }}
+                  >
                     {part.name}
+                    {assignedColor && ` → ${assignedColor.name}`}
                   </span>
                 </div>
-              )
-            )}
+              );
+            })}
 
             {/* Analyzing overlay */}
             {isAnalyzing && (
@@ -164,7 +221,7 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
         </div>
 
         {/* Parts selection panel */}
-        <div className="lg:w-72 flex flex-col gap-4">
+        <div className="lg:w-80 flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-lg">Furniture Parts</h3>
             <Button
@@ -179,6 +236,10 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
             </Button>
           </div>
 
+          <p className="text-xs text-muted-foreground">
+            Click a part, then select a color from the palette. You can assign different colors to different parts.
+          </p>
+
           {isAnalyzing ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
@@ -189,58 +250,95 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
             </div>
           ) : (
             <>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={selectAll} className="flex-1">
-                  Select All
+              {colorAssignments.size > 0 && (
+                <Button variant="outline" size="sm" onClick={clearAllAssignments}>
+                  Clear All Assignments
                 </Button>
-                <Button variant="outline" size="sm" onClick={clearSelection} className="flex-1">
-                  Clear
-                </Button>
-              </div>
+              )}
 
               <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
-                {parts.map((part) => (
-                  <label
-                    key={part.id}
-                    className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                      selectedPartIds.has(part.id)
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-muted-foreground/50'
-                    }`}
-                  >
-                    <Checkbox
-                      checked={selectedPartIds.has(part.id)}
-                      onCheckedChange={() => togglePartSelection(part.id)}
-                      className="mt-0.5"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{part.name}</span>
-                        {selectedPartIds.has(part.id) && (
-                          <Check className="w-3 h-3 text-primary" />
+                {parts.map((part) => {
+                  const assignedColor = colorAssignments.get(part.id);
+                  const isActive = activePartId === part.id;
+                  
+                  return (
+                    <div
+                      key={part.id}
+                      className={`relative flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                        isActive
+                          ? 'border-yellow-400 bg-yellow-400/10 ring-2 ring-yellow-400'
+                          : assignedColor
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-muted-foreground/50'
+                      }`}
+                      onClick={() => handlePartClick(part.id)}
+                    >
+                      {/* Color indicator */}
+                      <div 
+                        className="w-8 h-8 rounded-md border border-border flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: assignedColor?.hex || 'transparent' }}
+                      >
+                        {!assignedColor && <Palette className="w-4 h-4 text-muted-foreground" />}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{part.name}</span>
+                          {isActive && (
+                            <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded">
+                              Select color →
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {part.material} • {part.currentColor}
+                        </div>
+                        {assignedColor && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <span className="text-xs text-primary font-medium">
+                              → {assignedColor.name}
+                            </span>
+                          </div>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        {part.material} • {part.currentColor}
-                      </div>
-                      {part.description && (
-                        <div className="text-xs text-muted-foreground/70 mt-1 line-clamp-2">
-                          {part.description}
-                        </div>
+
+                      {/* Remove button */}
+                      {assignedColor && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeAssignment(part.id);
+                          }}
+                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-destructive/20 transition-colors"
+                        >
+                          <X className="w-3 h-3 text-muted-foreground hover:text-destructive" />
+                        </button>
                       )}
                     </div>
-                  </label>
-                ))}
+                  );
+                })}
               </div>
 
-              {selectedPartIds.size > 0 && selectedColor && (
-                <div className="p-3 bg-primary/10 rounded-lg text-sm">
-                  <strong>{selectedPartIds.size} part{selectedPartIds.size > 1 ? 's' : ''}</strong> will be recolored to{' '}
-                  <span 
-                    className="inline-block w-4 h-4 rounded-sm align-middle mx-1" 
-                    style={{ backgroundColor: selectedColor }}
-                  />
-                  <strong>{selectedColor}</strong>
+              {/* Summary of assignments */}
+              {colorAssignments.size > 0 && (
+                <div className="p-3 bg-primary/10 rounded-lg text-sm space-y-2">
+                  <strong>{colorAssignments.size} color change{colorAssignments.size > 1 ? 's' : ''} queued:</strong>
+                  <div className="space-y-1">
+                    {Array.from(colorAssignments.entries()).map(([partId, color]) => {
+                      const part = parts.find(p => p.id === partId);
+                      return part && (
+                        <div key={partId} className="flex items-center gap-2 text-xs">
+                          <span className="flex-1 truncate">{part.name}</span>
+                          <span>→</span>
+                          <span 
+                            className="inline-block w-4 h-4 rounded-sm border border-border" 
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <span className="text-muted-foreground">{color.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </>
@@ -250,5 +348,14 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
     );
   }
 );
+
+// Helper function to determine if a color is light
+function isLightColor(hex: string): boolean {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5;
+}
 
 PartSelector.displayName = "PartSelector";
