@@ -52,6 +52,18 @@ import WV7860VosgesTeak from "@/assets/patterns/WV-7860-Vosges-Teak.jpg";
 import WV9848DBlackenLegno from "@/assets/patterns/WV-9848D-Blacken-Legno.jpg";
 import WVT4222StateroomTeak from "@/assets/patterns/WV-T4222-Stateroom-Teak.jpg";
 
+// Import pattern images - Stone & Marble
+import ST2516Karadolomite from "@/assets/patterns/ST-2516-Karadolomite.jpg";
+import ST4982RedRustStone from "@/assets/patterns/ST-4982-Red-Rust-Stone.jpg";
+import ST4983CoffeeIceCream from "@/assets/patterns/ST-4983-Coffee-Ice-Cream.jpg";
+import ST6306CloudRiver from "@/assets/patterns/ST-6306-Cloud-River.jpg";
+import ST7377WhiteJade from "@/assets/patterns/ST-7377-White-Jade.jpg";
+import ST7458TravertineGrey from "@/assets/patterns/ST-7458-Travertine-Grey.jpg";
+import ST7888WhiteRock from "@/assets/patterns/ST-7888-White-Rock.jpg";
+import ST8462SlatePalm from "@/assets/patterns/ST-8462-Slate-Palm.jpg";
+import STD476NaturalStone from "@/assets/patterns/ST-D476-Natural-Stone.jpg";
+import STMB3476BlackGranite from "@/assets/patterns/ST-MB3476-Black-Granite.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -339,6 +351,72 @@ const patternCategories: PatternCategory[] = [
         name: "Stateroom Teak", 
         description: "Premium warm brown teak veneer",
         imageUrl: WVT4222StateroomTeak 
+      },
+    ],
+  },
+  {
+    id: "stone-marble",
+    name: "Stone & Marble Finishes",
+    patterns: [
+      { 
+        id: "st2516", 
+        name: "Karadolomite", 
+        description: "Grey marble with flowing wave patterns",
+        imageUrl: ST2516Karadolomite 
+      },
+      { 
+        id: "st4982", 
+        name: "Red Rust Stone", 
+        description: "Dark textured rust stone finish",
+        imageUrl: ST4982RedRustStone 
+      },
+      { 
+        id: "st4983", 
+        name: "Coffee Ice Cream", 
+        description: "Dark charcoal textured stone surface",
+        imageUrl: ST4983CoffeeIceCream 
+      },
+      { 
+        id: "st6306", 
+        name: "Cloud River", 
+        description: "Light grey-white marble with subtle veining",
+        imageUrl: ST6306CloudRiver 
+      },
+      { 
+        id: "st7377", 
+        name: "White Jade", 
+        description: "Creamy white marble with golden veins",
+        imageUrl: ST7377WhiteJade 
+      },
+      { 
+        id: "st7458", 
+        name: "Travertine Grey", 
+        description: "Silver-grey travertine with linear patterns",
+        imageUrl: ST7458TravertineGrey 
+      },
+      { 
+        id: "st7888", 
+        name: "White Rock", 
+        description: "Pure white marble with dramatic grey veins",
+        imageUrl: ST7888WhiteRock 
+      },
+      { 
+        id: "st8462", 
+        name: "Slate Palm", 
+        description: "Dark brown marble with golden veining",
+        imageUrl: ST8462SlatePalm 
+      },
+      { 
+        id: "std476", 
+        name: "Natural Stone", 
+        description: "Grey concrete-like natural stone texture",
+        imageUrl: STD476NaturalStone 
+      },
+      { 
+        id: "stmb3476", 
+        name: "Black Granite", 
+        description: "Deep black granite with white veining",
+        imageUrl: STMB3476BlackGranite 
       },
     ],
   },
