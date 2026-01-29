@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-// Import pattern images
+// Import pattern images - Stainless Steel
 import SS02HairlineSS from "@/assets/patterns/SS02-Hairline-SS.jpg";
 import SS03RoseGold from "@/assets/patterns/SS03-Rose-Gold.jpg";
 import SS04Black from "@/assets/patterns/SS04-Black.jpg";
@@ -11,6 +11,16 @@ import SS13Champagne from "@/assets/patterns/SS13-Champagne.jpg";
 import SS25GoldBronze from "@/assets/patterns/SS25-Gold-Bronze.jpg";
 import SS26RedBronze from "@/assets/patterns/SS26-Red-Bronze.jpg";
 import SS27GreenBronze from "@/assets/patterns/SS27-Green-Bronze.jpg";
+
+// Import pattern images - Powder Coat
+import PC011White from "@/assets/patterns/PC011-White.jpg";
+import PC038Gold from "@/assets/patterns/PC038-Gold.jpg";
+import PC051Silver from "@/assets/patterns/PC051-Silver.jpg";
+import PC053BrownGold from "@/assets/patterns/PC053-Brown-Gold.jpg";
+import PC056Champagne from "@/assets/patterns/PC056-Champagne.jpg";
+import PC058CrackBlack from "@/assets/patterns/PC058-Crack-Black.jpg";
+import PC059MattBlack from "@/assets/patterns/PC059-Matt-Black.jpg";
+import PP061Coffee from "@/assets/patterns/PP061-Coffee.jpg";
 
 export interface PatternOption {
   id: string;
@@ -77,6 +87,60 @@ const patternCategories: PatternCategory[] = [
         name: "Green Bronze", 
         description: "Hairline brushed stainless steel with green bronze plating",
         imageUrl: SS27GreenBronze 
+      },
+    ],
+  },
+  {
+    id: "powder-coat",
+    name: "Powder Coat Finishes",
+    patterns: [
+      { 
+        id: "pc011", 
+        name: "Matte White", 
+        description: "Smooth matte white powder coat finish",
+        imageUrl: PC011White 
+      },
+      { 
+        id: "pc038", 
+        name: "Gold", 
+        description: "Metallic gold powder coat finish",
+        imageUrl: PC038Gold 
+      },
+      { 
+        id: "pc051", 
+        name: "Silver", 
+        description: "Metallic silver powder coat finish",
+        imageUrl: PC051Silver 
+      },
+      { 
+        id: "pc053", 
+        name: "Brown Gold", 
+        description: "Speckled brown gold textured powder coat finish",
+        imageUrl: PC053BrownGold 
+      },
+      { 
+        id: "pc056", 
+        name: "Champagne", 
+        description: "Champagne powder coat finish",
+        imageUrl: PC056Champagne 
+      },
+      { 
+        id: "pc058", 
+        name: "Crack Black", 
+        description: "Textured crackle black powder coat finish",
+        imageUrl: PC058CrackBlack 
+      },
+      { 
+        id: "pc059", 
+        name: "Matte Black", 
+        description: "Smooth matte black powder coat finish",
+        imageUrl: PC059MattBlack 
+      },
+      { 
+        id: "pp061", 
+        name: "Coffee", 
+        description: "Metallic coffee brown powder coat finish",
+        imageUrl: PP061Coffee 
       },
     ],
   },
