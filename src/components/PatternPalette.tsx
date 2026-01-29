@@ -66,6 +66,12 @@ import STMB3476BlackGranite from "@/assets/patterns/ST-MB3476-Black-Granite.jpg"
 import STT1329DarioRamblas from "@/assets/patterns/ST-T1329-Dario-Ramblas.jpg";
 import STT1332GoyoRamblas from "@/assets/patterns/ST-T1332-Goyo-Ramblas.jpg";
 
+// Import pattern images - Fabric & Textile
+import FBGTL45White from "@/assets/patterns/FB-GTL45-White.jpg";
+import FBGTL51LimeGrey from "@/assets/patterns/FB-GTL51-Lime-Grey.jpg";
+import FBGTL56LightGrey from "@/assets/patterns/FB-GTL56-Light-Grey.jpg";
+import FBGTL59DarkGrey from "@/assets/patterns/FB-GTL59-Dark-Grey.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -431,6 +437,36 @@ const patternCategories: PatternCategory[] = [
         name: "Goyo Ramblas", 
         description: "Dark grey cement with weathered texture",
         imageUrl: STT1332GoyoRamblas 
+      },
+    ],
+  },
+  {
+    id: "fabric-textile",
+    name: "Fabric & Textile Finishes",
+    patterns: [
+      { 
+        id: "fbgtl45", 
+        name: "White Suede", 
+        description: "Soft off-white suede fabric texture",
+        imageUrl: FBGTL45White 
+      },
+      { 
+        id: "fbgtl51", 
+        name: "Lime Grey", 
+        description: "Warm taupe suede fabric texture",
+        imageUrl: FBGTL51LimeGrey 
+      },
+      { 
+        id: "fbgtl56", 
+        name: "Light Grey", 
+        description: "Cool light grey suede fabric texture",
+        imageUrl: FBGTL56LightGrey 
+      },
+      { 
+        id: "fbgtl59", 
+        name: "Dark Grey", 
+        description: "Charcoal dark grey suede fabric texture",
+        imageUrl: FBGTL59DarkGrey 
       },
     ],
   },
