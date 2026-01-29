@@ -72,6 +72,12 @@ import FBGTL51LimeGrey from "@/assets/patterns/FB-GTL51-Lime-Grey.jpg";
 import FBGTL56LightGrey from "@/assets/patterns/FB-GTL56-Light-Grey.jpg";
 import FBGTL59DarkGrey from "@/assets/patterns/FB-GTL59-Dark-Grey.jpg";
 
+// Import pattern images - Quartz & Terrazzo
+import GT3001White from "@/assets/patterns/GT-3001-White.jpg";
+import GT3004Black from "@/assets/patterns/GT-3004-Black.jpg";
+import GT3005Beige from "@/assets/patterns/GT-3005-Beige.jpg";
+import GT3025Grey from "@/assets/patterns/GT-3025-Grey.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -467,6 +473,36 @@ const patternCategories: PatternCategory[] = [
         name: "Dark Grey", 
         description: "Charcoal dark grey suede fabric texture",
         imageUrl: FBGTL59DarkGrey 
+      },
+    ],
+  },
+  {
+    id: "quartz-terrazzo",
+    name: "Quartz & Terrazzo Finishes",
+    patterns: [
+      { 
+        id: "gt3001", 
+        name: "White Quartz", 
+        description: "Sparkling white quartz with subtle aggregate",
+        imageUrl: GT3001White 
+      },
+      { 
+        id: "gt3004", 
+        name: "Black Quartz", 
+        description: "Deep black quartz with mirror-like flecks",
+        imageUrl: GT3004Black 
+      },
+      { 
+        id: "gt3005", 
+        name: "Beige Quartz", 
+        description: "Warm beige quartz with fine speckles",
+        imageUrl: GT3005Beige 
+      },
+      { 
+        id: "gt3025", 
+        name: "Grey Quartz", 
+        description: "Cool grey quartz with crystalline texture",
+        imageUrl: GT3025Grey 
       },
     ],
   },
