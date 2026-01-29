@@ -63,6 +63,8 @@ import ST7888WhiteRock from "@/assets/patterns/ST-7888-White-Rock.jpg";
 import ST8462SlatePalm from "@/assets/patterns/ST-8462-Slate-Palm.jpg";
 import STD476NaturalStone from "@/assets/patterns/ST-D476-Natural-Stone.jpg";
 import STMB3476BlackGranite from "@/assets/patterns/ST-MB3476-Black-Granite.jpg";
+import STT1329DarioRamblas from "@/assets/patterns/ST-T1329-Dario-Ramblas.jpg";
+import STT1332GoyoRamblas from "@/assets/patterns/ST-T1332-Goyo-Ramblas.jpg";
 
 export interface PatternOption {
   id: string;
@@ -417,6 +419,18 @@ const patternCategories: PatternCategory[] = [
         name: "Black Granite", 
         description: "Deep black granite with white veining",
         imageUrl: STMB3476BlackGranite 
+      },
+      { 
+        id: "stt1329", 
+        name: "Dario Ramblas", 
+        description: "Light cream cement with aged patina",
+        imageUrl: STT1329DarioRamblas 
+      },
+      { 
+        id: "stt1332", 
+        name: "Goyo Ramblas", 
+        description: "Dark grey cement with weathered texture",
+        imageUrl: STT1332GoyoRamblas 
       },
     ],
   },
