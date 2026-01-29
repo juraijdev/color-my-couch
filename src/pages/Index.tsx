@@ -6,6 +6,7 @@ import { ImageUploader } from "@/components/ImageUploader";
 import { PartSelector, PartSelectorRef, PartPatternAssignment } from "@/components/PartSelector";
 import { PreviewPanel } from "@/components/PreviewPanel";
 import { WorkflowSteps } from "@/components/WorkflowSteps";
+import { imageUrlToBase64 } from "@/lib/imageUtils";
 
 const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -62,6 +63,17 @@ const Index = () => {
     toast.info("AI is applying the selected patterns to the furniture parts...");
 
     try {
+      // Convert pattern images to base64 for the AI gateway
+      const assignmentsWithBase64 = await Promise.all(
+        patternAssignments.map(async (pa: PartPatternAssignment) => ({
+          partName: pa.part.name,
+          partMaterial: pa.part.material,
+          patternName: pa.targetPattern.name,
+          patternDescription: pa.targetPattern.description,
+          patternImageUrl: await imageUrlToBase64(pa.targetPattern.imageUrl),
+        }))
+      );
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recolor-furniture`,
         {
@@ -72,13 +84,7 @@ const Index = () => {
           },
           body: JSON.stringify({
             image: uploadedImage,
-            patternAssignments: patternAssignments.map((pa: PartPatternAssignment) => ({
-              partName: pa.part.name,
-              partMaterial: pa.part.material,
-              patternName: pa.targetPattern.name,
-              patternDescription: pa.targetPattern.description,
-              patternImageUrl: pa.targetPattern.imageUrl,
-            })),
+            patternAssignments: assignmentsWithBase64,
           }),
         }
       );
