@@ -96,6 +96,18 @@ import TW8308_48Onyx from "@/assets/patterns/TW-8308-48-Onyx.jpg";
 import TW8410_7Espresso from "@/assets/patterns/TW-8410-7-Espresso.jpg";
 import TW8410_22Oatmeal from "@/assets/patterns/TW-8410-22-Oatmeal.jpg";
 
+// Import pattern images - Linen & Woven
+import LN8815_4Cream from "@/assets/patterns/LN-8815-4-Cream.jpg";
+import LN8815_17Azure from "@/assets/patterns/LN-8815-17-Azure.jpg";
+import KR1818_4Taupe from "@/assets/patterns/KR-1818-4-Taupe.jpg";
+import KR1818_9Silver from "@/assets/patterns/KR-1818-9-Silver.jpg";
+import KR1818_14Terracotta from "@/assets/patterns/KR-1818-14-Terracotta.jpg";
+import KR1818_19Sage from "@/assets/patterns/KR-1818-19-Sage.jpg";
+import KR1818_27Cobalt from "@/assets/patterns/KR-1818-27-Cobalt.jpg";
+import KR1818_29Camel from "@/assets/patterns/KR-1818-29-Camel.jpg";
+import KR1818_31Cocoa from "@/assets/patterns/KR-1818-31-Cocoa.jpg";
+import KR1818_37Graphite from "@/assets/patterns/KR-1818-37-Graphite.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -617,6 +629,72 @@ const patternCategories: PatternCategory[] = [
         name: "Oatmeal Bouclé", 
         description: "Light cream bouclé weave with subtle texture",
         imageUrl: TW8410_22Oatmeal 
+      },
+    ],
+  },
+  {
+    id: "linen-woven",
+    name: "Linen & Woven Finishes",
+    patterns: [
+      { 
+        id: "ln8815-4", 
+        name: "Cream Linen", 
+        description: "Natural cream woven linen with chunky texture",
+        imageUrl: LN8815_4Cream 
+      },
+      { 
+        id: "ln8815-17", 
+        name: "Azure Linen", 
+        description: "Rich blue woven linen texture",
+        imageUrl: LN8815_17Azure 
+      },
+      { 
+        id: "kr1818-4", 
+        name: "Taupe Weave", 
+        description: "Neutral taupe woven fabric with fine texture",
+        imageUrl: KR1818_4Taupe 
+      },
+      { 
+        id: "kr1818-9", 
+        name: "Silver Weave", 
+        description: "Cool silver-grey woven fabric texture",
+        imageUrl: KR1818_9Silver 
+      },
+      { 
+        id: "kr1818-14", 
+        name: "Terracotta Weave", 
+        description: "Warm terracotta woven fabric texture",
+        imageUrl: KR1818_14Terracotta 
+      },
+      { 
+        id: "kr1818-19", 
+        name: "Sage Weave", 
+        description: "Soft sage green woven fabric texture",
+        imageUrl: KR1818_19Sage 
+      },
+      { 
+        id: "kr1818-27", 
+        name: "Cobalt Weave", 
+        description: "Deep cobalt blue woven fabric texture",
+        imageUrl: KR1818_27Cobalt 
+      },
+      { 
+        id: "kr1818-29", 
+        name: "Camel Weave", 
+        description: "Warm camel tan woven fabric texture",
+        imageUrl: KR1818_29Camel 
+      },
+      { 
+        id: "kr1818-31", 
+        name: "Cocoa Weave", 
+        description: "Rich cocoa brown woven fabric texture",
+        imageUrl: KR1818_31Cocoa 
+      },
+      { 
+        id: "kr1818-37", 
+        name: "Graphite Weave", 
+        description: "Dark graphite woven fabric texture",
+        imageUrl: KR1818_37Graphite 
       },
     ],
   },
