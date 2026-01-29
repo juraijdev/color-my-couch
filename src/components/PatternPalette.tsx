@@ -41,6 +41,16 @@ import WV9861EternalCedar from "@/assets/patterns/WV-9861-Eternal-Cedar.jpg";
 import WV9862EarthCedar from "@/assets/patterns/WV-9862-Earth-Cedar.jpg";
 import WV9870DawnCherry from "@/assets/patterns/WV-9870-Dawn-Cherry.jpg";
 import WVT1246CostaNogal from "@/assets/patterns/WV-T1246-Costa-Nogal.jpg";
+import WVT1270KarlaElm from "@/assets/patterns/WV-T1270-Karla-Elm.jpg";
+import WVT5243ClassicWalnut from "@/assets/patterns/WV-T5243-Classic-Walnut.jpg";
+import WV5439DAgedAlameda from "@/assets/patterns/WV-5439D-Aged-Alameda.jpg";
+import WV5997AliceWalnut from "@/assets/patterns/WV-5997-Alice-Walnut.jpg";
+import WV6405IvoryElm from "@/assets/patterns/WV-6405-Ivory-Elm.jpg";
+import WV6442AshWashingMaple from "@/assets/patterns/WV-6442-Ash-Washing-Maple.jpg";
+import WV7188LincolnWalnut from "@/assets/patterns/WV-7188-Lincoln-Walnut.jpg";
+import WV7860VosgesTeak from "@/assets/patterns/WV-7860-Vosges-Teak.jpg";
+import WV9848DBlackenLegno from "@/assets/patterns/WV-9848D-Blacken-Legno.jpg";
+import WVT4222StateroomTeak from "@/assets/patterns/WV-T4222-Stateroom-Teak.jpg";
 
 export interface PatternOption {
   id: string;
@@ -269,6 +279,66 @@ const patternCategories: PatternCategory[] = [
         name: "Costa Nogal", 
         description: "Golden-brown Spanish walnut finish",
         imageUrl: WVT1246CostaNogal 
+      },
+      { 
+        id: "wvt1270", 
+        name: "Karla Elm", 
+        description: "Warm golden elm with elegant grain",
+        imageUrl: WVT1270KarlaElm 
+      },
+      { 
+        id: "wvt5243", 
+        name: "Classic Walnut", 
+        description: "Timeless medium brown walnut finish",
+        imageUrl: WVT5243ClassicWalnut 
+      },
+      { 
+        id: "wv5439d", 
+        name: "Aged Alameda", 
+        description: "Dark espresso wood with subtle grain",
+        imageUrl: WV5439DAgedAlameda 
+      },
+      { 
+        id: "wv5997", 
+        name: "Alice Walnut", 
+        description: "Deep reddish-brown walnut veneer",
+        imageUrl: WV5997AliceWalnut 
+      },
+      { 
+        id: "wv6405", 
+        name: "Ivory Elm", 
+        description: "Light creamy elm with soft grain pattern",
+        imageUrl: WV6405IvoryElm 
+      },
+      { 
+        id: "wv6442", 
+        name: "Ash Washing Maple", 
+        description: "Grey washed maple with rustic texture",
+        imageUrl: WV6442AshWashingMaple 
+      },
+      { 
+        id: "wv7188", 
+        name: "Lincoln Walnut", 
+        description: "Rich dark walnut with prominent grain",
+        imageUrl: WV7188LincolnWalnut 
+      },
+      { 
+        id: "wv7860", 
+        name: "Vosges Teak", 
+        description: "Natural grey-toned teak finish",
+        imageUrl: WV7860VosgesTeak 
+      },
+      { 
+        id: "wv9848d", 
+        name: "Blacken Legno", 
+        description: "Dark charcoal eucalyptus finish",
+        imageUrl: WV9848DBlackenLegno 
+      },
+      { 
+        id: "wvt4222", 
+        name: "Stateroom Teak", 
+        description: "Premium warm brown teak veneer",
+        imageUrl: WVT4222StateroomTeak 
       },
     ],
   },
