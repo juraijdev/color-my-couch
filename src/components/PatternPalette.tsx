@@ -30,6 +30,18 @@ import SQ55BBlondCedar from "@/assets/patterns/SQ55B-Blond-Cedar.jpg";
 import SQ73TrendyWalnut from "@/assets/patterns/SQ73-Trendy-Walnut.jpg";
 import SQ731DawnCherry from "@/assets/patterns/SQ731-Dawn-Cherry.jpg";
 
+// Import pattern images - Wood Veneer
+import WV0756NaturalMaple from "@/assets/patterns/WV-0756-Natural-Maple.jpg";
+import WV9194TrendyWalnut from "@/assets/patterns/WV-9194-Trendy-Walnut.jpg";
+import WV9205LegnoSilverOak from "@/assets/patterns/WV-9205-Legno-Silver-Oak.jpg";
+import WV9348SubtropicalOak from "@/assets/patterns/WV-9348-Subtropical-Oak.jpg";
+import WV9834OceanVogue from "@/assets/patterns/WV-9834-Ocean-Vogue.jpg";
+import WV9860BlondCedar from "@/assets/patterns/WV-9860-Blond-Cedar.jpg";
+import WV9861EternalCedar from "@/assets/patterns/WV-9861-Eternal-Cedar.jpg";
+import WV9862EarthCedar from "@/assets/patterns/WV-9862-Earth-Cedar.jpg";
+import WV9870DawnCherry from "@/assets/patterns/WV-9870-Dawn-Cherry.jpg";
+import WVT1246CostaNogal from "@/assets/patterns/WV-T1246-Costa-Nogal.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -191,6 +203,72 @@ const patternCategories: PatternCategory[] = [
         name: "Dawn Cherry", 
         description: "Light cherry wood with fine vertical grain",
         imageUrl: SQ731DawnCherry 
+      },
+    ],
+  },
+  {
+    id: "wood-veneer",
+    name: "Wood Veneer Finishes",
+    patterns: [
+      { 
+        id: "wv0756", 
+        name: "Natural Maple", 
+        description: "Light golden maple with elegant grain pattern",
+        imageUrl: WV0756NaturalMaple 
+      },
+      { 
+        id: "wv9194", 
+        name: "Trendy Walnut", 
+        description: "Warm walnut veneer with fine vertical lines",
+        imageUrl: WV9194TrendyWalnut 
+      },
+      { 
+        id: "wv9205", 
+        name: "Legno Silver Oak", 
+        description: "Silver-highlighted oak with distinctive texture",
+        imageUrl: WV9205LegnoSilverOak 
+      },
+      { 
+        id: "wv9348", 
+        name: "Subtropical Oak", 
+        description: "Golden oak veneer with natural grain",
+        imageUrl: WV9348SubtropicalOak 
+      },
+      { 
+        id: "wv9834", 
+        name: "Ocean Vogue", 
+        description: "Rich brown driftwood finish",
+        imageUrl: WV9834OceanVogue 
+      },
+      { 
+        id: "wv9860", 
+        name: "Blond Cedar", 
+        description: "Light blonde cedar with soft grain",
+        imageUrl: WV9860BlondCedar 
+      },
+      { 
+        id: "wv9861", 
+        name: "Eternal Cedar", 
+        description: "Grey-toned cedar with subtle warmth",
+        imageUrl: WV9861EternalCedar 
+      },
+      { 
+        id: "wv9862", 
+        name: "Earth Cedar", 
+        description: "Warm earth-toned cedar veneer",
+        imageUrl: WV9862EarthCedar 
+      },
+      { 
+        id: "wv9870", 
+        name: "Dawn Cherry", 
+        description: "Light cream cherry with delicate grain",
+        imageUrl: WV9870DawnCherry 
+      },
+      { 
+        id: "wvt1246", 
+        name: "Costa Nogal", 
+        description: "Golden-brown Spanish walnut finish",
+        imageUrl: WVT1246CostaNogal 
       },
     ],
   },
