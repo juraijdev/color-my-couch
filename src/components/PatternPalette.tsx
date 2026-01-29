@@ -84,6 +84,18 @@ import GSBMP02ClassicOak from "@/assets/patterns/GS-BMP02-Classic-Oak.jpg";
 import GSBMP03MixedOilGray from "@/assets/patterns/GS-BMP03-Mixed-Oil-Gray.jpg";
 import GSBMP04WesternEuropean from "@/assets/patterns/GS-BMP04-Western-European.jpg";
 
+// Import pattern images - Tweed & Bouclé
+import TW8308_7Charcoal from "@/assets/patterns/TW-8308-7-Charcoal.jpg";
+import TW8308_9Coral from "@/assets/patterns/TW-8308-9-Coral.jpg";
+import TW8308_13Crimson from "@/assets/patterns/TW-8308-13-Crimson.jpg";
+import TW8308_27Denim from "@/assets/patterns/TW-8308-27-Denim.jpg";
+import TW8308_30Teal from "@/assets/patterns/TW-8308-30-Teal.jpg";
+import TW8308_42Taupe from "@/assets/patterns/TW-8308-42-Taupe.jpg";
+import TW8308_45Dove from "@/assets/patterns/TW-8308-45-Dove.jpg";
+import TW8308_48Onyx from "@/assets/patterns/TW-8308-48-Onyx.jpg";
+import TW8410_7Espresso from "@/assets/patterns/TW-8410-7-Espresso.jpg";
+import TW8410_22Oatmeal from "@/assets/patterns/TW-8410-22-Oatmeal.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -539,6 +551,72 @@ const patternCategories: PatternCategory[] = [
         name: "Western European", 
         description: "Light blonde wood with soft linear texture",
         imageUrl: GSBMP04WesternEuropean 
+      },
+    ],
+  },
+  {
+    id: "tweed-boucle",
+    name: "Tweed & Bouclé Finishes",
+    patterns: [
+      { 
+        id: "tw8308-7", 
+        name: "Charcoal Tweed", 
+        description: "Dark grey woven tweed with textured depth",
+        imageUrl: TW8308_7Charcoal 
+      },
+      { 
+        id: "tw8308-9", 
+        name: "Coral Tweed", 
+        description: "Warm coral-salmon woven tweed texture",
+        imageUrl: TW8308_9Coral 
+      },
+      { 
+        id: "tw8308-13", 
+        name: "Crimson Tweed", 
+        description: "Rich red woven tweed with subtle variation",
+        imageUrl: TW8308_13Crimson 
+      },
+      { 
+        id: "tw8308-27", 
+        name: "Denim Tweed", 
+        description: "Classic blue woven tweed texture",
+        imageUrl: TW8308_27Denim 
+      },
+      { 
+        id: "tw8308-30", 
+        name: "Teal Tweed", 
+        description: "Deep teal-green woven tweed fabric",
+        imageUrl: TW8308_30Teal 
+      },
+      { 
+        id: "tw8308-42", 
+        name: "Taupe Tweed", 
+        description: "Warm taupe-brown woven tweed texture",
+        imageUrl: TW8308_42Taupe 
+      },
+      { 
+        id: "tw8308-45", 
+        name: "Dove Tweed", 
+        description: "Soft dove grey woven tweed fabric",
+        imageUrl: TW8308_45Dove 
+      },
+      { 
+        id: "tw8308-48", 
+        name: "Onyx Tweed", 
+        description: "Deep charcoal-black woven tweed texture",
+        imageUrl: TW8308_48Onyx 
+      },
+      { 
+        id: "tw8410-7", 
+        name: "Espresso Bouclé", 
+        description: "Rich brown bouclé weave texture",
+        imageUrl: TW8410_7Espresso 
+      },
+      { 
+        id: "tw8410-22", 
+        name: "Oatmeal Bouclé", 
+        description: "Light cream bouclé weave with subtle texture",
+        imageUrl: TW8410_22Oatmeal 
       },
     ],
   },
