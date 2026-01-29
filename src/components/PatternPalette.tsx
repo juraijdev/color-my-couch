@@ -107,6 +107,10 @@ import KR1818_27Cobalt from "@/assets/patterns/KR-1818-27-Cobalt.jpg";
 import KR1818_29Camel from "@/assets/patterns/KR-1818-29-Camel.jpg";
 import KR1818_31Cocoa from "@/assets/patterns/KR-1818-31-Cocoa.jpg";
 import KR1818_37Graphite from "@/assets/patterns/KR-1818-37-Graphite.jpg";
+import KR1818_43Oat from "@/assets/patterns/KR-1818-43-Oat.jpg";
+import KR1818_49Ash from "@/assets/patterns/KR-1818-49-Ash.jpg";
+import KR1818_57Crimson from "@/assets/patterns/KR-1818-57-Crimson.jpg";
+import KR1818_62Slate from "@/assets/patterns/KR-1818-62-Slate.jpg";
 
 export interface PatternOption {
   id: string;
@@ -695,6 +699,30 @@ const patternCategories: PatternCategory[] = [
         name: "Graphite Weave", 
         description: "Dark graphite woven fabric texture",
         imageUrl: KR1818_37Graphite 
+      },
+      { 
+        id: "kr1818-43", 
+        name: "Oat Weave", 
+        description: "Natural oat-colored woven fabric texture",
+        imageUrl: KR1818_43Oat 
+      },
+      { 
+        id: "kr1818-49", 
+        name: "Ash Weave", 
+        description: "Cool ash grey woven fabric texture",
+        imageUrl: KR1818_49Ash 
+      },
+      { 
+        id: "kr1818-57", 
+        name: "Crimson Weave", 
+        description: "Rich crimson red woven fabric texture",
+        imageUrl: KR1818_57Crimson 
+      },
+      { 
+        id: "kr1818-62", 
+        name: "Slate Blue Weave", 
+        description: "Soft slate blue woven fabric texture",
+        imageUrl: KR1818_62Slate 
       },
     ],
   },
