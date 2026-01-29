@@ -22,6 +22,14 @@ import PC058CrackBlack from "@/assets/patterns/PC058-Crack-Black.jpg";
 import PC059MattBlack from "@/assets/patterns/PC059-Matt-Black.jpg";
 import PP061Coffee from "@/assets/patterns/PP061-Coffee.jpg";
 
+// Import pattern images - Wood Grain
+import SQ52AliceWalnut from "@/assets/patterns/SQ52-Alice-Walnut.jpg";
+import SQ53LincolnWalnut from "@/assets/patterns/SQ53-Lincoln-Walnut.jpg";
+import SQ54SubtropicalOak from "@/assets/patterns/SQ54-Subtropical-Oak.jpg";
+import SQ55BBlondCedar from "@/assets/patterns/SQ55B-Blond-Cedar.jpg";
+import SQ73TrendyWalnut from "@/assets/patterns/SQ73-Trendy-Walnut.jpg";
+import SQ731DawnCherry from "@/assets/patterns/SQ731-Dawn-Cherry.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -141,6 +149,48 @@ const patternCategories: PatternCategory[] = [
         name: "Coffee", 
         description: "Metallic coffee brown powder coat finish",
         imageUrl: PP061Coffee 
+      },
+    ],
+  },
+  {
+    id: "wood-grain",
+    name: "Wood Grain Finishes",
+    patterns: [
+      { 
+        id: "sq52", 
+        name: "Alice Walnut", 
+        description: "Dark rich walnut wood grain with golden highlights",
+        imageUrl: SQ52AliceWalnut 
+      },
+      { 
+        id: "sq53", 
+        name: "Lincoln Walnut", 
+        description: "Grey-brown walnut wood grain with subtle texture",
+        imageUrl: SQ53LincolnWalnut 
+      },
+      { 
+        id: "sq54", 
+        name: "Subtropical Oak", 
+        description: "Light golden oak with distinctive grain pattern",
+        imageUrl: SQ54SubtropicalOak 
+      },
+      { 
+        id: "sq55b", 
+        name: "Blond Cedar", 
+        description: "Light natural cedar wood grain finish",
+        imageUrl: SQ55BBlondCedar 
+      },
+      { 
+        id: "sq73", 
+        name: "Trendy Walnut", 
+        description: "Natural walnut with flowing grain lines",
+        imageUrl: SQ73TrendyWalnut 
+      },
+      { 
+        id: "sq731", 
+        name: "Dawn Cherry", 
+        description: "Light cherry wood with fine vertical grain",
+        imageUrl: SQ731DawnCherry 
       },
     ],
   },
