@@ -1,15 +1,15 @@
 import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
-import { ColorPalette, ColorOption } from "@/components/ColorPalette";
+import { PatternPalette, PatternOption } from "@/components/PatternPalette";
 import { ImageUploader } from "@/components/ImageUploader";
-import { PartSelector, PartSelectorRef, PartColorAssignment } from "@/components/PartSelector";
+import { PartSelector, PartSelectorRef, PartPatternAssignment } from "@/components/PartSelector";
 import { PreviewPanel } from "@/components/PreviewPanel";
 import { WorkflowSteps } from "@/components/WorkflowSteps";
 
 const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
+  const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasSelection, setHasSelection] = useState(false);
@@ -31,13 +31,13 @@ const Index = () => {
   const handleImageClear = useCallback(() => {
     setUploadedImage(null);
     setGeneratedImage(null);
-    setSelectedColor(null);
+    setSelectedPattern(null);
     setHasSelection(false);
   }, []);
 
-  const handleColorSelect = useCallback((color: ColorOption) => {
-    setSelectedColor(color);
-    toast.info(`Selected: ${color.name} - Click on a part to apply`);
+  const handlePatternSelect = useCallback((pattern: PatternOption) => {
+    setSelectedPattern(pattern);
+    toast.info(`Selected: ${pattern.name} - Click on a part to apply`);
   }, []);
 
   const handleSelectionChange = useCallback((hasSelection: boolean) => {
@@ -50,16 +50,16 @@ const Index = () => {
       return;
     }
 
-    const colorAssignments = partSelectorRef.current?.getColorAssignments();
+    const patternAssignments = partSelectorRef.current?.getPatternAssignments();
     const hasParts = partSelectorRef.current?.hasSelection();
 
-    if (!hasParts || !colorAssignments || colorAssignments.length === 0) {
-      toast.error("Please assign colors to at least one furniture part");
+    if (!hasParts || !patternAssignments || patternAssignments.length === 0) {
+      toast.error("Please assign patterns to at least one furniture part");
       return;
     }
 
     setIsGenerating(true);
-    toast.info("AI is recoloring the selected parts with their assigned colors...");
+    toast.info("AI is applying the selected patterns to the furniture parts...");
 
     try {
       const response = await fetch(
@@ -72,11 +72,12 @@ const Index = () => {
           },
           body: JSON.stringify({
             image: uploadedImage,
-            colorAssignments: colorAssignments.map((ca: PartColorAssignment) => ({
-              partName: ca.part.name,
-              partMaterial: ca.part.material,
-              colorName: ca.targetColor.name,
-              colorHex: ca.targetColor.hex,
+            patternAssignments: patternAssignments.map((pa: PartPatternAssignment) => ({
+              partName: pa.part.name,
+              partMaterial: pa.part.material,
+              patternName: pa.targetPattern.name,
+              patternDescription: pa.targetPattern.description,
+              patternImageUrl: pa.targetPattern.imageUrl,
             })),
           }),
         }
@@ -99,7 +100,7 @@ const Index = () => {
 
       if (result.output) {
         setGeneratedImage(result.output);
-        toast.success("Furniture recoloring complete!");
+        toast.success("Furniture customization complete!");
       } else {
         throw new Error("No output image received");
       }
@@ -118,11 +119,11 @@ const Index = () => {
       <Header />
 
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Left Sidebar - Color Palette */}
+        {/* Left Sidebar - Pattern Palette */}
         <aside className="w-full lg:w-72 border-b lg:border-b-0 lg:border-r border-border bg-card/30 shrink-0 max-h-64 lg:max-h-none overflow-auto lg:overflow-visible">
-          <ColorPalette
-            selectedColor={selectedColor}
-            onColorSelect={handleColorSelect}
+          <PatternPalette
+            selectedPattern={selectedPattern}
+            onPatternSelect={handlePatternSelect}
           />
         </aside>
 
@@ -136,7 +137,7 @@ const Index = () => {
                 <PartSelector
                   ref={partSelectorRef}
                   imageUrl={uploadedImage}
-                  selectedColor={selectedColor}
+                  selectedPattern={selectedPattern}
                   onSelectionChange={handleSelectionChange}
                 />
               ) : (
