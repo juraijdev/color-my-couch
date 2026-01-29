@@ -78,6 +78,12 @@ import GT3004Black from "@/assets/patterns/GT-3004-Black.jpg";
 import GT3005Beige from "@/assets/patterns/GT-3005-Beige.jpg";
 import GT3025Grey from "@/assets/patterns/GT-3025-Grey.jpg";
 
+// Import pattern images - Grain Series
+import GSBMP01Formosa from "@/assets/patterns/GS-BMP01-Formosa.jpg";
+import GSBMP02ClassicOak from "@/assets/patterns/GS-BMP02-Classic-Oak.jpg";
+import GSBMP03MixedOilGray from "@/assets/patterns/GS-BMP03-Mixed-Oil-Gray.jpg";
+import GSBMP04WesternEuropean from "@/assets/patterns/GS-BMP04-Western-European.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -503,6 +509,36 @@ const patternCategories: PatternCategory[] = [
         name: "Grey Quartz", 
         description: "Cool grey quartz with crystalline texture",
         imageUrl: GT3025Grey 
+      },
+    ],
+  },
+  {
+    id: "grain-series",
+    name: "Grain Series Finishes",
+    patterns: [
+      { 
+        id: "gsbmp01", 
+        name: "Formosa", 
+        description: "Dark espresso wood with fine vertical grain",
+        imageUrl: GSBMP01Formosa 
+      },
+      { 
+        id: "gsbmp02", 
+        name: "Classic Oak", 
+        description: "Light grey oak with elegant grain pattern",
+        imageUrl: GSBMP02ClassicOak 
+      },
+      { 
+        id: "gsbmp03", 
+        name: "Mixed Oil Gray", 
+        description: "Warm olive-grey wood with subtle grain",
+        imageUrl: GSBMP03MixedOilGray 
+      },
+      { 
+        id: "gsbmp04", 
+        name: "Western European", 
+        description: "Light blonde wood with soft linear texture",
+        imageUrl: GSBMP04WesternEuropean 
       },
     ],
   },
