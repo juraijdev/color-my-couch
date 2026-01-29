@@ -112,6 +112,16 @@ import KR1818_49Ash from "@/assets/patterns/KR-1818-49-Ash.jpg";
 import KR1818_57Crimson from "@/assets/patterns/KR-1818-57-Crimson.jpg";
 import KR1818_62Slate from "@/assets/patterns/KR-1818-62-Slate.jpg";
 
+// Import pattern images - Canvas & Outdoor Fabrics
+import BXB05Burgundy from "@/assets/patterns/BXB05-Burgundy.jpg";
+import BXB08OceanBlue from "@/assets/patterns/BXB08-Ocean-Blue.jpg";
+import BXB11Navy from "@/assets/patterns/BXB11-Navy.jpg";
+import BXB12Espresso from "@/assets/patterns/BXB12-Espresso.jpg";
+import BXE01Natural from "@/assets/patterns/BXE01-Natural.jpg";
+import BXE04Silver from "@/assets/patterns/BXE04-Silver.jpg";
+import BXE05Lime from "@/assets/patterns/BXE05-Lime.jpg";
+import BXE06Turquoise from "@/assets/patterns/BXE06-Turquoise.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -723,6 +733,60 @@ const patternCategories: PatternCategory[] = [
         name: "Slate Blue Weave", 
         description: "Soft slate blue woven fabric texture",
         imageUrl: KR1818_62Slate 
+      },
+    ],
+  },
+  {
+    id: "canvas-outdoor",
+    name: "Canvas & Outdoor Fabrics",
+    patterns: [
+      { 
+        id: "bxb05", 
+        name: "Burgundy Canvas", 
+        description: "Rich burgundy outdoor canvas with tight weave",
+        imageUrl: BXB05Burgundy 
+      },
+      { 
+        id: "bxb08", 
+        name: "Ocean Blue Canvas", 
+        description: "Bright ocean blue outdoor canvas texture",
+        imageUrl: BXB08OceanBlue 
+      },
+      { 
+        id: "bxb11", 
+        name: "Navy Canvas", 
+        description: "Deep navy blue outdoor canvas fabric",
+        imageUrl: BXB11Navy 
+      },
+      { 
+        id: "bxb12", 
+        name: "Espresso Canvas", 
+        description: "Dark espresso brown outdoor canvas",
+        imageUrl: BXB12Espresso 
+      },
+      { 
+        id: "bxe01", 
+        name: "Natural Basketweave", 
+        description: "Light natural beige basketweave texture",
+        imageUrl: BXE01Natural 
+      },
+      { 
+        id: "bxe04", 
+        name: "Silver Basketweave", 
+        description: "Cool silver grey basketweave fabric",
+        imageUrl: BXE04Silver 
+      },
+      { 
+        id: "bxe05", 
+        name: "Lime Basketweave", 
+        description: "Fresh lime green basketweave texture",
+        imageUrl: BXE05Lime 
+      },
+      { 
+        id: "bxe06", 
+        name: "Turquoise Basketweave", 
+        description: "Vibrant turquoise basketweave fabric",
+        imageUrl: BXE06Turquoise 
       },
     ],
   },
