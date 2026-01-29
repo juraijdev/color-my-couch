@@ -1,0 +1,211 @@
+import { useState } from "react";
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+
+// Import pattern images
+import SS02HairlineSS from "@/assets/patterns/SS02-Hairline-SS.jpg";
+import SS03RoseGold from "@/assets/patterns/SS03-Rose-Gold.jpg";
+import SS04Black from "@/assets/patterns/SS04-Black.jpg";
+import SS12Gold from "@/assets/patterns/SS12-Gold.jpg";
+import SS13Champagne from "@/assets/patterns/SS13-Champagne.jpg";
+import SS25GoldBronze from "@/assets/patterns/SS25-Gold-Bronze.jpg";
+import SS26RedBronze from "@/assets/patterns/SS26-Red-Bronze.jpg";
+import SS27GreenBronze from "@/assets/patterns/SS27-Green-Bronze.jpg";
+
+export interface PatternOption {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+}
+
+export interface PatternCategory {
+  id: string;
+  name: string;
+  patterns: PatternOption[];
+}
+
+const patternCategories: PatternCategory[] = [
+  {
+    id: "stainless-steel",
+    name: "Hairline Stainless Steel",
+    patterns: [
+      { 
+        id: "ss02", 
+        name: "Brushed Steel", 
+        description: "Hairline brushed stainless steel with silver finish",
+        imageUrl: SS02HairlineSS 
+      },
+      { 
+        id: "ss03", 
+        name: "Rose Gold", 
+        description: "Hairline brushed stainless steel with rose gold plating",
+        imageUrl: SS03RoseGold 
+      },
+      { 
+        id: "ss04", 
+        name: "Black Titanium", 
+        description: "Hairline brushed stainless steel with black titanium plating",
+        imageUrl: SS04Black 
+      },
+      { 
+        id: "ss12", 
+        name: "Gold", 
+        description: "Hairline brushed stainless steel with gold plating",
+        imageUrl: SS12Gold 
+      },
+      { 
+        id: "ss13", 
+        name: "Champagne", 
+        description: "Hairline brushed stainless steel with champagne plating",
+        imageUrl: SS13Champagne 
+      },
+      { 
+        id: "ss25", 
+        name: "Gold Bronze", 
+        description: "Hairline brushed stainless steel with gold bronze plating",
+        imageUrl: SS25GoldBronze 
+      },
+      { 
+        id: "ss26", 
+        name: "Red Bronze", 
+        description: "Hairline brushed stainless steel with red bronze plating",
+        imageUrl: SS26RedBronze 
+      },
+      { 
+        id: "ss27", 
+        name: "Green Bronze", 
+        description: "Hairline brushed stainless steel with green bronze plating",
+        imageUrl: SS27GreenBronze 
+      },
+    ],
+  },
+];
+
+interface PatternPaletteProps {
+  selectedPattern: PatternOption | null;
+  onPatternSelect: (pattern: PatternOption) => void;
+}
+
+export function PatternPalette({ selectedPattern, onPatternSelect }: PatternPaletteProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(
+    patternCategories.map((c) => c.id)
+  );
+
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const filteredCategories = patternCategories
+    .map((category) => ({
+      ...category,
+      patterns: category.patterns.filter((pattern) =>
+        pattern.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pattern.description.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    }))
+    .filter((category) => category.patterns.length > 0);
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b border-border">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          Material Patterns
+        </h2>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search patterns..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 bg-secondary border-border focus:border-primary"
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4">
+        {filteredCategories.map((category) => (
+          <div key={category.id} className="space-y-2">
+            <button
+              onClick={() => toggleCategory(category.id)}
+              className="w-full flex items-center justify-between text-sm font-medium text-foreground hover:text-primary transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                {category.name}
+                <span className="text-xs text-muted-foreground">
+                  ({category.patterns.length})
+                </span>
+              </span>
+              {expandedCategories.includes(category.id) ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </button>
+
+            {expandedCategories.includes(category.id) && (
+              <div className="grid grid-cols-2 gap-2 animate-fade-in">
+                {category.patterns.map((pattern) => (
+                  <button
+                    key={pattern.id}
+                    onClick={() => onPatternSelect(pattern)}
+                    className={`group relative aspect-square rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                      selectedPattern?.id === pattern.id 
+                        ? "border-primary ring-2 ring-primary/50" 
+                        : "border-border hover:border-muted-foreground"
+                    }`}
+                    title={pattern.name}
+                  >
+                    <img 
+                      src={pattern.imageUrl} 
+                      alt={pattern.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-0 left-0 right-0 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[10px] font-medium text-white truncate block">
+                        {pattern.name}
+                      </span>
+                    </div>
+                    {selectedPattern?.id === pattern.id && (
+                      <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {selectedPattern && (
+        <div className="p-4 border-t border-border bg-secondary/50">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-lg border border-border overflow-hidden">
+              <img 
+                src={selectedPattern.imageUrl} 
+                alt={selectedPattern.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{selectedPattern.name}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {selectedPattern.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -5,11 +5,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ColorAssignment {
+interface PatternAssignment {
   partName: string;
   partMaterial: string;
-  colorName: string;
-  colorHex: string;
+  patternName: string;
+  patternDescription: string;
+  patternImageUrl: string;
 }
 
 serve(async (req) => {
@@ -24,16 +25,19 @@ serve(async (req) => {
     }
 
     const body = await req.json()
-    console.log("Recolor request:", { 
+    console.log("Pattern application request:", { 
       hasImage: !!body.image,
-      colorAssignments: body.colorAssignments,
+      patternAssignments: body.patternAssignments?.map((p: PatternAssignment) => ({ 
+        partName: p.partName, 
+        patternName: p.patternName 
+      })),
     })
 
     // Validate required fields
-    if (!body.image || !body.colorAssignments || body.colorAssignments.length === 0) {
+    if (!body.image || !body.patternAssignments || body.patternAssignments.length === 0) {
       return new Response(
         JSON.stringify({ 
-          error: "Missing required fields: image and colorAssignments are required" 
+          error: "Missing required fields: image and patternAssignments are required" 
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
@@ -41,26 +45,59 @@ serve(async (req) => {
       )
     }
 
-    // Build detailed prompt for multi-color recoloring
-    const assignments: ColorAssignment[] = body.colorAssignments;
+    // Build detailed prompt for multi-pattern application
+    const assignments: PatternAssignment[] = body.patternAssignments;
     
-    const colorChangesList = assignments.map((a: ColorAssignment) => 
-      `- Change the "${a.partName}" (${a.partMaterial}) to ${a.colorName} (${a.colorHex})`
+    const patternChangesList = assignments.map((a: PatternAssignment) => 
+      `- Apply "${a.patternName}" finish to the "${a.partName}" (${a.partMaterial}): ${a.patternDescription}`
     ).join("\n");
     
-    const prompt = `Edit this furniture image with the following color changes:
+    const prompt = `Edit this furniture image by applying the following material/finish changes:
 
-${colorChangesList}
+${patternChangesList}
 
 IMPORTANT INSTRUCTIONS:
-- Apply EACH color change to its specific part as listed above
+- Apply EACH material/finish change to its specific part as listed above
+- The new materials should look like brushed/hairline stainless steel with the specified plating
+- Maintain the metallic brushed texture appearance with fine vertical hairlines
 - Keep everything else EXACTLY the same - same lighting, same angle, same background, same proportions
-- Each part should have its own distinct new color as specified
-- The new colors should look natural and realistic on each material type
+- Each part should have its own distinct new finish as specified
+- The new finishes should look natural and realistic, matching professional stainless steel finishes
 - Maintain professional product photography quality
-- Do NOT change any parts that are not listed above`;
+- Do NOT change any parts that are not listed above
+- Preserve the 3D form and reflections appropriate for metal surfaces`;
 
-    console.log("Generating recolored image with prompt:", prompt)
+    console.log("Generating image with pattern application prompt:", prompt)
+
+    // Build the message content with pattern reference images
+    const messageContent: any[] = [
+      {
+        type: "text",
+        text: prompt
+      },
+      {
+        type: "image_url",
+        image_url: {
+          url: body.image
+        }
+      }
+    ];
+
+    // Add pattern reference images
+    for (const assignment of assignments) {
+      if (assignment.patternImageUrl) {
+        messageContent.push({
+          type: "text",
+          text: `Reference for "${assignment.patternName}" finish to apply to "${assignment.partName}":`
+        });
+        messageContent.push({
+          type: "image_url",
+          image_url: {
+            url: assignment.patternImageUrl
+          }
+        });
+      }
+    }
 
     // Use Lovable AI with image editing capabilities
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -70,22 +107,11 @@ IMPORTANT INSTRUCTIONS:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
+        model: "google/gemini-2.5-flash-image",
         messages: [
           {
             role: "user",
-            content: [
-              {
-                type: "text",
-                text: prompt
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: body.image
-                }
-              }
-            ]
+            content: messageContent
           }
         ],
         modalities: ["image", "text"]
@@ -134,7 +160,7 @@ IMPORTANT INSTRUCTIONS:
       console.log("No image found in response. Full response:", JSON.stringify(aiResult, null, 2).substring(0, 2000));
       
       return new Response(JSON.stringify({ 
-        error: "Image generation failed. The AI couldn't generate a recolored image. Please try again.",
+        error: "Image generation failed. The AI couldn't generate the customized image. Please try again.",
         details: message?.content || "No content returned"
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
