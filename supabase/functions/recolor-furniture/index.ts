@@ -49,23 +49,30 @@ serve(async (req) => {
     const assignments: PatternAssignment[] = body.patternAssignments;
     
     const patternChangesList = assignments.map((a: PatternAssignment) => 
-      `- Apply "${a.patternName}" finish to the "${a.partName}" (${a.partMaterial}): ${a.patternDescription}`
+      `- "${a.partName}" (${a.partMaterial}): Apply "${a.patternName}" - ${a.patternDescription}`
     ).join("\n");
     
-    const prompt = `Edit this furniture image by applying the following material/finish changes:
+    const prompt = `CRITICAL TASK: Recolor/retexture ONLY the specified furniture parts. The furniture shape, structure, and form must remain EXACTLY IDENTICAL.
 
+PARTS TO RECOLOR:
 ${patternChangesList}
 
-IMPORTANT INSTRUCTIONS:
-- Apply EACH material/finish change to its specific part as listed above
-- The new materials should look like brushed/hairline stainless steel with the specified plating
-- Maintain the metallic brushed texture appearance with fine vertical hairlines
-- Keep everything else EXACTLY the same - same lighting, same angle, same background, same proportions
-- Each part should have its own distinct new finish as specified
-- The new finishes should look natural and realistic, matching professional stainless steel finishes
-- Maintain professional product photography quality
-- Do NOT change any parts that are not listed above
-- Preserve the 3D form and reflections appropriate for metal surfaces`;
+ABSOLUTE REQUIREMENTS - DO NOT VIOLATE:
+1. SHAPE PRESERVATION: The furniture silhouette, contours, edges, and 3D form must be PIXEL-PERFECT identical to the input image
+2. NO STRUCTURAL CHANGES: Do not add, remove, reshape, resize, or modify ANY part of the furniture structure
+3. EXACT PROPORTIONS: All dimensions, angles, curves, and relationships between parts must stay exactly the same
+4. BACKGROUND UNCHANGED: Keep the exact same background, shadows, reflections, and environment
+5. LIGHTING UNCHANGED: Maintain the exact same lighting direction, intensity, and highlights
+6. CAMERA ANGLE: Same perspective, no rotation, no zoom, no crop changes
+
+MATERIAL APPLICATION RULES:
+- Apply the new material/pattern ONLY as a color/texture overlay on the specified parts
+- Match the material's color, grain direction, and surface texture from the reference images
+- Preserve the original 3D shading and form - only change the surface appearance
+- Natural lighting reflections should adapt to the new material properties
+- Unspecified parts must remain COMPLETELY unchanged
+
+Think of this as a "skin" change - the furniture body stays exactly the same, only the surface material appearance changes.`;
 
     console.log("Generating image with pattern application prompt:", prompt)
 
