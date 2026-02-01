@@ -135,7 +135,7 @@ export interface PatternCategory {
   patterns: PatternOption[];
 }
 
-const patternCategories: PatternCategory[] = [
+export const patternCategories: PatternCategory[] = [
   {
     id: "stainless-steel",
     name: "Hairline Stainless Steel",

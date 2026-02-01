@@ -1,11 +1,13 @@
 import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
-import { Header } from "@/components/Header";
-import { PatternPalette, PatternOption } from "@/components/PatternPalette";
-import { ImageUploader } from "@/components/ImageUploader";
-import { PartSelector, PartSelectorRef, PartPatternAssignment } from "@/components/PartSelector";
-import { PreviewPanel } from "@/components/PreviewPanel";
-import { WorkflowSteps } from "@/components/WorkflowSteps";
+import { Sofa, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { StepIndicator } from "@/components/StepIndicator";
+import { UploadArea } from "@/components/UploadArea";
+import { FurnitureEditor, FurnitureEditorRef, PartPatternAssignment } from "@/components/FurnitureEditor";
+import { PatternGrid } from "@/components/PatternGrid";
+import { GeneratePanel } from "@/components/GeneratePanel";
+import { PatternOption } from "@/components/PatternPalette";
 import { imageUrlToBase64 } from "@/lib/imageUtils";
 
 const Index = () => {
@@ -14,7 +16,7 @@ const Index = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasSelection, setHasSelection] = useState(false);
-  const partSelectorRef = useRef<PartSelectorRef>(null);
+  const furnitureEditorRef = useRef<FurnitureEditorRef>(null);
 
   const getCurrentStep = (): 1 | 2 | 3 => {
     if (!uploadedImage) return 1;
@@ -38,7 +40,6 @@ const Index = () => {
 
   const handlePatternSelect = useCallback((pattern: PatternOption) => {
     setSelectedPattern(pattern);
-    toast.info(`Selected: ${pattern.name} - Click on a part to apply`);
   }, []);
 
   const handleSelectionChange = useCallback((hasSelection: boolean) => {
@@ -51,8 +52,8 @@ const Index = () => {
       return;
     }
 
-    const patternAssignments = partSelectorRef.current?.getPatternAssignments();
-    const hasParts = partSelectorRef.current?.hasSelection();
+    const patternAssignments = furnitureEditorRef.current?.getPatternAssignments();
+    const hasParts = furnitureEditorRef.current?.hasSelection();
 
     if (!hasParts || !patternAssignments || patternAssignments.length === 0) {
       toast.error("Please assign patterns to at least one furniture part");
@@ -60,10 +61,9 @@ const Index = () => {
     }
 
     setIsGenerating(true);
-    toast.info("AI is applying the selected patterns to the furniture parts...");
+    toast.info("AI is applying the selected patterns...");
 
     try {
-      // Convert pattern images to base64 for the AI gateway
       const assignmentsWithBase64 = await Promise.all(
         patternAssignments.map(async (pa: PartPatternAssignment) => ({
           partName: pa.part.name,
@@ -97,16 +97,12 @@ const Index = () => {
       const result = await response.json();
       
       if (result.error) {
-        if (result.analysis) {
-          toast.info("AI analyzed your request but couldn't generate an image directly.");
-          console.log("AI Analysis:", result.analysis);
-        }
         throw new Error(result.error);
       }
 
       if (result.output) {
         setGeneratedImage(result.output);
-        toast.success("Furniture customization complete!");
+        toast.success("Design generated successfully!");
       } else {
         throw new Error("No output image received");
       }
@@ -119,55 +115,85 @@ const Index = () => {
   }, [uploadedImage]);
 
   const canGenerate = Boolean(uploadedImage && hasSelection && !isGenerating);
+  const assignmentCount = furnitureEditorRef.current?.getPatternAssignments().length || 0;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-
-      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Left Sidebar - Pattern Palette */}
-        <aside className="w-full lg:w-72 border-b lg:border-b-0 lg:border-r border-border bg-card/30 shrink-0 max-h-64 lg:max-h-none overflow-auto lg:overflow-visible">
-          <PatternPalette
-            selectedPattern={selectedPattern}
-            onPatternSelect={handlePatternSelect}
-          />
-        </aside>
-
-        {/* Main Content - Upload Area or Part Selector */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <WorkflowSteps currentStep={getCurrentStep()} />
-
-          <div className="flex-1 p-4 lg:p-8 overflow-auto">
-            <div className="h-full panel p-6">
-              {uploadedImage ? (
-                <PartSelector
-                  ref={partSelectorRef}
-                  imageUrl={uploadedImage}
-                  selectedPattern={selectedPattern}
-                  onSelectionChange={handleSelectionChange}
-                />
-              ) : (
-                <ImageUploader
-                  uploadedImage={uploadedImage}
-                  onImageUpload={handleImageUpload}
-                  onImageClear={handleImageClear}
-                />
-              )}
-            </div>
+      {/* Header */}
+      <header className="h-14 border-b border-border bg-card/80 backdrop-blur-sm flex items-center justify-between px-4 lg:px-6 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+            <Sofa className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="font-bold text-base lg:text-lg">Furniture Customizer</h1>
           </div>
         </div>
 
-        {/* Right Sidebar - Preview & Export */}
-        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-border bg-card/30 shrink-0">
-          <PreviewPanel
-            originalImage={uploadedImage}
-            generatedImage={generatedImage}
-            isGenerating={isGenerating}
-            onGenerate={handleGenerate}
-            canGenerate={canGenerate}
-            onClearImage={handleImageClear}
-          />
-        </aside>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-medium text-primary">AI Ready</span>
+          </div>
+          <Button variant="ghost" size="icon" className="h-9 w-9">
+            <HelpCircle className="w-5 h-5" />
+          </Button>
+        </div>
+      </header>
+
+      {/* Step Indicator */}
+      <StepIndicator 
+        currentStep={getCurrentStep()} 
+        hasImage={Boolean(uploadedImage)}
+        hasPatternAssigned={hasSelection}
+      />
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {!uploadedImage ? (
+          /* Step 1: Upload Area */
+          <div className="flex-1 overflow-auto">
+            <UploadArea onImageUpload={handleImageUpload} />
+          </div>
+        ) : (
+          /* Step 2 & 3: Editor + Patterns + Generate */
+          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            {/* Left: Furniture Editor */}
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              <FurnitureEditor
+                ref={furnitureEditorRef}
+                imageUrl={uploadedImage}
+                selectedPattern={selectedPattern}
+                onSelectionChange={handleSelectionChange}
+                onBack={handleImageClear}
+              />
+            </div>
+
+            {/* Right: Patterns + Generate */}
+            <div className="w-full lg:w-[420px] xl:w-[480px] border-t lg:border-t-0 lg:border-l border-border flex flex-col overflow-hidden bg-muted/30">
+              {/* Pattern Grid */}
+              <div className="flex-1 min-h-0 p-4 overflow-hidden">
+                <PatternGrid
+                  selectedPattern={selectedPattern}
+                  onPatternSelect={handlePatternSelect}
+                  disabled={!uploadedImage}
+                />
+              </div>
+
+              {/* Generate Panel */}
+              <div className="shrink-0 p-4 pt-0">
+                <GeneratePanel
+                  originalImage={uploadedImage}
+                  generatedImage={generatedImage}
+                  isGenerating={isGenerating}
+                  onGenerate={handleGenerate}
+                  canGenerate={canGenerate}
+                  assignmentCount={hasSelection ? assignmentCount : 0}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
