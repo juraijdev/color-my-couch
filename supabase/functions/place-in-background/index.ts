@@ -29,19 +29,29 @@ serve(async (req) => {
       )
     }
 
-    const prompt = `You are a professional interior design compositor. Your task is to seamlessly place the furniture from the FIRST image into the scene shown in the SECOND image (the background/room).
+    const prompt = `You are a professional interior design compositor. Your ONLY task is to take the EXACT furniture from image 1 and place it into the room/scene in image 2.
 
-CRITICAL REQUIREMENTS:
-1. FURNITURE PRESERVATION: The furniture from image 1 must appear EXACTLY as it is — same shape, same color, same material, same proportions, same design. Do NOT alter the furniture in ANY way.
-2. NATURAL PLACEMENT: Place the furniture naturally in the background scene. It should look like it belongs there — correct perspective, correct scale relative to the room, sitting on the floor/surface properly.
-3. LIGHTING MATCH: Adjust the furniture's lighting and shadows to match the ambient lighting of the background scene so it looks photorealistic and naturally integrated.
-4. SHADOWS: Add natural shadows beneath and around the furniture to ground it in the scene.
-5. PERSPECTIVE: Match the perspective/angle of the furniture to the room's vanishing points so it doesn't look pasted on.
-6. SCALE: Size the furniture appropriately relative to the room — it should look like it actually fits in the space.
-7. DO NOT modify or remove anything from the background scene — just add the furniture into it naturally.
-8. The result should look like a professional interior design photograph.
+ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
 
-Output a single photorealistic image of the furniture placed in the background scene.`;
+1. PIXEL-PERFECT FURNITURE PRESERVATION: The furniture must appear EXACTLY as it is in image 1. IDENTICAL shape, silhouette, outline, contours, edges, curves, angles, proportions, dimensions, color, material, texture, pattern, grain, and every single visual detail. Do NOT redraw, reimagine, regenerate, or artistically interpret the furniture. It must be a direct copy-paste of the furniture — not a recreation.
+
+2. ZERO MODIFICATIONS TO FURNITURE: Do NOT change, add, remove, reshape, resize, stretch, compress, rotate the form of, recolor, retexture, smooth, sharpen, stylize, or alter the furniture in ANY way whatsoever. Every leg, panel, handle, shelf, joint, corner, curve, and surface must be IDENTICAL to image 1.
+
+3. NO ARTISTIC INTERPRETATION OF FURNITURE: Do NOT "improve" the furniture, change its style, modernize it, simplify it, add details, remove details, or make ANY creative modifications to the furniture itself. The furniture is a fixed, immutable object.
+
+4. PLACEMENT RULES: Place the furniture naturally in the background scene with:
+   - Correct scale relative to the room (appropriate size compared to walls, doors, other objects)
+   - Proper grounding on the floor/surface
+   - Natural shadows beneath and around the furniture to anchor it in the scene
+   - Lighting on the furniture adjusted to match the ambient lighting direction and color temperature of the room
+
+5. BACKGROUND PRESERVATION: Do NOT modify, remove, or rearrange anything in the background scene. Only ADD the furniture into it.
+
+6. The result should look like a professional interior design photograph where the furniture was physically placed in the room and photographed.
+
+THINK OF IT THIS WAY: You are cutting out the EXACT furniture from photo 1 with perfect precision and pasting it into photo 2, then adding realistic shadows and lighting adjustments so it looks naturally placed. The furniture pixels themselves do not change — only their lighting/shadow integration with the new environment.
+
+Output a single photorealistic image.`;
 
     const messageContent = [
       { type: "text", text: prompt },
