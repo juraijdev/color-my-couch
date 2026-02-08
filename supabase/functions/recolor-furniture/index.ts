@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface PatternAssignment {
@@ -52,27 +52,30 @@ serve(async (req) => {
       `- "${a.partName}" (${a.partMaterial}): Apply "${a.patternName}" - ${a.patternDescription}`
     ).join("\n");
     
-    const prompt = `CRITICAL TASK: Recolor/retexture ONLY the specified furniture parts. The furniture shape, structure, and form must remain EXACTLY IDENTICAL.
+    const prompt = `You are a product photo retouching assistant. Your ONLY job is to change the surface color/material/texture of specific furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed.
 
 PARTS TO RECOLOR:
 ${patternChangesList}
 
-ABSOLUTE REQUIREMENTS - DO NOT VIOLATE:
-1. SHAPE PRESERVATION: The furniture silhouette, contours, edges, and 3D form must be PIXEL-PERFECT identical to the input image
-2. NO STRUCTURAL CHANGES: Do not add, remove, reshape, resize, or modify ANY part of the furniture structure
-3. EXACT PROPORTIONS: All dimensions, angles, curves, and relationships between parts must stay exactly the same
-4. BACKGROUND UNCHANGED: Keep the exact same background, shadows, reflections, and environment
-5. LIGHTING UNCHANGED: Maintain the exact same lighting direction, intensity, and highlights
-6. CAMERA ANGLE: Same perspective, no rotation, no zoom, no crop changes
+ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
-MATERIAL APPLICATION RULES:
-- Apply the new material/pattern ONLY as a color/texture overlay on the specified parts
-- Match the material's color, grain direction, and surface texture from the reference images
-- Preserve the original 3D shading and form - only change the surface appearance
-- Natural lighting reflections should adapt to the new material properties
-- Unspecified parts must remain COMPLETELY unchanged
+1. IDENTICAL FURNITURE SHAPE: The output furniture must have the EXACT same silhouette, outline, contours, edges, curves, angles, proportions, dimensions, and 3D form as the input. Not similar — IDENTICAL. Do NOT redraw, reimagine, or regenerate the furniture. Think of it as repainting the exact same physical object.
 
-Think of this as a "skin" change - the furniture body stays exactly the same, only the surface material appearance changes.`;
+2. ZERO STRUCTURAL CHANGES: Do NOT add, remove, reshape, resize, reposition, rotate, bend, stretch, compress, or modify ANY structural element. Every leg, shelf, handle, panel, joint, corner, curve, and edge must remain in the EXACT same position and shape.
+
+3. IDENTICAL CAMERA & COMPOSITION: Same exact camera angle, perspective, focal length, distance, framing, crop, and composition. The furniture must occupy the EXACT same pixels in the frame.
+
+4. IDENTICAL BACKGROUND: The background, floor, shadows, reflections, and surrounding environment must be completely unchanged.
+
+5. IDENTICAL LIGHTING: Same light direction, intensity, highlights, specular reflections, and ambient occlusion. Only the material's response to light changes (e.g., matte vs glossy).
+
+6. COLOR/TEXTURE CHANGE ONLY: Extract the color, grain pattern, and surface texture from each reference pattern image. Apply that color/texture ONLY to the surface of the specified part. The underlying 3D shading, form shadows, and highlight contours must remain — just recolored to match the new material.
+
+7. UNSPECIFIED PARTS UNTOUCHED: Any furniture part NOT listed above must remain 100% identical to the input — same color, same texture, same everything.
+
+8. NO ARTISTIC INTERPRETATION: Do NOT "improve" the image, change the style, add effects, change resolution, or make any creative modifications. This is a mechanical recoloring task.
+
+THINK OF IT THIS WAY: You are digitally spray-painting specific parts of a real photograph. The furniture is a physical object that cannot change shape. You can only change what color/material its surface appears to be.`;
 
     console.log("Generating image with pattern application prompt:", prompt)
 
@@ -114,7 +117,7 @@ Think of this as a "skin" change - the furniture body stays exactly the same, on
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-3-pro-image-preview",
         messages: [
           {
             role: "user",
