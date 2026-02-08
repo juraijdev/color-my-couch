@@ -9,7 +9,7 @@ export function Header() {
           <Sofa className="w-5 h-5 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="font-display font-bold text-lg">Furniture Customizer</h1>
+          <h1 className="font-display font-bold text-lg">LUSHBYGesign</h1>
           <p className="text-xs text-muted-foreground">AI-Powered Color Transformation</p>
         </div>
       </div>
@@ -19,7 +19,7 @@ export function Header() {
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           <span className="text-sm text-muted-foreground">AI Ready</span>
         </div>
-        
+
         <Button variant="ghost" size="icon">
           <HelpCircle className="w-5 h-5" />
         </Button>
