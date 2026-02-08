@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.segment-furniture]
 verify_jwt = false
+
+[functions.place-in-background]
+verify_jwt = false

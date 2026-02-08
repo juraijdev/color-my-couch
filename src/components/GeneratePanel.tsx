@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check } from "lucide-react";
+import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { BackgroundPlacer } from "@/components/BackgroundPlacer";
 
 interface GeneratePanelProps {
   originalImage: string | null;
@@ -31,6 +32,7 @@ export function GeneratePanel({
   const [fileName, setFileName] = useState("customized-furniture");
   const [format, setFormat] = useState("png");
   const [showExport, setShowExport] = useState(false);
+  const [showBackgroundPlacer, setShowBackgroundPlacer] = useState(false);
 
   const handleDownload = () => {
     if (!generatedImage) return;
@@ -42,6 +44,18 @@ export function GeneratePanel({
     link.click();
     document.body.removeChild(link);
   };
+
+  // If background placer is active, show it instead
+  if (showBackgroundPlacer && generatedImage) {
+    return (
+      <div className="h-full bg-card rounded-xl border border-border overflow-hidden">
+        <BackgroundPlacer
+          generatedImage={generatedImage}
+          onClose={() => setShowBackgroundPlacer(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-card rounded-xl border border-border overflow-hidden">
@@ -150,9 +164,19 @@ export function GeneratePanel({
           </div>
         )}
 
-        {/* Export section */}
+        {/* Post-generation actions */}
         {generatedImage && (
           <>
+            {/* Place in Background button */}
+            <Button
+              variant="outline"
+              className="w-full border-primary/30 text-primary hover:bg-primary/10"
+              onClick={() => setShowBackgroundPlacer(true)}
+            >
+              <ImageIconLucide className="w-4 h-4 mr-2" />
+              Place in Background
+            </Button>
+
             <Button
               variant="outline"
               className="w-full"
