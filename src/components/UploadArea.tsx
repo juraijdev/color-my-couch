@@ -56,7 +56,7 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
           AI-Powered Furniture Customization
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-          Transform Your Furniture
+          Transform Your Design
         </h1>
         <p className="text-muted-foreground text-lg">
           Upload a photo and our AI will help you visualize different materials and finishes
