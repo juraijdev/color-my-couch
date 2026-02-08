@@ -53,42 +53,61 @@ serve(async (req) => {
 
 CRITICAL ANALYSIS RULES:
 
-1. IDENTIFY EVERY DISTINCT MATERIAL ZONE: Look carefully at the furniture and identify ALL distinct parts based on material, finish, and function. Apply the GROUPING RULES below:
+1. IDENTIFY EVERY DISTINCT MATERIAL ZONE: Look carefully at the furniture and identify ALL distinct parts based on material, finish, and function. You MUST identify every visible part — do not skip any. Apply the GROUPING RULES below:
 
 2. TOP SURFACE GROUPING RULE (CRITICAL):
    - ALL top surface modules/compartments must be grouped into ONE SINGLE PART called "Top Surface"
    - Even if the top has 3 or 4 separate compartments/modules, they are ONE part — the user will assign ONE color/material to all of them together
    - Do NOT create separate parts like "Top Module 1", "Top Module 2", etc.
+   - The "Top Surface" includes the ENTIRE top face/surface area of each module — all the flat horizontal surfaces where items are placed
 
 3. STAINLESS STEEL TRIM GROUPING RULE (CRITICAL):
    - ALL stainless steel / metal elements must be grouped into ONE SINGLE PART called "Stainless Steel Trim & Edges"
-   - This includes: divider strips between top modules, front edge/lip of the top surface, side edges, border trim, and any other metallic strips or bezels
+   - This includes: divider strips between top modules, front edge/lip of the top surface, side edges of the top surface, border trim, and any other metallic strips or bezels
    - Do NOT split dividers into "Divider 1", "Divider 2", etc. — they are ONE part
    - The user will assign ONE color/finish to all these metal elements together
 
 4. SHELF / LOWER WOOD GROUPING RULE (CRITICAL):
-   - ALL wooden shelves (lower shelf, middle shelf, any storage shelves) must be grouped into ONE SINGLE PART called "Shelf Wood"
+   - ALL wooden shelves must be grouped into ONE SINGLE PART called "Shelf Wood"
+   - This means the ENTIRE shelf surface — top face, front edge, side edges, and bottom face of EVERY shelf
+   - The shelf must be FULLY covered when recolored — not just the bottom or just the top, but the COMPLETE shelf panel including all visible faces
    - Even if there are multiple shelves at different levels, they are ONE part — the user will assign ONE color/material to all shelves together
    - Do NOT create separate parts like "Lower Shelf", "Middle Shelf", etc.
 
-5. OTHER PARTS TO IDENTIFY SEPARATELY:
-   - **Frame / structural elements**: Legs, base frame, support bars (group as one "Frame / Legs" part if same material)
-   - **Side panels**: If present, group as one "Side Panels" part
-   - **Back panel**: If visible, identify as one part
-   - **Hardware**: Handles, knobs, hinges — group as one "Hardware" part if present
-   - **Casters/wheels**: If present, identify as one part
-   - **Other materials**: Glass, fabric, leather, plastic components
+5. FRONT PANEL RULE (CRITICAL):
+   - If the furniture has front panels, fascia boards, front skirts, or any vertical front-facing decorative/structural panels below the top surface, they MUST be identified as a separate part called "Front Panel"
+   - This includes: front apron, front rail, decorative front board, kick plate, or any vertical surface facing the user on the front side
+   - Front panels are commonly found between the top surface and the lower shelf on buffet tables, sideboards, and serving stations
+   - Do NOT skip or merge front panels into other parts — they are a distinct recolorable surface
 
-6. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
-7. Identify the current color/material of each part
+6. OTHER PARTS TO IDENTIFY (DO NOT SKIP ANY):
+   - **Frame / Legs**: Legs, base frame, support bars — group as one "Frame / Legs" part if same material
+   - **Side panels**: If present, group as one "Side Panels" part  
+   - **Back panel**: If visible, identify as one "Back Panel" part
+   - **Front Panel**: See rule 5 above — MUST be identified if present
+   - **Hardware**: Handles, knobs, hinges — group as one "Hardware" part if present
+   - **Casters/wheels**: If present, identify as one "Casters / Wheels" part
+   - **Doors / Drawers**: If present, identify as separate parts
+   - **Other materials**: Glass, fabric, leather, plastic components — each as its own part
+
+7. COMPLETENESS CHECK: Before returning, verify you have identified:
+   - Every horizontal surface (top, shelves)
+   - Every vertical surface (front panels, side panels, back panel)
+   - Every structural element (frame, legs)
+   - Every trim/metal element
+   - Every accessory (hardware, wheels, doors)
+   If any visible part is missing, add it.
+
+8. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
+9. Identify the current color/material of each part
 
 Return your analysis as JSON with this exact structure:
 {
   "parts": [
     {
       "id": "unique_id",
-      "name": "Human readable name like 'Top Surface' or 'Stainless Steel Trim & Edges'",
-      "description": "Brief description including material details",
+      "name": "Human readable name like 'Top Surface' or 'Front Panel'",
+      "description": "Brief description including material details and what faces/surfaces are included",
       "material": "wood|metal|fabric|leather|glass|plastic|stainless_steel|other",
       "currentColor": "approximate current color like 'brushed silver' or 'dark brown'",
       "location": {
@@ -103,18 +122,20 @@ Return your analysis as JSON with this exact structure:
 
 SUMMARY OF GROUPING:
 - All top surface modules → ONE "Top Surface" part
-- All metal trim, dividers, edges → ONE "Stainless Steel Trim & Edges" part  
-- All wooden shelves → ONE "Shelf Wood" part
+- All metal trim, dividers, front/side edges → ONE "Stainless Steel Trim & Edges" part  
+- All wooden shelves (FULLY — all faces) → ONE "Shelf Wood" part
+- Front panels/fascia → "Front Panel" part (DO NOT SKIP)
+- Frame/legs → "Frame / Legs" part
 - Other distinct elements → separate parts as appropriate
 
-IMPORTANT: Aim for 3-8 well-grouped parts. Keep it simple and practical for the user. Metal is SEPARATE from wood — never merge stainless steel into wooden parts.`
+IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible parts — do not skip front panels, side panels, or any other visible surface. Metal is SEPARATE from wood — never merge stainless steel into wooden parts.`
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Analyze this furniture image and identify ALL distinct parts that can be recolored. Apply these GROUPING RULES: (1) Combine ALL top surface modules/compartments into ONE single 'Top Surface' part — do NOT split into separate modules. (2) Group ALL stainless steel / metal elements (divider strips, front edge, side edges, border trim) into ONE single 'Stainless Steel Trim & Edges' part. (3) Combine ALL wooden shelves (lower, middle, any level) into ONE single 'Shelf Wood' part. (4) Identify other distinct parts separately: frame/legs, side panels, hardware, wheels, etc. Aim for 3-8 well-grouped parts. Return the JSON structure."
+                text: "Analyze this furniture image and identify ALL distinct parts that can be recolored. Apply these GROUPING RULES: (1) Combine ALL top surface modules/compartments into ONE single 'Top Surface' part. (2) Group ALL stainless steel / metal elements (divider strips, front edge, side edges, border trim) into ONE single 'Stainless Steel Trim & Edges' part. (3) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE single 'Shelf Wood' part. (4) IMPORTANT: Identify FRONT PANELS separately — any vertical front-facing panel/fascia/apron below the top surface MUST be listed as 'Front Panel'. (5) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers. Do NOT skip any visible part. Aim for 4-10 well-grouped parts. Return the JSON structure."
               },
               {
                 type: "image_url",
