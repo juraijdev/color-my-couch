@@ -126,7 +126,7 @@ const Index = () => {
             <Sofa className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-bold text-base lg:text-lg">Furniture Customizer</h1>
+            <h1 className="font-bold text-base lg:text-lg">LUSHbyGESIGN</h1>
           </div>
         </div>
 
