@@ -49,22 +49,35 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a furniture analysis expert. Analyze the furniture image and identify the distinct parts/materials visible.
-            
-Your job is to:
-1. Identify all distinct furniture parts (e.g., "wood frame", "metal legs", "fabric cushion", "drawer fronts", etc.)
-2. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
-3. Identify the current color/material of each part
+            content: `You are an expert furniture analyst specializing in commercial and hospitality furniture, particularly buffet tables, serving stations, and display units.
+
+CRITICAL ANALYSIS RULES:
+
+1. IDENTIFY EVERY DISTINCT MATERIAL ZONE: Look carefully at the furniture and identify ALL distinct parts based on material, finish, and function. Pay extremely close attention to:
+   - **STAINLESS STEEL EDGES / TRIM / BORDERS**: Buffet tables and serving stations typically have stainless steel edges, trims, or borders between modules/sections on the top surface. These MUST be identified as separate parts. Look for thin metallic strips, bezels, or frames that separate or border the top surface modules.
+   - **INDIVIDUAL TOP SURFACE MODULES**: If the top surface is divided into multiple sections/modules (e.g., 3 or 4 compartments on a buffet table), identify EACH module separately AND the stainless steel trim/edges between them.
+   - **Frame / structural elements**: Legs, base frame, support bars
+   - **Panels**: Side panels, back panels, door fronts
+   - **Hardware**: Handles, knobs, hinges, casters/wheels
+   - **Other materials**: Glass, fabric, leather, plastic components
+
+2. BE GRANULAR WITH TOP SURFACES: For buffet tables and similar furniture:
+   - Identify each top module/compartment as a separate part (e.g., "Top Module 1 - Left", "Top Module 2 - Center", "Top Module 3 - Right")
+   - Identify ALL stainless steel edges, borders, and trim pieces as separate parts (e.g., "Stainless Steel Edge Trim", "Module Divider Strips")
+   - If there are different materials on the top (wood panels + metal borders), each gets its own part
+
+3. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
+4. Identify the current color/material of each part
 
 Return your analysis as JSON with this exact structure:
 {
   "parts": [
     {
       "id": "unique_id",
-      "name": "Human readable name like 'Wood Top Surface'",
-      "description": "Brief description",
-      "material": "wood|metal|fabric|leather|glass|plastic|other",
-      "currentColor": "approximate current color like 'dark brown'",
+      "name": "Human readable name like 'Top Module 1 - Left Panel'",
+      "description": "Brief description including material details",
+      "material": "wood|metal|fabric|leather|glass|plastic|stainless_steel|other",
+      "currentColor": "approximate current color like 'brushed silver' or 'dark brown'",
       "location": {
         "top": 0-100,
         "left": 0-100,
@@ -75,14 +88,14 @@ Return your analysis as JSON with this exact structure:
   ]
 }
 
-Be precise and identify 3-8 distinct selectable parts.`
+IMPORTANT: Be thorough — identify 4-12 distinct selectable parts. Do NOT merge stainless steel edges into the wooden panels. They are SEPARATE parts. Every visible material transition boundary should result in a separate part entry.`
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Analyze this furniture image and identify all the distinct parts that can be recolored. Return the JSON structure with all parts."
+                text: "Analyze this furniture image and identify ALL distinct parts that can be recolored. Pay SPECIAL ATTENTION to: (1) If this is a buffet table or serving station, identify EACH top surface module separately AND the stainless steel edges/trim/dividers between modules as their own parts. (2) Identify every material transition — wood panels, metal frames, stainless steel borders, handles, legs, wheels, etc. Return the JSON structure with all parts."
               },
               {
                 type: "image_url",
