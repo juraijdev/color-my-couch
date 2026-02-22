@@ -35,21 +35,25 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
 
 1. PIXEL-PERFECT FURNITURE PRESERVATION: The furniture must appear EXACTLY as it is in image 1. IDENTICAL shape, silhouette, outline, contours, edges, curves, angles, proportions, dimensions, color, material, texture, pattern, grain, and every single visual detail. Do NOT redraw, reimagine, regenerate, or artistically interpret the furniture. It must be a direct copy-paste of the furniture — not a recreation.
 
-2. ZERO MODIFICATIONS TO FURNITURE: Do NOT change, add, remove, reshape, resize, stretch, compress, rotate the form of, recolor, retexture, smooth, sharpen, stylize, or alter the furniture in ANY way whatsoever. Every leg, panel, handle, shelf, joint, corner, curve, and surface must be IDENTICAL to image 1.
+2. ZERO MODIFICATIONS TO FURNITURE: Do NOT change, add, remove, reshape, resize, stretch, compress, rotate the form of, recolor, retexture, smooth, sharpen, stylize, or alter the furniture in ANY way whatsoever. Every leg, panel, handle, shelf, joint, corner, curve, and surface must be IDENTICAL to image 1. The colors, materials, textures, and finishes must remain EXACTLY as they are — do NOT alter them even slightly.
 
 3. NO ARTISTIC INTERPRETATION OF FURNITURE: Do NOT "improve" the furniture, change its style, modernize it, simplify it, add details, remove details, or make ANY creative modifications to the furniture itself. The furniture is a fixed, immutable object.
 
-4. PLACEMENT RULES: Place the furniture naturally in the background scene with:
-   - Correct scale relative to the room (appropriate size compared to walls, doors, other objects)
+4. PROPORTION MATCHING (CRITICAL): Look at the OTHER furniture and objects already present in the background scene (image 2). Your placed furniture MUST be scaled to match the real-world proportions of those existing objects. If there are chairs, tables, sofas, or other furniture in the background, use them as scale references. The placed furniture should look like it physically belongs in that space at a realistic size — not too large, not too small compared to surrounding objects, doors, windows, and walls.
+
+5. PLACEMENT RULES: Place the furniture naturally in the background scene with:
+   - Correct scale relative to the room AND relative to other furniture/objects already in the scene
    - Proper grounding on the floor/surface
    - Natural shadows beneath and around the furniture to anchor it in the scene
    - Lighting on the furniture adjusted to match the ambient lighting direction and color temperature of the room
 
-5. BACKGROUND PRESERVATION: Do NOT modify, remove, or rearrange anything in the background scene. Only ADD the furniture into it.
+6. BACKGROUND PRESERVATION: Do NOT modify, remove, or rearrange anything in the background scene. Only ADD the furniture into it.
 
-6. The result should look like a professional interior design photograph where the furniture was physically placed in the room and photographed.
+7. COLOR & DESIGN PRESERVATION: The furniture's colors, materials, textures, patterns, and finishes from image 1 must be preserved EXACTLY in the output. Do NOT change any color, do NOT change any material appearance. The only adjustments allowed are lighting/shadow integration with the environment.
 
-THINK OF IT THIS WAY: You are cutting out the EXACT furniture from photo 1 with perfect precision and pasting it into photo 2, then adding realistic shadows and lighting adjustments so it looks naturally placed. The furniture pixels themselves do not change — only their lighting/shadow integration with the new environment.
+8. The result should look like a professional interior design photograph where the furniture was physically placed in the room and photographed.
+
+THINK OF IT THIS WAY: You are cutting out the EXACT furniture from photo 1 with perfect precision and pasting it into photo 2, then adding realistic shadows and lighting adjustments so it looks naturally placed. The furniture pixels themselves do not change — only their lighting/shadow integration with the new environment. Scale it to match other objects in the room.
 
 Output a single photorealistic image.`;
 
