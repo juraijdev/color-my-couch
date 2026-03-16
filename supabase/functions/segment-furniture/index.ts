@@ -91,10 +91,10 @@ CRITICAL ANALYSIS RULES:
 
 10. BUFFET TOP VALIDATION CHECK (MANDATORY):
    - If the top surface is split into multiple modules, look again specifically for the thin separator strips between modules
-   - Also look again for the thin front lip and side lip directly below the top surface
-   - If those thin strips visually match each other, they MUST be included in the same "Stainless Steel Trim & Edges" part
-   - The top wood/stone must stop exactly where the thin metal lip begins
-   - Never return a buffet table where the divider strips are metal but the matching thin front/side top lip is missing from the stainless trim group
+   - Also look again for the thin front lip, side lip, and the small side return / side panel at the left/right ends of the top assembly
+   - If those thin strips/panels visually match each other, they MUST be included in the same "Stainless Steel Trim & Edges" part
+   - The top wood/stone must stop exactly where the thin metal lip or side-return panel begins
+   - Never return a buffet table where the divider strips are metal but the matching thin front/side top lip or the small top side-return panel is missing from the stainless trim group
 
 11. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
 12. Identify the current color/material of each part
