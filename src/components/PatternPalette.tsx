@@ -132,6 +132,14 @@ import A0933DAquaWave from "@/assets/patterns/A093-3D-Aqua-Wave.png";
 import A1103DOrangeWeave from "@/assets/patterns/A110-3D-Orange-Weave.png";
 import A03423DWhiteArch from "@/assets/patterns/A034-2-3D-White-Arch.png";
 import A0343DSoftWhiteArch from "@/assets/patterns/A034-3D-Soft-White-Arch.png";
+import A0903DIndigoPetal from "@/assets/patterns/A090-3D-Indigo-Petal.png";
+import A13623DWhiteGeoStripe from "@/assets/patterns/A136-2-3D-White-Geo-Stripe.png";
+import A16923DWhiteHex from "@/assets/patterns/A169-2-3D-White-Hex.png";
+import A11023DWhiteWeave from "@/assets/patterns/A110-2-3D-White-Weave.png";
+import A11223DWhiteStarFacet from "@/assets/patterns/A112-2-3D-White-Star-Facet.png";
+import A11923DWhiteRibbed from "@/assets/patterns/A119-2-3D-White-Ribbed.png";
+import A03423DSoftWhiteArchAlt from "@/assets/patterns/A034-2-3D-Soft-White-Arch-Alt.png";
+import A09323DWhiteWave from "@/assets/patterns/A093-2-3D-White-Wave.png";
 
 export interface PatternOption {
   id: string;
