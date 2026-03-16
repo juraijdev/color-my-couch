@@ -122,6 +122,17 @@ import BXE04Silver from "@/assets/patterns/BXE04-Silver.jpg";
 import BXE05Lime from "@/assets/patterns/BXE05-Lime.jpg";
 import BXE06Turquoise from "@/assets/patterns/BXE06-Turquoise.jpg";
 
+// Import pattern images - 3D Materials
+import A1363DGeoStripe from "@/assets/patterns/A136-3D-Geo-Stripe.png";
+import A1693DDarkHex from "@/assets/patterns/A169-3D-Dark-Hex.png";
+import A2073DOliveScale from "@/assets/patterns/A207-3D-Olive-Scale.png";
+import A1123DSilverStar from "@/assets/patterns/A112-3D-Silver-Star.png";
+import A11923DNavyRibbed from "@/assets/patterns/A119-2-3D-Navy-Ribbed.png";
+import A0933DAquaWave from "@/assets/patterns/A093-3D-Aqua-Wave.png";
+import A1103DOrangeWeave from "@/assets/patterns/A110-3D-Orange-Weave.png";
+import A03423DWhiteArch from "@/assets/patterns/A034-2-3D-White-Arch.png";
+import A0343DSoftWhiteArch from "@/assets/patterns/A034-3D-Soft-White-Arch.png";
+
 export interface PatternOption {
   id: string;
   name: string;
