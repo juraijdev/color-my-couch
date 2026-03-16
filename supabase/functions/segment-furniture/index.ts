@@ -148,13 +148,15 @@ SUMMARY OF RULES:
 - EXCLUDE all background elements (walls, floors, scenery) — only identify the FURNITURE ITSELF
 - Cover the FULL furniture — never cut it in half
 - All top surface modules → ONE "Top Surface" part
+- For buffet tops with multiple modules, all stainless divider strips + perimeter edges + matching front-side top metal → ONE "Stainless Steel Trim & Edges" part
+- Do NOT create three or four separate divider parts if they are the same finish
 - Metal elements → group by function (trim vs frame vs decorative) or ONE part if all same
 - All wooden shelves (FULLY — all faces) → ONE "Shelf Wood" part
 - Front panels/fascia → "Front Panel" part (DO NOT SKIP)
 - Frame/legs → "Frame / Legs" part
 - Other distinct elements → separate parts as appropriate
 
-IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, or any other visible surface. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. NEVER include background/room elements as furniture parts.`
+IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. NEVER include background/room elements as furniture parts.`
           },
           {
             role: "user",
