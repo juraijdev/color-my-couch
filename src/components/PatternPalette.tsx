@@ -122,6 +122,17 @@ import BXE04Silver from "@/assets/patterns/BXE04-Silver.jpg";
 import BXE05Lime from "@/assets/patterns/BXE05-Lime.jpg";
 import BXE06Turquoise from "@/assets/patterns/BXE06-Turquoise.jpg";
 
+// Import pattern images - 3D Materials
+import A1363DGeoStripe from "@/assets/patterns/A136-3D-Geo-Stripe.png";
+import A1693DDarkHex from "@/assets/patterns/A169-3D-Dark-Hex.png";
+import A2073DOliveScale from "@/assets/patterns/A207-3D-Olive-Scale.png";
+import A1123DSilverStar from "@/assets/patterns/A112-3D-Silver-Star.png";
+import A11923DNavyRibbed from "@/assets/patterns/A119-2-3D-Navy-Ribbed.png";
+import A0933DAquaWave from "@/assets/patterns/A093-3D-Aqua-Wave.png";
+import A1103DOrangeWeave from "@/assets/patterns/A110-3D-Orange-Weave.png";
+import A03423DWhiteArch from "@/assets/patterns/A034-2-3D-White-Arch.png";
+import A0343DSoftWhiteArch from "@/assets/patterns/A034-3D-Soft-White-Arch.png";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -787,6 +798,66 @@ export const patternCategories: PatternCategory[] = [
         name: "Turquoise Basketweave", 
         description: "Vibrant turquoise basketweave fabric",
         imageUrl: BXE06Turquoise 
+      },
+    ],
+  },
+  {
+    id: "3d-materials",
+    name: "3D Material Patterns",
+    patterns: [
+      {
+        id: "3d-a136",
+        name: "Geo Stripe Silver",
+        description: "3D geometric striped panel in silver and charcoal tones",
+        imageUrl: A1363DGeoStripe,
+      },
+      {
+        id: "3d-a169",
+        name: "Dark Hex Relief",
+        description: "3D dark hexagonal relief pattern with graphite finish",
+        imageUrl: A1693DDarkHex,
+      },
+      {
+        id: "3d-a207",
+        name: "Olive Scale Relief",
+        description: "3D olive scalloped pattern with layered scale texture",
+        imageUrl: A2073DOliveScale,
+      },
+      {
+        id: "3d-a112",
+        name: "Silver Star Facet",
+        description: "3D metallic silver starburst panel with faceted geometry",
+        imageUrl: A1123DSilverStar,
+      },
+      {
+        id: "3d-a119-2",
+        name: "Navy Ribbed Panel",
+        description: "3D deep navy vertical ribbed panel finish",
+        imageUrl: A11923DNavyRibbed,
+      },
+      {
+        id: "3d-a093",
+        name: "Aqua Wave Relief",
+        description: "3D soft aqua wave panel with flowing vertical texture",
+        imageUrl: A0933DAquaWave,
+      },
+      {
+        id: "3d-a110",
+        name: "Orange Weave Block",
+        description: "3D orange woven block pattern with structured depth",
+        imageUrl: A1103DOrangeWeave,
+      },
+      {
+        id: "3d-a034-2",
+        name: "White Arch Relief",
+        description: "3D bright white arch panel with ribbed inset geometry",
+        imageUrl: A03423DWhiteArch,
+      },
+      {
+        id: "3d-a034",
+        name: "Soft White Arch Relief",
+        description: "3D soft white arch panel with subtle ribbed inset texture",
+        imageUrl: A0343DSoftWhiteArch,
       },
     ],
   },
