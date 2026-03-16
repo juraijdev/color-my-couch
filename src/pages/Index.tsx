@@ -68,6 +68,8 @@ const Index = () => {
         patternAssignments.map(async (pa: PartPatternAssignment) => ({
           partName: pa.part.name,
           partMaterial: pa.part.material,
+          partDescription: pa.part.description,
+          partLocation: pa.part.location,
           patternName: pa.targetPattern.name,
           patternDescription: pa.targetPattern.description,
           patternImageUrl: await imageUrlToBase64(pa.targetPattern.imageUrl),
