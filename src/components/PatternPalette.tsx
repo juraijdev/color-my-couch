@@ -801,6 +801,66 @@ export const patternCategories: PatternCategory[] = [
       },
     ],
   },
+  {
+    id: "3d-materials",
+    name: "3D Material Patterns",
+    patterns: [
+      {
+        id: "3d-a136",
+        name: "Geo Stripe Silver",
+        description: "3D geometric striped panel in silver and charcoal tones",
+        imageUrl: A1363DGeoStripe,
+      },
+      {
+        id: "3d-a169",
+        name: "Dark Hex Relief",
+        description: "3D dark hexagonal relief pattern with graphite finish",
+        imageUrl: A1693DDarkHex,
+      },
+      {
+        id: "3d-a207",
+        name: "Olive Scale Relief",
+        description: "3D olive scalloped pattern with layered scale texture",
+        imageUrl: A2073DOliveScale,
+      },
+      {
+        id: "3d-a112",
+        name: "Silver Star Facet",
+        description: "3D metallic silver starburst panel with faceted geometry",
+        imageUrl: A1123DSilverStar,
+      },
+      {
+        id: "3d-a119-2",
+        name: "Navy Ribbed Panel",
+        description: "3D deep navy vertical ribbed panel finish",
+        imageUrl: A11923DNavyRibbed,
+      },
+      {
+        id: "3d-a093",
+        name: "Aqua Wave Relief",
+        description: "3D soft aqua wave panel with flowing vertical texture",
+        imageUrl: A0933DAquaWave,
+      },
+      {
+        id: "3d-a110",
+        name: "Orange Weave Block",
+        description: "3D orange woven block pattern with structured depth",
+        imageUrl: A1103DOrangeWeave,
+      },
+      {
+        id: "3d-a034-2",
+        name: "White Arch Relief",
+        description: "3D bright white arch panel with ribbed inset geometry",
+        imageUrl: A03423DWhiteArch,
+      },
+      {
+        id: "3d-a034",
+        name: "Soft White Arch Relief",
+        description: "3D soft white arch panel with subtle ribbed inset texture",
+        imageUrl: A0343DSoftWhiteArch,
+      },
+    ],
+  },
 ];
 
 interface PatternPaletteProps {
