@@ -5,12 +5,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+interface PartLocation {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
 interface PatternAssignment {
   partName: string;
   partMaterial: string;
+  partDescription?: string;
+  partLocation?: PartLocation;
   patternName: string;
   patternDescription: string;
   patternImageUrl: string;
+}
+
+function formatPartLocation(location?: PartLocation) {
+  if (!location) return "Approximate location: not provided.";
+
+  return `Approximate location in photo — top ${location.top}%, left ${location.left}%, width ${location.width}%, height ${location.height}%`;
 }
 
 serve(async (req) => {
@@ -48,38 +63,51 @@ serve(async (req) => {
     // Build detailed prompt for multi-pattern application
     const assignments: PatternAssignment[] = body.patternAssignments;
     
-    const patternChangesList = assignments.map((a: PatternAssignment) => 
-      `- "${a.partName}" (${a.partMaterial}): Apply "${a.patternName}" - ${a.patternDescription}`
-    ).join("\n");
+    const patternChangesList = assignments.map((a: PatternAssignment) => {
+      const partDetails = a.partDescription
+        ? `Existing part details: ${a.partDescription}`
+        : "Existing part details: not provided.";
+      const partLocation = formatPartLocation(a.partLocation);
+
+      return `- "${a.partName}" (${a.partMaterial}): Apply "${a.patternName}" - ${a.patternDescription}. ${partDetails} ${partLocation}`;
+    }).join("\n");
     
-    const prompt = `You are a product photo retouching assistant. Your ONLY job is to change the surface color/material/texture of specific furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed.
+    const prompt = `You are a product photo retouching assistant. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed.
 
 PARTS TO RECOLOR:
 ${patternChangesList}
 
 ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
-1. IDENTICAL FURNITURE SHAPE: The output furniture must have the EXACT same silhouette, outline, contours, edges, curves, angles, proportions, dimensions, and 3D form as the input. Not similar — IDENTICAL. Do NOT redraw, reimagine, or regenerate the furniture. Think of it as repainting the exact same physical object.
+1. IDENTICAL FURNITURE SHAPE: The output furniture must have the EXACT same silhouette, outline, contours, edges, curves, angles, proportions, dimensions, and 3D form as the input. Not similar — IDENTICAL. Do NOT redraw, regenerate, redesign, or reinterpret the furniture. Think of it as repainting the exact same physical object.
 
-2. ZERO STRUCTURAL CHANGES: Do NOT add, remove, reshape, resize, reposition, rotate, bend, stretch, compress, or modify ANY structural element. Every leg, shelf, handle, panel, joint, corner, curve, and edge must remain in the EXACT same position and shape.
+2. ZERO STRUCTURAL CHANGES: Do NOT add, remove, invent, reshape, resize, reposition, rotate, bend, stretch, compress, or modify ANY structural element. Every leg, shelf, handle, panel, joint, corner, curve, divider, trim strip, lip, opening, caster, and edge must remain in the EXACT same position and shape.
 
-3. IDENTICAL CAMERA & COMPOSITION: Same exact camera angle, perspective, focal length, distance, framing, crop, and composition. The furniture must occupy the EXACT same pixels in the frame.
+3. NO NEW DETAILS: Never add any new divider, border, frame, groove, strip, seam, panel, handle, shelf, cutout, metal band, or decorative detail that is not already visible in the original photo. Use ONLY the existing geometry and existing visible part boundaries.
 
-4. IDENTICAL BACKGROUND: The background, floor, shadows, reflections, and surrounding environment must be completely unchanged.
+4. IDENTICAL CAMERA & COMPOSITION: Same exact camera angle, perspective, focal length, distance, framing, crop, and composition. The furniture must occupy the EXACT same pixels in the frame.
 
-5. IDENTICAL LIGHTING: Same light direction, intensity, highlights, specular reflections, and ambient occlusion. Only the material's response to light changes (e.g., matte vs glossy).
+5. IDENTICAL BACKGROUND: The background, floor, shadows, reflections, and surrounding environment must be completely unchanged.
 
-6. COLOR/TEXTURE CHANGE ONLY: Extract the color, grain pattern, and surface texture from each reference pattern image. Apply that color/texture ONLY to the surface of the specified part. The underlying 3D shading, form shadows, and highlight contours must remain — just recolored to match the new material.
+6. IDENTICAL LIGHTING: Same light direction, intensity, highlights, specular reflections, and ambient occlusion. Only the material's response to light changes.
 
-7. UNSPECIFIED PARTS UNTOUCHED: Any furniture part NOT listed above must remain 100% identical to the input — same color, same texture, same everything.
+7. COLOR/TEXTURE CHANGE ONLY: Extract the color, grain pattern, and surface texture from each reference pattern image. Apply that finish ONLY to the surface of the specified existing part. The underlying 3D shading, form shadows, and highlight contours must remain — just recolored to match the new material.
 
-8. NO ARTISTIC INTERPRETATION: Do NOT "improve" the image, change the style, add effects, change resolution, or make any creative modifications. This is a mechanical recoloring task.
+8. UNSPECIFIED PARTS UNTOUCHED: Any furniture part NOT listed above must remain 100% identical to the input — same color, same texture, same everything.
 
-9. CRITICAL BUFFET TABLE RULE: If a part named "Stainless Steel Trim & Edges" is present, it includes ALL matching top divider strips between modules AND the thin front/side metal lip directly under the top surface AND the matching perimeter top edge. These thin top metal lips/dividers are NOT wood and must render in the SAME finish as the rest of the stainless trim system.
+9. CRITICAL BUFFET TABLE RULE: If a part named "Stainless Steel Trim & Edges" is present, it includes ALL matching top divider strips between top modules, the thin front metal lip under the top, the thin side metal lip under the top, the small top side edge panel / side return at the left and right ends of the top assembly, and the matching perimeter top edge caps. All of those visible existing pieces must render in the SAME metal finish.
 
-10. TOP SURFACE SEPARATION RULE: If a part named "Top Surface" is present, recolor ONLY the broad top wood/stone faces. Do NOT let the top wood/stone finish bleed into the thin front lip, side lip, perimeter edge cap, or module divider strips when those belong to "Stainless Steel Trim & Edges".
+10. DO NOT EXPAND METAL AREAS: The stainless trim finish must stay only on the exact existing thin metal pieces already visible in the photo. Do NOT widen them, duplicate them, extend them, or create extra metal pieces.
 
-THINK OF IT THIS WAY: You are digitally spray-painting specific parts of a real photograph. The furniture is a physical object that cannot change shape. You can only change what color/material its surface appears to be.`;
+11. TOP SURFACE SEPARATION RULE: If a part named "Top Surface" is present, recolor ONLY the broad top wood/stone faces. Do NOT let the top wood/stone finish bleed into the thin front lip, side lip, small top side edge panel / side return, perimeter edge cap, or module divider strips when those belong to "Stainless Steel Trim & Edges".
+
+12. COUNT AND POSITION MUST MATCH: If the original has two divider strips, keep exactly two. If the original has a narrow metal side panel / side return on the top assembly, keep exactly that visible panel only where it already exists. Never mirror, duplicate, or invent additional top details.
+
+13. NO OPENING CHANGES: Do NOT change cutouts, shelf openings, frame thickness, or panel proportions. Never turn open space into a panel or panel into open space.
+
+14. NO ARTISTIC INTERPRETATION: Do NOT "improve" the image, change the style, add effects, change resolution, or make any creative modifications. This is a strict mechanical recoloring task.
+
+THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
 
     console.log("Generating image with pattern application prompt:", prompt)
 

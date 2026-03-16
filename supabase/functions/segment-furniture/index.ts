@@ -32,23 +32,24 @@ CRITICAL ANALYSIS RULES:
    - The "Top Surface" must EXCLUDE any thin metal perimeter lip, side lip, front lip, divider strip, separator band, bezel, edge cap, or trim band even if it touches the top wood directly
 
 4. TOP METAL LIP + DIVIDER SYSTEM RULE (MOST CRITICAL FOR BUFFET TABLES):
-   - On buffet tables, serving stations, and multi-module top assemblies, the thin front edge directly under the top surface, the thin side edge under the top surface, the perimeter top lip, and ALL divider strips between top modules belong to the SAME metal system
+   - On buffet tables, serving stations, and multi-module top assemblies, the thin front edge directly under the top surface, the thin side edge under the top surface, the small side return / side panel of the top assembly, the perimeter top lip, edge caps, and ALL divider strips between top modules belong to the SAME metal system
    - This metal system must ALWAYS be grouped into ONE SINGLE PART called "Stainless Steel Trim & Edges" when it shares the same finish
-   - The divider strips and the thin front/side edge lip of the top MUST have the SAME color/material assignment as each other because they are the same trim system
-   - Do NOT leave the front/side top lip inside "Top Surface", "Front Panel", or any wood part
-   - Do NOT omit thin top lips just because they are narrow — they are critical recolorable parts
+   - The small top side panel / side return at the left or right end of the top assembly is NOT part of the wood top when it visually matches the metal trim — it belongs with the stainless trim group
+   - The divider strips, top side edge panels / side returns, and the thin front/side edge lips of the top MUST have the SAME color/material assignment as each other because they are the same trim system
+   - Do NOT leave the front/side top lip or the small top side panel / side return inside "Top Surface", "Front Panel", or any wood part
+   - Do NOT omit thin top lips, side returns, or divider strips just because they are narrow — they are critical recolorable parts
    - Do NOT split the top dividers into 3 or 4 separate parts if they are the same finish — all identical dividers are ONE grouped part
-   - If the buffet top has matching metal trim visible on the front, side, and between top modules, all of those matching thin strips must be one grouped metal part
+   - If the buffet top has matching metal trim visible on the front, side, side-return panel, and between top modules, all of those matching thin pieces must be one grouped metal part
 
 5. METAL TRIM & EDGES RULE (CRITICAL):
    - Carefully identify ALL metal / stainless steel elements on the furniture
-   - For buffet tables and serving stations with 3 or 4 top modules, ALL stainless steel divider strips, separator bands, edge trims, perimeter top lips, and the thin front/side metal edge directly below the top surface must be grouped into ONE SINGLE PART called "Stainless Steel Trim & Edges"
-   - This ONE grouped metal part must include: top dividers between modules, perimeter top edging, the visible thin side/front metal lip directly under or around the wooden/stone top, and any matching front-facing metal strip/lip below the top surface when it is part of the same stainless steel system
-   - The WOOD/STONE "Top Surface" must EXCLUDE these narrow metal lips/edges/dividers — do NOT merge them into the top wood part even if they are thin
+   - For buffet tables and serving stations with 3 or 4 top modules, ALL stainless steel divider strips, separator bands, edge trims, perimeter top lips, top edge caps, small top side return panels, and the thin front/side metal edge directly below or wrapping the top surface must be grouped into ONE SINGLE PART called "Stainless Steel Trim & Edges"
+   - This ONE grouped metal part must include: top dividers between modules, perimeter top edging, the visible thin side/front metal lip directly under or around the wooden/stone top, the small top side edge panel / side return at the left/right ends of the top assembly, and any matching front-facing metal strip/lip below the top surface when it is part of the same stainless steel system
+   - The WOOD/STONE "Top Surface" must EXCLUDE these narrow metal lips/edges/dividers/side-return panels — do NOT merge them into the top wood part even if they are thin
    - These metal divider/edge parts are often very thin but still MUST be identified because they are recolored separately from the top surface
    - If the furniture has DIFFERENT TYPES of metal elements beyond this top trim system (e.g., structural frame vs decorative trim vs edge bands), you MAY split them only when they clearly serve different functions or have different finishes
    - Examples of distinct metal groups:
-     * "Stainless Steel Trim & Edges" — grouped divider strips, front edge lips, side edge lips, perimeter border trim, top edge caps, bezels
+     * "Stainless Steel Trim & Edges" — grouped divider strips, front edge lips, side edge lips, side return panels, perimeter border trim, top edge caps, bezels
      * "Metal Frame / Legs" — structural metal legs, base frame, support bars
      * "Decorative Metal Screens" — perforated panels, lattice work, ornamental metal
    - If all visible metal is the same type/finish, group into ONE "Stainless Steel Trim & Edges" part
@@ -90,10 +91,10 @@ CRITICAL ANALYSIS RULES:
 
 10. BUFFET TOP VALIDATION CHECK (MANDATORY):
    - If the top surface is split into multiple modules, look again specifically for the thin separator strips between modules
-   - Also look again for the thin front lip and side lip directly below the top surface
-   - If those thin strips visually match each other, they MUST be included in the same "Stainless Steel Trim & Edges" part
-   - The top wood/stone must stop exactly where the thin metal lip begins
-   - Never return a buffet table where the divider strips are metal but the matching thin front/side top lip is missing from the stainless trim group
+   - Also look again for the thin front lip, side lip, and the small side return / side panel at the left/right ends of the top assembly
+   - If those thin strips/panels visually match each other, they MUST be included in the same "Stainless Steel Trim & Edges" part
+   - The top wood/stone must stop exactly where the thin metal lip or side-return panel begins
+   - Never return a buffet table where the divider strips are metal but the matching thin front/side top lip or the small top side-return panel is missing from the stainless trim group
 
 11. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
 12. Identify the current color/material of each part
@@ -121,19 +122,19 @@ SUMMARY OF RULES:
 - EXCLUDE all background elements (walls, floors, scenery) — only identify the FURNITURE ITSELF
 - Cover the FULL furniture — never cut it in half
 - All top surface modules → ONE "Top Surface" part containing ONLY the main wood/stone top faces
-- For buffet tops with multiple modules, all stainless divider strips + perimeter top lip + thin front/side top edge lip/cap + matching front-side top metal → ONE "Stainless Steel Trim & Edges" part
-- The thin front/side top edge lip and the divider strips must ALWAYS share the same grouped metal part and same recolor result
+- For buffet tops with multiple modules, all stainless divider strips + perimeter top lip + thin front/side top edge lip/cap + small top side return / side panel + matching front-side top metal → ONE "Stainless Steel Trim & Edges" part
+- The thin front/side top edge lip, the small top side return / side panel, and the divider strips must ALWAYS share the same grouped metal part and same recolor result
 - Do NOT create three or four separate divider parts if they are the same finish
-- Do NOT merge thin top metal lips/dividers into Top Surface, Front Panel, or any wood part
+- Do NOT merge thin top metal lips/dividers/side-return panels into Top Surface, Front Panel, or any wood part
 - Metal elements → group by function (trim vs frame vs decorative) or ONE part if all same
 - All wooden shelves (FULLY — all faces) → ONE "Shelf Wood" part
 - Front panels/fascia → "Front Panel" part (DO NOT SKIP)
 - Frame/legs → "Frame / Legs" part
 - Other distinct elements → separate parts as appropriate
 
-IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. The furniture silhouette and shape must remain exact. NEVER include background/room elements as furniture parts.`;
+IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, top side-return panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. The furniture silhouette and shape must remain exact. NEVER include background/room elements as furniture parts.`;
 
-const userPrompt = "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part, but EXCLUDE any thin metal perimeter lips, side lips, front lips, edge caps, or divider strips from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips and perimeter top trim into ONE 'Stainless Steel Trim & Edges' part if they share the same finish. Do NOT split identical dividers into multiple parts. (3) The thin top front/side metal lip must always be grouped with the divider strips when they visually belong to the same trim system. (4) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (5) IMPORTANT: Identify FRONT PANELS separately — any vertical front-facing panel/fascia must be listed as 'Front Panel'. (6) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims are critical parts and must not be skipped. Do NOT skip any visible furniture part. Preserve the exact furniture shape and construction logic. Aim for 4-10 well-grouped parts. Return the JSON structure.";
+const userPrompt = "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part, but EXCLUDE any thin metal perimeter lips, side lips, front lips, edge caps, side-return panels, or divider strips from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips, small top side-return panels, and perimeter top trim into ONE 'Stainless Steel Trim & Edges' part if they share the same finish. Do NOT split identical dividers into multiple parts. (3) The thin top front/side metal lip and the small top side-return panel must always be grouped with the divider strips when they visually belong to the same trim system. (4) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (5) IMPORTANT: Identify FRONT PANELS separately — any vertical front-facing panel/fascia must be listed as 'Front Panel'. (6) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims and the small top side panel are critical parts and must not be skipped. Do NOT skip any visible furniture part. Preserve the exact furniture shape and construction logic. Aim for 4-10 well-grouped parts. Return the JSON structure.";
 
 function extractPartsFromContent(content: string) {
   try {
