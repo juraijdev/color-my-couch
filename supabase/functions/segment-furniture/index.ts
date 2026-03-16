@@ -87,19 +87,33 @@ CRITICAL ANALYSIS RULES:
    - If all visible metal is the same type/finish, group into ONE "Stainless Steel Trim & Edges" part
    - Metal is ALWAYS separate from wood — never merge metallic elements into wooden parts
 
-5. SHELF / LOWER WOOD GROUPING RULE (CRITICAL):
+5. METAL TRIM & EDGES RULE (CRITICAL):
+   - Carefully identify ALL metal / stainless steel elements on the furniture
+   - For buffet tables and serving stations with 3 or 4 top modules, ALL stainless steel divider strips, separator bands, edge trims, and the metal front-side edging of the top assembly must be grouped into ONE SINGLE PART called "Stainless Steel Trim & Edges"
+   - This ONE grouped metal part must include: top dividers between modules, perimeter top edging, the visible thin side/front metal lip directly under or around the wooden/stone top, and the matching front-facing metal strip/lip below the top surface when it is part of the same stainless steel system
+   - The WOOD/STONE "Top Surface" must EXCLUDE these narrow metal lips/edges/dividers — do NOT merge them into the top wood part even if they are thin
+   - These metal divider/edge parts are often very thin but still MUST be identified because they are recolored separately from the top surface
+   - Do NOT split the top dividers into separate parts for each module — all top dividers are ONE grouped part if they share the same finish
+   - If the furniture has DIFFERENT TYPES of metal elements beyond this top trim system (e.g., structural frame vs decorative trim vs edge bands), you MAY split them only when they clearly serve different functions or have different finishes
+   - Examples of distinct metal groups:
+     * "Stainless Steel Trim & Edges" — grouped divider strips, front edge lips, side edge lips, perimeter border trim, bezels
+     * "Metal Frame / Legs" — structural metal legs, base frame, support bars
+     * "Decorative Metal Screens" — perforated panels, lattice work, ornamental metal
+   - If all visible metal is the same type/finish, group into ONE "Stainless Steel Trim & Edges" part
+   - Metal is ALWAYS separate from wood — never merge metallic elements into wooden parts
+ 
+6. SHELF / LOWER WOOD GROUPING RULE (CRITICAL):
    - ALL wooden shelves must be grouped into ONE SINGLE PART called "Shelf Wood"
    - This means the ENTIRE shelf surface — top face, front edge, side edges, and bottom face of EVERY shelf
    - The shelf must be FULLY covered when recolored — not just the bottom or just the top, but the COMPLETE shelf panel including all visible faces
    - Even if there are multiple shelves at different levels, they are ONE part — the user will assign ONE color/material to all shelves together
    - Do NOT create separate parts like "Lower Shelf", "Middle Shelf", etc.
-
-6. FRONT PANEL RULE (CRITICAL):
+ 
+7. FRONT PANEL RULE (CRITICAL):
    - If the furniture has front panels, fascia boards, front skirts, or any vertical front-facing decorative/structural panels below the top surface, they MUST be identified as a separate part called "Front Panel"
    - This includes: front apron, front rail, decorative front board, kick plate, or any vertical surface facing the user on the front side
    - Front panels are commonly found between the top surface and the lower shelf on buffet tables, sideboards, and serving stations
    - Do NOT skip or merge front panels into other parts — they are a distinct recolorable surface
-
 7. OTHER PARTS TO IDENTIFY (DO NOT SKIP ANY):
    - **Frame / Legs**: Legs, base frame, support bars — group as one "Frame / Legs" part if same material
    - **Side panels**: If present, group as one "Side Panels" part  
@@ -163,7 +177,7 @@ IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furnit
             content: [
               {
                 type: "text",
-                text: "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part. (2) Identify metal elements — group by function (trim/edges vs structural frame vs decorative screens) or as ONE part if all same type. (3) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (4) IMPORTANT: Identify FRONT PANELS separately — any vertical front-facing panel/fascia must be listed as 'Front Panel'. (5) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Do NOT skip any visible furniture part. Aim for 4-10 well-grouped parts. Return the JSON structure."
+                text: "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part, but EXCLUDE any thin metal perimeter lips/edge bands/dividers from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips into ONE 'Stainless Steel Trim & Edges' part if they share the same finish. Do NOT split identical dividers into multiple parts. (3) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (4) IMPORTANT: Identify FRONT PANELS separately — any vertical front-facing panel/fascia must be listed as 'Front Panel'. (5) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims are still important parts and must not be skipped. Do NOT skip any visible furniture part. Aim for 4-10 well-grouped parts. Return the JSON structure."
               },
               {
                 type: "image_url",
