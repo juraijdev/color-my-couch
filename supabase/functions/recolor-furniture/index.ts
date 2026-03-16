@@ -75,6 +75,10 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 8. NO ARTISTIC INTERPRETATION: Do NOT "improve" the image, change the style, add effects, change resolution, or make any creative modifications. This is a mechanical recoloring task.
 
+9. CRITICAL BUFFET TABLE RULE: If a part named "Stainless Steel Trim & Edges" is present, it includes ALL matching top divider strips between modules AND the thin front/side metal lip directly under the top surface AND the matching perimeter top edge. These thin top metal lips/dividers are NOT wood and must render in the SAME finish as the rest of the stainless trim system.
+
+10. TOP SURFACE SEPARATION RULE: If a part named "Top Surface" is present, recolor ONLY the broad top wood/stone faces. Do NOT let the top wood/stone finish bleed into the thin front lip, side lip, perimeter edge cap, or module divider strips when those belong to "Stainless Steel Trim & Edges".
+
 THINK OF IT THIS WAY: You are digitally spray-painting specific parts of a real photograph. The furniture is a physical object that cannot change shape. You can only change what color/material its surface appears to be.`;
 
     console.log("Generating image with pattern application prompt:", prompt)
