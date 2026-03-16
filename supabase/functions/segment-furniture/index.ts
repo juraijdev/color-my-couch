@@ -121,8 +121,9 @@ CRITICAL ANALYSIS RULES:
    - That the FULL furniture is covered (not cut in half)
    If any visible furniture part is missing, add it.
 
-9. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
-10. Identify the current color/material of each part
+9. For buffet tables with multi-module tops, make sure the grouped "Stainless Steel Trim & Edges" part spans all repeated top dividers and the matching front-side top metal trim so rendering preserves the real furniture construction
+10. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
+11. Identify the current color/material of each part
 
 Return your analysis as JSON with this exact structure:
 {
