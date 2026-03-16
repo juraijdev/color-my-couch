@@ -76,12 +76,15 @@ CRITICAL ANALYSIS RULES:
 
 4. METAL TRIM & EDGES RULE (CRITICAL):
    - Carefully identify ALL metal / stainless steel elements on the furniture
-   - If the furniture has DIFFERENT TYPES of metal elements (e.g., structural frame vs decorative trim vs edge bands), you MAY split them into separate parts if they serve different functions or have different finishes
+   - For buffet tables and serving stations with 3 or 4 top modules, ALL stainless steel divider strips, separator bands, edge trims, and the metal front-side edging of the top assembly must be grouped into ONE SINGLE PART called "Stainless Steel Trim & Edges"
+   - This ONE grouped metal part must include: top dividers between modules, perimeter top edging, and the matching front-facing metal strip/lip directly below or around the top surface when it is part of the same stainless steel system
+   - Do NOT split the top dividers into separate parts for each module — all top dividers are ONE grouped part if they share the same finish
+   - If the furniture has DIFFERENT TYPES of metal elements beyond this top trim system (e.g., structural frame vs decorative trim vs edge bands), you MAY split them only when they clearly serve different functions or have different finishes
    - Examples of distinct metal groups:
-     * "Stainless Steel Trim & Edges" — divider strips, front edge lips, border trim, bezels
+     * "Stainless Steel Trim & Edges" — grouped divider strips, front edge lips, perimeter border trim, bezels
      * "Metal Frame / Legs" — structural metal legs, base frame, support bars
      * "Decorative Metal Screens" — perforated panels, lattice work, ornamental metal
-   - If all metal is the same type/finish, group into ONE "Stainless Steel Trim & Edges" part
+   - If all visible metal is the same type/finish, group into ONE "Stainless Steel Trim & Edges" part
    - Metal is ALWAYS separate from wood — never merge metallic elements into wooden parts
 
 5. SHELF / LOWER WOOD GROUPING RULE (CRITICAL):
@@ -118,8 +121,9 @@ CRITICAL ANALYSIS RULES:
    - That the FULL furniture is covered (not cut in half)
    If any visible furniture part is missing, add it.
 
-9. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
-10. Identify the current color/material of each part
+9. For buffet tables with multi-module tops, make sure the grouped "Stainless Steel Trim & Edges" part spans all repeated top dividers and the matching front-side top metal trim so rendering preserves the real furniture construction
+10. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
+11. Identify the current color/material of each part
 
 Return your analysis as JSON with this exact structure:
 {
@@ -144,13 +148,15 @@ SUMMARY OF RULES:
 - EXCLUDE all background elements (walls, floors, scenery) — only identify the FURNITURE ITSELF
 - Cover the FULL furniture — never cut it in half
 - All top surface modules → ONE "Top Surface" part
+- For buffet tops with multiple modules, all stainless divider strips + perimeter edges + matching front-side top metal → ONE "Stainless Steel Trim & Edges" part
+- Do NOT create three or four separate divider parts if they are the same finish
 - Metal elements → group by function (trim vs frame vs decorative) or ONE part if all same
 - All wooden shelves (FULLY — all faces) → ONE "Shelf Wood" part
 - Front panels/fascia → "Front Panel" part (DO NOT SKIP)
 - Frame/legs → "Frame / Legs" part
 - Other distinct elements → separate parts as appropriate
 
-IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, or any other visible surface. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. NEVER include background/room elements as furniture parts.`
+IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. NEVER include background/room elements as furniture parts.`
           },
           {
             role: "user",
