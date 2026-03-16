@@ -5,12 +5,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+interface PartLocation {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
 interface PatternAssignment {
   partName: string;
   partMaterial: string;
+  partDescription?: string;
+  partLocation?: PartLocation;
   patternName: string;
   patternDescription: string;
   patternImageUrl: string;
+}
+
+function formatPartLocation(location?: PartLocation) {
+  if (!location) return "Approximate location: not provided.";
+
+  return `Approximate location in photo — top ${location.top}%, left ${location.left}%, width ${location.width}%, height ${location.height}%`;
 }
 
 serve(async (req) => {
