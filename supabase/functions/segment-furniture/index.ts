@@ -161,16 +161,18 @@ Return your analysis as JSON with this exact structure:
 SUMMARY OF RULES:
 - EXCLUDE all background elements (walls, floors, scenery) — only identify the FURNITURE ITSELF
 - Cover the FULL furniture — never cut it in half
-- All top surface modules → ONE "Top Surface" part
-- For buffet tops with multiple modules, all stainless divider strips + perimeter edges + matching front-side top metal → ONE "Stainless Steel Trim & Edges" part
+- All top surface modules → ONE "Top Surface" part containing ONLY the main wood/stone top faces
+- For buffet tops with multiple modules, all stainless divider strips + perimeter top lip + thin front/side top edge lip/cap + matching front-side top metal → ONE "Stainless Steel Trim & Edges" part
+- The thin front/side top edge lip and the divider strips must ALWAYS share the same grouped metal part and same recolor result
 - Do NOT create three or four separate divider parts if they are the same finish
+- Do NOT merge thin top metal lips/dividers into Top Surface, Front Panel, or any wood part
 - Metal elements → group by function (trim vs frame vs decorative) or ONE part if all same
 - All wooden shelves (FULLY — all faces) → ONE "Shelf Wood" part
 - Front panels/fascia → "Front Panel" part (DO NOT SKIP)
 - Frame/legs → "Frame / Legs" part
 - Other distinct elements → separate parts as appropriate
 
-IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. NEVER include background/room elements as furniture parts.`
+IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. The furniture silhouette and shape must remain exact. NEVER include background/room elements as furniture parts.`
           },
           {
             role: "user",
