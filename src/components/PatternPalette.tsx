@@ -132,6 +132,14 @@ import A0933DAquaWave from "@/assets/patterns/A093-3D-Aqua-Wave.png";
 import A1103DOrangeWeave from "@/assets/patterns/A110-3D-Orange-Weave.png";
 import A03423DWhiteArch from "@/assets/patterns/A034-2-3D-White-Arch.png";
 import A0343DSoftWhiteArch from "@/assets/patterns/A034-3D-Soft-White-Arch.png";
+import A0903DIndigoPetal from "@/assets/patterns/A090-3D-Indigo-Petal.png";
+import A13623DWhiteGeoStripe from "@/assets/patterns/A136-2-3D-White-Geo-Stripe.png";
+import A16923DWhiteHex from "@/assets/patterns/A169-2-3D-White-Hex.png";
+import A11023DWhiteWeave from "@/assets/patterns/A110-2-3D-White-Weave.png";
+import A11223DWhiteStarFacet from "@/assets/patterns/A112-2-3D-White-Star-Facet.png";
+import A11923DWhiteRibbed from "@/assets/patterns/A119-2-3D-White-Ribbed.png";
+import A03423DSoftWhiteArchAlt from "@/assets/patterns/A034-2-3D-Soft-White-Arch-Alt.png";
+import A09323DWhiteWave from "@/assets/patterns/A093-2-3D-White-Wave.png";
 
 export interface PatternOption {
   id: string;
@@ -858,6 +866,54 @@ export const patternCategories: PatternCategory[] = [
         name: "Soft White Arch Relief",
         description: "3D soft white arch panel with subtle ribbed inset texture",
         imageUrl: A0343DSoftWhiteArch,
+      },
+      {
+        id: "3d-a090",
+        name: "Indigo Petal Relief",
+        description: "3D indigo petal pattern with soft sculpted depth",
+        imageUrl: A0903DIndigoPetal,
+      },
+      {
+        id: "3d-a136-2",
+        name: "White Geo Stripe Relief",
+        description: "3D white geometric striped panel with crisp layered depth",
+        imageUrl: A13623DWhiteGeoStripe,
+      },
+      {
+        id: "3d-a169-2",
+        name: "White Hex Relief",
+        description: "3D white hexagonal relief pattern with clean faceted geometry",
+        imageUrl: A16923DWhiteHex,
+      },
+      {
+        id: "3d-a110-2",
+        name: "White Weave Block",
+        description: "3D white woven block pattern with structured panel depth",
+        imageUrl: A11023DWhiteWeave,
+      },
+      {
+        id: "3d-a112-2",
+        name: "White Star Facet",
+        description: "3D white starburst panel with faceted geometric texture",
+        imageUrl: A11223DWhiteStarFacet,
+      },
+      {
+        id: "3d-a119-white",
+        name: "White Ribbed Panel",
+        description: "3D white vertical ribbed panel with soft shadowed grooves",
+        imageUrl: A11923DWhiteRibbed,
+      },
+      {
+        id: "3d-a034-2-alt",
+        name: "Soft White Arch Relief Alt",
+        description: "3D soft white arch panel with refined ribbed inset geometry",
+        imageUrl: A03423DSoftWhiteArchAlt,
+      },
+      {
+        id: "3d-a093-2",
+        name: "White Wave Relief",
+        description: "3D white wave panel with flowing vertical sculpted texture",
+        imageUrl: A09323DWhiteWave,
       },
     ],
   },
