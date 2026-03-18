@@ -105,7 +105,7 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
             </p>
           </div>
 
-          <Button variant="glow" size="lg" className="mt-2">
+          <Button variant="default" size="lg" className="mt-2">
             <Upload className="w-5 h-5 mr-2" />
             Choose Image
           </Button>
