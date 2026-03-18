@@ -131,7 +131,7 @@ export function GeneratePanel({
           disabled={!canGenerate || isGenerating}
           className={cn(
             "w-full h-12 text-base font-semibold transition-all",
-            canGenerate && !isGenerating && "bg-primary hover:bg-primary/90 shadow-[0_0_20px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_30px_hsl(var(--primary)/0.6)]"
+            canGenerate && !isGenerating && "bg-primary hover:bg-primary/90"
           )}
           variant={canGenerate ? "default" : "secondary"}
         >
