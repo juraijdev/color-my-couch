@@ -95,13 +95,13 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 8. UNSPECIFIED PARTS UNTOUCHED: Any furniture part NOT listed above must remain 100% identical to the input — same color, same texture, same everything.
 
-9. CRITICAL BUFFET TABLE RULE: If a part named "Stainless Steel Trim & Edges" is present, it includes ALL matching top divider strips between top modules, the thin front metal lip under the top, the thin side metal lip under the top, the small top side edge panel / side return at the left and right ends of the top assembly, and the matching perimeter top edge caps. All of those visible existing pieces must render in the SAME metal finish.
+9. CRITICAL BUFFET TABLE RULE: If a part named "Stainless Steel Trim & Edges" is present, it includes ALL matching top divider strips between top modules, the thin front metal lip under the top, the thin side metal lip under the top, every small vertical top side edge panel / side return / outer end cap at the left and right ends of the top assembly, and the matching perimeter top edge caps. All of those visible existing pieces must render in the SAME metal finish.
 
 10. DO NOT EXPAND METAL AREAS: The stainless trim finish must stay only on the exact existing thin metal pieces already visible in the photo. Do NOT widen them, duplicate them, extend them, or create extra metal pieces.
 
-11. TOP SURFACE SEPARATION RULE: If a part named "Top Surface" is present, recolor ONLY the broad top wood/stone faces. Do NOT let the top wood/stone finish bleed into the thin front lip, side lip, small top side edge panel / side return, perimeter edge cap, or module divider strips when those belong to "Stainless Steel Trim & Edges".
+11. TOP SURFACE SEPARATION RULE: If a part named "Top Surface" is present, recolor ONLY the broad upper horizontal wood/stone faces. Do NOT let the top wood/stone finish bleed into any thin front lip, side lip, vertical top side panel, side return, outer end cap, perimeter edge cap, or module divider strip when those belong to "Stainless Steel Trim & Edges".
 
-12. COUNT AND POSITION MUST MATCH: If the original has two divider strips, keep exactly two. If the original has a narrow metal side panel / side return on the top assembly, keep exactly that visible panel only where it already exists. Never mirror, duplicate, or invent additional top details.
+12. COUNT AND POSITION MUST MATCH: If the original has two divider strips, keep exactly two. If the original has a narrow metal top side panel / side return / outer end cap on the top assembly, keep exactly that visible panel only where it already exists. Never mirror, duplicate, invent, or enlarge any top detail.
 
 13. NO OPENING CHANGES: Do NOT change cutouts, shelf openings, frame thickness, or panel proportions. Never turn open space into a panel or panel into open space.
 
