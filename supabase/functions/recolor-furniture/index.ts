@@ -28,6 +28,41 @@ function formatPartLocation(location?: PartLocation) {
   return `Approximate location in photo — top ${location.top}%, left ${location.left}%, width ${location.width}%, height ${location.height}%`;
 }
 
+function findAssignment(assignments: PatternAssignment[], partName: string) {
+  return assignments.find(
+    (assignment) => assignment.partName.toLowerCase() === partName.toLowerCase(),
+  );
+}
+
+function buildConsistencyLocks(assignments: PatternAssignment[]) {
+  const locks = [
+    "Never blend, average, or compromise two different assigned finishes into one shared look.",
+    "Keep each assigned reference pattern faithful in color, contrast, material feel, and visible texture scale.",
+    "Preserve the original furniture shading and geometry, and only change the specified surface finish.",
+  ];
+
+  const topSurface = findAssignment(assignments, "Top Surface");
+  const trim = findAssignment(assignments, "Stainless Steel Trim & Edges");
+
+  if (topSurface && trim) {
+    locks.unshift(
+      `Apply "${topSurface.patternName}" ONLY to the broad upper horizontal top wood/stone faces.`,
+      `Apply "${trim.patternName}" ONLY to the thin front lip, thin side lip, perimeter edge caps, divider strips between top modules, and every small vertical top side panel / side return / outer end cap.`,
+      `The top side edge panels and the divider strips are one continuous metal trim system and must all render in the SAME "${trim.patternName}" finish.`,
+      `The broad horizontal top wood/stone faces must NOT take on "${trim.patternName}", and the metal trim system must NOT take on "${topSurface.patternName}".`,
+      `"Top Surface" and "Stainless Steel Trim & Edges" are different parts and must stay visibly separate in the final image.`,
+    );
+
+    if (topSurface.patternName !== trim.patternName) {
+      locks.unshift(
+        `Because "${topSurface.patternName}" and "${trim.patternName}" are different assignments, the final result is WRONG if the top wood and the top trim system end up looking like the same color or material.`,
+      );
+    }
+  }
+
+  return locks.map((lock, index) => `${index + 1}. ${lock}`).join("\n");
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -71,11 +106,16 @@ serve(async (req) => {
 
       return `- "${a.partName}" (${a.partMaterial}): Apply "${a.patternName}" - ${a.patternDescription}. ${partDetails} ${partLocation}`;
     }).join("\n");
+
+    const consistencyLocks = buildConsistencyLocks(assignments);
     
     const prompt = `You are a product photo retouching assistant. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed.
 
 PARTS TO RECOLOR:
 ${patternChangesList}
+
+CONSISTENCY LOCKS:
+${consistencyLocks}
 
 ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
@@ -95,17 +135,25 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 8. UNSPECIFIED PARTS UNTOUCHED: Any furniture part NOT listed above must remain 100% identical to the input — same color, same texture, same everything.
 
-9. CRITICAL BUFFET TABLE RULE: If a part named "Stainless Steel Trim & Edges" is present, it includes ALL matching top divider strips between top modules, the thin front metal lip under the top, the thin side metal lip under the top, every small vertical top side edge panel / side return / outer end cap at the left and right ends of the top assembly, and the matching perimeter top edge caps. All of those visible existing pieces must render in the SAME metal finish.
+9. TOP WOOD VS METAL LOCK: If both "Top Surface" and "Stainless Steel Trim & Edges" are present, they are TWO DIFFERENT recolorable parts. Never merge them, never blur them together, and never let one borrow the other's finish unless the user explicitly assigned the same reference pattern to both.
 
-10. DO NOT EXPAND METAL AREAS: The stainless trim finish must stay only on the exact existing thin metal pieces already visible in the photo. Do NOT widen them, duplicate them, extend them, or create extra metal pieces.
+10. CRITICAL BUFFET TABLE RULE: If a part named "Stainless Steel Trim & Edges" is present, it includes ALL matching top divider strips between top modules, the thin front metal lip under the top, the thin side metal lip under the top, every small vertical top side edge panel / side return / outer end cap at the left and right ends of the top assembly, and the matching perimeter top edge caps. All of those visible existing pieces must render in the SAME metal finish.
 
-11. TOP SURFACE SEPARATION RULE: If a part named "Top Surface" is present, recolor ONLY the broad upper horizontal wood/stone faces. Do NOT let the top wood/stone finish bleed into any thin front lip, side lip, vertical top side panel, side return, outer end cap, perimeter edge cap, or module divider strip when those belong to "Stainless Steel Trim & Edges".
+11. DO NOT EXPAND METAL AREAS: The stainless trim finish must stay only on the exact existing thin metal pieces already visible in the photo. Do NOT widen them, duplicate them, extend them, or create extra metal pieces.
 
-12. COUNT AND POSITION MUST MATCH: If the original has two divider strips, keep exactly two. If the original has a narrow metal top side panel / side return / outer end cap on the top assembly, keep exactly that visible panel only where it already exists. Never mirror, duplicate, invent, or enlarge any top detail.
+12. TOP SURFACE SEPARATION RULE: If a part named "Top Surface" is present, recolor ONLY the broad upper horizontal wood/stone faces. Do NOT let the top wood/stone finish bleed into any thin front lip, side lip, vertical top side panel, side return, outer end cap, perimeter edge cap, or module divider strip when those belong to "Stainless Steel Trim & Edges".
 
-13. NO OPENING CHANGES: Do NOT change cutouts, shelf openings, frame thickness, or panel proportions. Never turn open space into a panel or panel into open space.
+13. TOP METAL SYSTEM MATCH RULE: The side edge metal, side-return panels, outer end caps, perimeter edge caps, thin front/side lips, and divider strips of the top assembly are one continuous trim system. They must all show the SAME assigned trim finish, with no mismatched pieces.
 
-14. NO ARTISTIC INTERPRETATION: Do NOT "improve" the image, change the style, add effects, change resolution, or make any creative modifications. This is a strict mechanical recoloring task.
+14. NEVER AVERAGE DIFFERENT REFERENCES: If two parts have different assigned patterns, do NOT create an in-between or blended appearance. Each part must visibly match its own assigned reference image, even when the parts touch each other.
+
+15. REFERENCE FIDELITY RULE: The final finish must look like the real assigned pattern/material, with believable scale, grain/texture direction, contrast, and color accuracy suitable for customer-facing product visualization.
+
+16. COUNT AND POSITION MUST MATCH: If the original has two divider strips, keep exactly two. If the original has a narrow metal top side panel / side return / outer end cap on the top assembly, keep exactly that visible panel only where it already exists. Never mirror, duplicate, invent, or enlarge any top detail.
+
+17. NO OPENING CHANGES: Do NOT change cutouts, shelf openings, frame thickness, or panel proportions. Never turn open space into a panel or panel into open space.
+
+18. NO ARTISTIC INTERPRETATION: Do NOT "improve" the image, change the style, add effects, change resolution, or make any creative modifications. This is a strict mechanical recoloring task.
 
 THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
 
@@ -150,6 +198,7 @@ THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real p
       },
       body: JSON.stringify({
         model: "google/gemini-3-pro-image-preview",
+        temperature: 0.1,
         messages: [
           {
             role: "user",

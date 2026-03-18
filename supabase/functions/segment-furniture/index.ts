@@ -5,6 +5,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const TOP_SURFACE_NAME = "Top Surface";
+const TRIM_NAME = "Stainless Steel Trim & Edges";
+
 const systemPrompt = `You are an expert furniture analyst specializing in commercial and hospitality furniture, particularly buffet tables, serving stations, and display units.
 
 CRITICAL ANALYSIS RULES:
@@ -31,6 +34,8 @@ CRITICAL ANALYSIS RULES:
    - The "Top Surface" includes ONLY the broad, upper, horizontal wood/stone faces where items are placed
    - The "Top Surface" does NOT include any vertical side face, outer side panel, side return, fascia, end cap, front lip, side lip, divider strip, separator band, bezel, edge cap, or trim band even if it is attached directly to the top wood/stone
    - If a visible side face of the top assembly is metal, it MUST stay out of "Top Surface"
+   - If the top wood/stone and the surrounding trim are visibly different materials, you MUST return them as different parts every single time
+   - Never use one large mixed part that swallows both the top wood/stone and the surrounding metal trim system
 
 4. TOP METAL SIDE PANEL + LIP + DIVIDER SYSTEM RULE (MOST CRITICAL FOR BUFFET TABLES):
    - On buffet tables, serving stations, and multi-module top assemblies, the thin front edge directly under the top surface, the thin side edge under the top surface, every small vertical side panel / side return / outer end cap of the top assembly, the perimeter top lip, edge caps, and ALL divider strips between top modules belong to the SAME metal system
@@ -41,6 +46,7 @@ CRITICAL ANALYSIS RULES:
    - Do NOT omit thin top lips, top side panels, side returns, outer end caps, or divider strips just because they are narrow — they are critical recolorable parts
    - Do NOT split the top dividers or top side metal panels into multiple duplicate parts if they share the same finish
    - If the buffet top has matching metal trim visible on the front, side, side-return panel, vertical top side fascia, and between top modules, all of those matching thin pieces must be one grouped metal part
+   - The side edge metal and the divider metal must stay in the SAME grouped part so the user can recolor them together
 
 5. METAL TRIM & EDGES RULE (CRITICAL):
    - Carefully identify ALL metal / stainless steel elements on the furniture
@@ -96,9 +102,16 @@ CRITICAL ANALYSIS RULES:
    - If those thin strips/panels visually match each other, they MUST be included in the same "Stainless Steel Trim & Edges" part
    - The top wood/stone must stop exactly where the metal front lip, side lip, divider strip, or top side panel begins
    - Never return a buffet table where the divider strips are metal but the matching thin front/side top lip or the small top side-return panel / vertical top side fascia is missing from the stainless trim group
+   - Never return a buffet table where the broad horizontal top wood/stone and the top side/divider metal are merged into the same recolorable part
 
-11. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
-12. Identify the current color/material of each part
+11. CONSISTENCY CHECK (MANDATORY):
+   - Your result must be stable and reusable for repeated recoloring
+   - If the furniture clearly shows a broad horizontal top wood/stone area plus thin side/divider metal, preserve that separation consistently every time
+   - The descriptions for "Top Surface" and "Stainless Steel Trim & Edges" must clearly explain that they are different parts
+   - If the top side edge and the divider strips are the same visible metal system, the user must be able to recolor them together from one metal part
+
+12. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
+13. Identify the current color/material of each part
 
 Return your analysis as JSON with this exact structure:
 {
@@ -127,6 +140,7 @@ SUMMARY OF RULES:
 - The thin front/side top edge lip, the small vertical top side panel / side return, and the divider strips must ALWAYS share the same grouped metal part and same recolor result
 - Do NOT create three or four separate divider parts if they are the same finish
 - Do NOT merge thin top metal lips/dividers/vertical top side panels/side-return panels into Top Surface, Front Panel, Side Panels, or any wood part
+- If top wood/stone and top trim are different visible materials, they MUST remain separate parts every time
 - Metal elements → group by function (trim vs frame vs decorative) or ONE part if all same
 - All wooden shelves (FULLY — all faces) → ONE "Shelf Wood" part
 - Front panels/fascia → "Front Panel" part (DO NOT SKIP)
@@ -135,7 +149,7 @@ SUMMARY OF RULES:
 
 IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, top side-return panels, vertical top side fascia panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. The furniture silhouette and shape must remain exact. NEVER include background/room elements as furniture parts.`;
 
-const userPrompt = "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part, but EXCLUDE any metal side panels, side-return panels, vertical top fascia, perimeter lips, side lips, front lips, edge caps, or divider strips from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips, small vertical top side panels, side-return panels, outer end caps, and perimeter top trim into ONE 'Stainless Steel Trim & Edges' part if they share the same finish. Do NOT split identical dividers into multiple parts. (3) The thin top front/side metal lip and the small vertical top side panel / side-return panel must always be grouped with the divider strips when they visually belong to the same trim system. (4) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (5) IMPORTANT: Identify FRONT PANELS separately — any vertical front-facing panel/fascia must be listed as 'Front Panel'. (6) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims and the small top side panel are critical parts and must not be skipped. Do NOT skip any visible furniture part. Preserve the exact furniture shape and construction logic. Aim for 4-10 well-grouped parts. Return the JSON structure.";
+const userPrompt = "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part, but EXCLUDE any metal side panels, side-return panels, vertical top fascia, perimeter lips, side lips, front lips, edge caps, or divider strips from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips, small vertical top side panels, side-return panels, outer end caps, and perimeter top trim into ONE 'Stainless Steel Trim & Edges' part if they share the same finish. Do NOT split identical dividers into multiple parts. (3) The thin top front/side metal lip and the small vertical top side panel / side-return panel must always be grouped with the divider strips when they visually belong to the same trim system. (4) The top side edge metal and the divider metal must stay in the same grouped part so the user can recolor them together. (5) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (6) IMPORTANT: Identify FRONT PANELS separately — any vertical front-facing panel/fascia must be listed as 'Front Panel'. (7) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims and the small top side panel are critical parts and must not be skipped. (8) If the broad top wood/stone and the surrounding side/divider trim are visibly different materials, they MUST be returned as different parts every time. Do NOT skip any visible furniture part. Preserve the exact furniture shape and construction logic. Aim for 4-10 well-grouped parts. Return the JSON structure.";
 
 function extractPartsFromContent(content: string) {
   try {
@@ -150,6 +164,80 @@ function extractPartsFromContent(content: string) {
     console.error("Failed to parse AI response:", parseError);
     return [];
   }
+}
+
+function canonicalizePartName(name: unknown, fallback: string) {
+  const normalized = String(name ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+  if (!normalized) return fallback;
+  if (normalized.includes("top surface")) return TOP_SURFACE_NAME;
+  if (
+    normalized.includes("stainless steel trim") ||
+    normalized.includes("trim edges") ||
+    normalized.includes("trim and edges")
+  ) {
+    return TRIM_NAME;
+  }
+  if (normalized.includes("front panel") || normalized.includes("front fascia") || normalized.includes("front apron")) {
+    return "Front Panel";
+  }
+  if (normalized.includes("shelf")) return "Shelf Wood";
+  if (normalized.includes("frame") || normalized.includes("legs")) return "Frame / Legs";
+
+  return String(name).trim() || fallback;
+}
+
+function getCanonicalDescription(partName: string, fallback: string, hasTopSurface: boolean, hasTrim: boolean) {
+  if (partName === TOP_SURFACE_NAME) {
+    return hasTrim
+      ? 'The broad, upper, horizontal wood or stone faces of the top assembly only. This part excludes the thin front lip, thin side lip, perimeter edge caps, divider strips between top modules, and every small vertical top side panel / side return / outer end cap, which belong to "Stainless Steel Trim & Edges".'
+      : "The broad, upper, horizontal wood or stone faces of the top assembly only, excluding any trim, lips, dividers, or side-return panels.";
+  }
+
+  if (partName === TRIM_NAME) {
+    return hasTopSurface
+      ? 'All matching metal divider strips between top modules, perimeter top trim, thin front and side lips directly below or wrapping the top, and every small vertical top side panel / side return / outer end cap. This metal system stays separate from the broad horizontal top wood or stone faces, which belong to "Top Surface".'
+      : "All matching metal trim and edge components, including divider strips, perimeter edging, thin lips, and small side-return panels that share the same finish.";
+  }
+
+  return fallback;
+}
+
+function normalizeParts(parts: any[]) {
+  const canonicalNames = parts.map((part, index) =>
+    canonicalizePartName(part?.name, `Part ${index + 1}`)
+  );
+
+  const hasTopSurface = canonicalNames.includes(TOP_SURFACE_NAME);
+  const hasTrim = canonicalNames.includes(TRIM_NAME);
+
+  return parts.map((part, index) => {
+    const name = canonicalNames[index];
+    const description = getCanonicalDescription(
+      name,
+      typeof part?.description === "string" ? part.description : "",
+      hasTopSurface,
+      hasTrim,
+    );
+
+    return {
+      ...part,
+      id: String(part?.id ?? `part_${index + 1}`),
+      name,
+      description,
+      material:
+        name === TOP_SURFACE_NAME
+          ? "wood"
+          : name === TRIM_NAME
+            ? "stainless_steel"
+            : typeof part?.material === "string"
+              ? part.material
+              : "other",
+    };
+  });
 }
 
 serve(async (req) => {
@@ -191,6 +279,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
+        temperature: 0.1,
         messages: [
           {
             role: "system",
@@ -241,7 +330,9 @@ serve(async (req) => {
 
     console.log("AI response:", content);
 
-    const parts = extractPartsFromContent(content);
+    const parts = normalizeParts(extractPartsFromContent(content));
+
+    console.log("Normalized parts:", JSON.stringify(parts));
 
     return new Response(JSON.stringify({
       parts: parts.length > 0
