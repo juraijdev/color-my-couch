@@ -14,6 +14,7 @@ const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [allFurnitureImages, setAllFurnitureImages] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasSelection, setHasSelection] = useState(false);
   const furnitureEditorRef = useRef<FurnitureEditorRef>(null);
