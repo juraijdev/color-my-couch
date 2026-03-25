@@ -47,7 +47,17 @@ const Index = () => {
     setHasSelection(hasSelection);
   }, []);
 
-  const handleGenerate = useCallback(async () => {
+  const handleAddMoreFurniture = useCallback(() => {
+    if (generatedImage && !allFurnitureImages.includes(generatedImage)) {
+      setAllFurnitureImages((prev) => [...prev, generatedImage]);
+    }
+    setUploadedImage(null);
+    setGeneratedImage(null);
+    setSelectedPattern(null);
+    setHasSelection(false);
+    toast.info("Upload another furniture to customize. All pieces will be placed together.");
+  }, [generatedImage, allFurnitureImages]);
+
     if (!uploadedImage) {
       toast.error("Please upload an image first");
       return;
