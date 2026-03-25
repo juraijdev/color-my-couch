@@ -116,6 +116,10 @@ const Index = () => {
 
       if (result.output) {
         setGeneratedImage(result.output);
+        setAllFurnitureImages((prev) => {
+          if (prev.includes(result.output)) return prev;
+          return [...prev, result.output];
+        });
         toast.success("Design generated successfully!");
       } else {
         throw new Error("No output image received");
