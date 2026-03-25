@@ -17,6 +17,9 @@ export default function Customize() {
   const [hasSelection, setHasSelection] = useState(false);
   const furnitureEditorRef = useRef<FurnitureEditorRef>(null);
 
+  // Multi-furniture: track all customized furniture images
+  const [allFurnitureImages, setAllFurnitureImages] = useState<string[]>([]);
+
   const getCurrentStep = (): 1 | 2 | 3 => {
     if (!uploadedImage) return 1;
     if (!hasSelection) return 2;
@@ -44,6 +47,20 @@ export default function Customize() {
   const handleSelectionChange = useCallback((hasSelection: boolean) => {
     setHasSelection(hasSelection);
   }, []);
+
+  /** When user wants to add another furniture piece after generation */
+  const handleAddMoreFurniture = useCallback(() => {
+    // Save current generated image to the collection
+    if (generatedImage && !allFurnitureImages.includes(generatedImage)) {
+      setAllFurnitureImages((prev) => [...prev, generatedImage]);
+    }
+    // Reset editor for new furniture
+    setUploadedImage(null);
+    setGeneratedImage(null);
+    setSelectedPattern(null);
+    setHasSelection(false);
+    toast.info("Upload another furniture to customize. All pieces will be placed together.");
+  }, [generatedImage, allFurnitureImages]);
 
   const handleGenerate = useCallback(async () => {
     if (!uploadedImage) {
@@ -103,6 +120,11 @@ export default function Customize() {
 
       if (result.output) {
         setGeneratedImage(result.output);
+        // Add to collection automatically
+        setAllFurnitureImages((prev) => {
+          if (prev.includes(result.output)) return prev;
+          return [...prev, result.output];
+        });
         toast.success("Design generated successfully!");
       } else {
         throw new Error("No output image received");
@@ -165,6 +187,8 @@ export default function Customize() {
                   onGenerate={handleGenerate}
                   canGenerate={canGenerate}
                   assignmentCount={hasSelection ? assignmentCount : 0}
+                  allFurnitureImages={allFurnitureImages}
+                  onAddMoreFurniture={handleAddMoreFurniture}
                 />
               </div>
             </div>
