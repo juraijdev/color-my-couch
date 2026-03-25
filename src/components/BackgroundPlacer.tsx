@@ -1,5 +1,5 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { Upload, ImageIcon, Loader2, Sparkles, RotateCcw, X, Download } from "lucide-react";
+import { Upload, Loader2, Sparkles, RotateCcw, X, Download, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,13 +11,21 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/imageUtils";
 
 interface BackgroundPlacerProps {
-  generatedImage: string;
+  /** Array of customized furniture images (base64 data URLs) */
+  furnitureImages: string[];
   onClose: () => void;
+  /** Called when user wants to add another furniture before placing */
+  onAddMoreFurniture?: () => void;
 }
 
-export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerProps) {
+export function BackgroundPlacer({
+  furnitureImages,
+  onClose,
+  onAddMoreFurniture,
+}: BackgroundPlacerProps) {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [compositedImage, setCompositedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -68,21 +76,36 @@ export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerPr
       return;
     }
 
+    if (furnitureImages.length === 0) {
+      toast.error("No furniture images to place");
+      return;
+    }
+
     setIsProcessing(true);
-    toast.info("AI is placing your furniture in the scene...");
+    toast.info(
+      furnitureImages.length > 1
+        ? `AI is placing ${furnitureImages.length} furniture pieces in the scene...`
+        : "AI is placing your furniture in the scene..."
+    );
 
     try {
+      // Compress all images to reduce payload
+      const compressedBackground = await compressImage(backgroundImage, 1200, 0.8);
+      const compressedFurniture = await Promise.all(
+        furnitureImages.map((img) => compressImage(img, 1200, 0.85))
+      );
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/place-in-background`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
-            furnitureImage: generatedImage,
-            backgroundImage: backgroundImage,
+            furnitureImages: compressedFurniture,
+            backgroundImage: compressedBackground,
           }),
         }
       );
@@ -106,7 +129,11 @@ export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerPr
       }
     } catch (error) {
       console.error("Background placement error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to place furniture. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to place furniture. Please try again."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -135,7 +162,9 @@ export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerPr
         <div>
           <h2 className="font-semibold text-lg">Place in Background</h2>
           <p className="text-sm text-muted-foreground">
-            Upload a room or scene to place your furniture in
+            {furnitureImages.length > 1
+              ? `${furnitureImages.length} furniture pieces ready to place`
+              : "Upload a room or scene to place your furniture in"}
           </p>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose}>
@@ -145,61 +174,75 @@ export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerPr
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
-        {/* Preview Images Row */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Generated furniture preview */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Your Furniture
-            </label>
-            <div className="aspect-square rounded-xl border border-border overflow-hidden bg-muted/50">
-              <img
-                src={generatedImage}
-                alt="Generated furniture"
-                className="w-full h-full object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Background preview or upload */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Background Scene
-            </label>
-            {backgroundImage ? (
-              <div className="relative aspect-square rounded-xl border border-border overflow-hidden bg-muted/50 group">
-                <img
-                  src={backgroundImage}
-                  alt="Background scene"
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  onClick={clearBackground}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 hover:bg-destructive/20 transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
-                </button>
-              </div>
-            ) : (
+        {/* Furniture thumbnails */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Your Furniture ({furnitureImages.length})
+          </label>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {furnitureImages.map((img, idx) => (
               <div
-                className={cn(
-                  "aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all gap-2",
-                  isDragging
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50 bg-muted/30"
-                )}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
+                key={idx}
+                className="w-20 h-20 shrink-0 rounded-lg border border-border overflow-hidden bg-muted/50"
               >
-                <Upload className="w-8 h-8 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground text-center px-2">
-                  Drop or click to upload background
-                </p>
+                <img
+                  src={img}
+                  alt={`Furniture ${idx + 1}`}
+                  className="w-full h-full object-contain"
+                />
               </div>
+            ))}
+            {/* Add more furniture button */}
+            {onAddMoreFurniture && (
+              <button
+                onClick={onAddMoreFurniture}
+                className="w-20 h-20 shrink-0 rounded-lg border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-1 transition-colors"
+              >
+                <Plus className="w-5 h-5 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground">Add More</span>
+              </button>
             )}
           </div>
+        </div>
+
+        {/* Background upload */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Background Scene
+          </label>
+          {backgroundImage ? (
+            <div className="relative aspect-video rounded-xl border border-border overflow-hidden bg-muted/50 group">
+              <img
+                src={backgroundImage}
+                alt="Background scene"
+                className="w-full h-full object-cover"
+              />
+              <button
+                onClick={clearBackground}
+                className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 hover:bg-destructive/20 transition-colors opacity-0 group-hover:opacity-100"
+              >
+                <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
+              </button>
+            </div>
+          ) : (
+            <div
+              className={cn(
+                "aspect-video rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all gap-2",
+                isDragging
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50 bg-muted/30"
+              )}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="w-8 h-8 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground text-center px-2">
+                Drop or click to upload background
+              </p>
+            </div>
+          )}
         </div>
 
         <input
@@ -223,7 +266,10 @@ export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerPr
                     <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
                       <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     </div>
-                    <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" style={{ animationDuration: '1.5s' }} />
+                    <div
+                      className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin"
+                      style={{ animationDuration: "1.5s" }}
+                    />
                   </div>
                   <div className="text-center">
                     <p className="font-semibold">Compositing scene...</p>
@@ -255,7 +301,9 @@ export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerPr
             disabled={!backgroundImage || isProcessing}
             className={cn(
               "w-full h-11 font-semibold transition-all",
-              backgroundImage && !isProcessing && "bg-primary hover:bg-primary/90 shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
+              backgroundImage &&
+                !isProcessing &&
+                "bg-primary hover:bg-primary/90 shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
             )}
             variant={backgroundImage ? "default" : "secondary"}
           >
@@ -267,7 +315,7 @@ export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerPr
             ) : (
               <>
                 <Sparkles className="w-5 h-5 mr-2" />
-                Place in Background
+                Place {furnitureImages.length > 1 ? `${furnitureImages.length} Pieces` : ""} in Background
               </>
             )}
           </Button>
@@ -287,7 +335,9 @@ export function BackgroundPlacer({ generatedImage, onClose }: BackgroundPlacerPr
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Format</label>
                   <Select value={format} onValueChange={setFormat}>
-                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="png">PNG (Best Quality)</SelectItem>
                       <SelectItem value="jpg">JPG (Smaller Size)</SelectItem>
