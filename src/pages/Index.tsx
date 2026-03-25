@@ -207,6 +207,8 @@ const Index = () => {
                   onGenerate={handleGenerate}
                   canGenerate={canGenerate}
                   assignmentCount={hasSelection ? assignmentCount : 0}
+                  allFurnitureImages={allFurnitureImages}
+                  onAddMoreFurniture={handleAddMoreFurniture}
                 />
               </div>
             </div>
