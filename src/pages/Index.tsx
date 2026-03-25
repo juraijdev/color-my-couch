@@ -14,6 +14,7 @@ const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [allFurnitureImages, setAllFurnitureImages] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasSelection, setHasSelection] = useState(false);
   const furnitureEditorRef = useRef<FurnitureEditorRef>(null);
@@ -45,6 +46,17 @@ const Index = () => {
   const handleSelectionChange = useCallback((hasSelection: boolean) => {
     setHasSelection(hasSelection);
   }, []);
+
+  const handleAddMoreFurniture = useCallback(() => {
+    if (generatedImage && !allFurnitureImages.includes(generatedImage)) {
+      setAllFurnitureImages((prev) => [...prev, generatedImage]);
+    }
+    setUploadedImage(null);
+    setGeneratedImage(null);
+    setSelectedPattern(null);
+    setHasSelection(false);
+    toast.info("Upload another furniture to customize. All pieces will be placed together.");
+  }, [generatedImage, allFurnitureImages]);
 
   const handleGenerate = useCallback(async () => {
     if (!uploadedImage) {
@@ -104,6 +116,10 @@ const Index = () => {
 
       if (result.output) {
         setGeneratedImage(result.output);
+        setAllFurnitureImages((prev) => {
+          if (prev.includes(result.output)) return prev;
+          return [...prev, result.output];
+        });
         toast.success("Design generated successfully!");
       } else {
         throw new Error("No output image received");
@@ -191,6 +207,8 @@ const Index = () => {
                   onGenerate={handleGenerate}
                   canGenerate={canGenerate}
                   assignmentCount={hasSelection ? assignmentCount : 0}
+                  allFurnitureImages={allFurnitureImages}
+                  onAddMoreFurniture={handleAddMoreFurniture}
                 />
               </div>
             </div>

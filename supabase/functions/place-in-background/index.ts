@@ -17,19 +17,58 @@ serve(async (req) => {
     }
 
     const body = await req.json()
+
+    // Support both old single-image API and new multi-image API
+    let furnitureImages: string[] = []
+    if (body.furnitureImages && Array.isArray(body.furnitureImages)) {
+      furnitureImages = body.furnitureImages
+    } else if (body.furnitureImage) {
+      furnitureImages = [body.furnitureImage]
+    }
+
+    const backgroundImage = body.backgroundImage
+
     console.log("Place in background request:", {
-      hasFurnitureImage: !!body.furnitureImage,
-      hasBackgroundImage: !!body.backgroundImage,
+      furnitureCount: furnitureImages.length,
+      hasBackgroundImage: !!backgroundImage,
     })
 
-    if (!body.furnitureImage || !body.backgroundImage) {
+    if (furnitureImages.length === 0 || !backgroundImage) {
       return new Response(
-        JSON.stringify({ error: "Both furnitureImage and backgroundImage are required" }),
+        JSON.stringify({ error: "At least one furniture image and a background image are required" }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
 
-    const prompt = `You are a professional interior design compositor. Your ONLY task is to take the EXACT furniture from image 1 and place it into the room/scene in image 2.
+    const isMultiple = furnitureImages.length > 1
+
+    const prompt = isMultiple
+      ? `You are a professional interior design compositor. Your task is to take ALL ${furnitureImages.length} furniture pieces from the provided furniture images and place ALL of them together into the room/scene in the background image.
+
+ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
+
+1. PIXEL-PERFECT FURNITURE PRESERVATION: Each furniture piece must appear EXACTLY as it is in its source image. IDENTICAL shape, silhouette, outline, contours, edges, curves, angles, proportions, dimensions, color, material, texture, pattern, grain, and every single visual detail. Do NOT redraw, reimagine, regenerate, or artistically interpret ANY furniture. Each must be a direct copy-paste — not a recreation.
+
+2. ZERO MODIFICATIONS: Do NOT change, add, remove, reshape, resize, stretch, compress, recolor, retexture, smooth, sharpen, stylize, or alter ANY furniture in ANY way. The colors, materials, textures, and finishes of each piece must remain EXACTLY as they are.
+
+3. PLACE ALL ${furnitureImages.length} PIECES: Every single furniture piece provided must appear in the final output. Do NOT omit any piece.
+
+4. NATURAL ARRANGEMENT: Arrange all furniture pieces naturally in the room as an interior designer would. They should NOT overlap. Space them logically — e.g., chairs near a table, separate items along walls, etc. Use the room's existing layout as a guide.
+
+5. PROPORTION MATCHING: Each piece must be scaled to match real-world proportions relative to the room and to each other. Use existing objects (doors, windows, other furniture in the background) as scale references.
+
+6. PLACEMENT RULES for each piece:
+   - Correct scale relative to the room AND to other placed furniture
+   - Proper grounding on the floor/surface
+   - Natural shadows beneath and around each piece
+   - Lighting adjusted to match ambient direction and color temperature
+
+7. BACKGROUND PRESERVATION: Do NOT modify, remove, or rearrange anything in the background scene. Only ADD the furniture into it.
+
+8. COLOR & DESIGN PRESERVATION: Each furniture piece's colors, materials, textures, patterns, and finishes must be preserved EXACTLY. The only adjustments allowed are lighting/shadow integration.
+
+Output a single photorealistic image with ALL furniture pieces naturally placed in the room.`
+      : `You are a professional interior design compositor. Your ONLY task is to take the EXACT furniture from image 1 and place it into the room/scene in the background image.
 
 ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
 
@@ -39,7 +78,7 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
 
 3. NO ARTISTIC INTERPRETATION OF FURNITURE: Do NOT "improve" the furniture, change its style, modernize it, simplify it, add details, remove details, or make ANY creative modifications to the furniture itself. The furniture is a fixed, immutable object.
 
-4. PROPORTION MATCHING (CRITICAL): Look at the OTHER furniture and objects already present in the background scene (image 2). Your placed furniture MUST be scaled to match the real-world proportions of those existing objects. If there are chairs, tables, sofas, or other furniture in the background, use them as scale references. The placed furniture should look like it physically belongs in that space at a realistic size — not too large, not too small compared to surrounding objects, doors, windows, and walls.
+4. PROPORTION MATCHING (CRITICAL): Look at the OTHER furniture and objects already present in the background scene. Your placed furniture MUST be scaled to match the real-world proportions of those existing objects. If there are chairs, tables, sofas, or other furniture in the background, use them as scale references. The placed furniture should look like it physically belongs in that space at a realistic size.
 
 5. PLACEMENT RULES: Place the furniture naturally in the background scene with:
    - Correct scale relative to the room AND relative to other furniture/objects already in the scene
@@ -53,17 +92,24 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
 
 8. The result should look like a professional interior design photograph where the furniture was physically placed in the room and photographed.
 
-THINK OF IT THIS WAY: You are cutting out the EXACT furniture from photo 1 with perfect precision and pasting it into photo 2, then adding realistic shadows and lighting adjustments so it looks naturally placed. The furniture pixels themselves do not change — only their lighting/shadow integration with the new environment. Scale it to match other objects in the room.
-
 Output a single photorealistic image.`;
 
-    const messageContent = [
+    // Build message content with all furniture images
+    const messageContent: any[] = [
       { type: "text", text: prompt },
-      { type: "text", text: "FURNITURE IMAGE (place this into the background):" },
-      { type: "image_url", image_url: { url: body.furnitureImage } },
-      { type: "text", text: "BACKGROUND/ROOM IMAGE (place furniture into this scene):" },
-      { type: "image_url", image_url: { url: body.backgroundImage } },
     ];
+
+    furnitureImages.forEach((img, idx) => {
+      messageContent.push(
+        { type: "text", text: `FURNITURE ${isMultiple ? `#${idx + 1}` : "IMAGE"} (place this into the background):` },
+        { type: "image_url", image_url: { url: img } }
+      );
+    });
+
+    messageContent.push(
+      { type: "text", text: "BACKGROUND/ROOM IMAGE (place furniture into this scene):" },
+      { type: "image_url", image_url: { url: backgroundImage } }
+    );
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide } from "lucide-react";
+import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,10 @@ interface GeneratePanelProps {
   onGenerate: () => void;
   canGenerate: boolean;
   assignmentCount: number;
+  /** All customized furniture images collected so far */
+  allFurnitureImages?: string[];
+  /** Called when user wants to add another furniture */
+  onAddMoreFurniture?: () => void;
 }
 
 export function GeneratePanel({
@@ -28,6 +32,8 @@ export function GeneratePanel({
   onGenerate,
   canGenerate,
   assignmentCount,
+  allFurnitureImages = [],
+  onAddMoreFurniture,
 }: GeneratePanelProps) {
   const [fileName, setFileName] = useState("customized-furniture");
   const [format, setFormat] = useState("png");
@@ -45,13 +51,21 @@ export function GeneratePanel({
     document.body.removeChild(link);
   };
 
+  // Build the list of furniture images for background placement
+  const furnitureForPlacement = allFurnitureImages.length > 0
+    ? allFurnitureImages
+    : generatedImage
+    ? [generatedImage]
+    : [];
+
   // If background placer is active, show it instead
-  if (showBackgroundPlacer && generatedImage) {
+  if (showBackgroundPlacer && furnitureForPlacement.length > 0) {
     return (
       <div className="h-full bg-card rounded-xl border border-border overflow-hidden">
         <BackgroundPlacer
-          generatedImage={generatedImage}
+          furnitureImages={furnitureForPlacement}
           onClose={() => setShowBackgroundPlacer(false)}
+          onAddMoreFurniture={onAddMoreFurniture}
         />
       </div>
     );
@@ -100,6 +114,12 @@ export function GeneratePanel({
                 Complete
               </div>
             </div>
+            {/* Show count of all collected furniture */}
+            {allFurnitureImages.length > 1 && (
+              <p className="text-xs text-muted-foreground">
+                {allFurnitureImages.length} furniture pieces customized
+              </p>
+            )}
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4 text-center py-8">
@@ -167,6 +187,18 @@ export function GeneratePanel({
         {/* Post-generation actions */}
         {generatedImage && (
           <>
+            {/* Add Another Furniture */}
+            {onAddMoreFurniture && (
+              <Button
+                variant="outline"
+                className="w-full border-accent/30 hover:bg-accent/10"
+                onClick={onAddMoreFurniture}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Customize Another Furniture
+              </Button>
+            )}
+
             {/* Place in Background button */}
             <Button
               variant="outline"
@@ -175,6 +207,9 @@ export function GeneratePanel({
             >
               <ImageIconLucide className="w-4 h-4 mr-2" />
               Place in Background
+              {allFurnitureImages.length > 1 && (
+                <span className="ml-1 text-xs">({allFurnitureImages.length} pieces)</span>
+              )}
             </Button>
 
             <Button
