@@ -58,6 +58,7 @@ const Index = () => {
     toast.info("Upload another furniture to customize. All pieces will be placed together.");
   }, [generatedImage, allFurnitureImages]);
 
+  const handleGenerate = useCallback(async () => {
     if (!uploadedImage) {
       toast.error("Please upload an image first");
       return;
