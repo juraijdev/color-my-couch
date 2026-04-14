@@ -300,11 +300,6 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{part.name}</span>
-                            {isActive && (
-                              <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-medium">
-                                Select pattern ↓
-                              </span>
-                            )}
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5">
                             {part.material} • {part.currentColor}
