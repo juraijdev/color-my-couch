@@ -44,7 +44,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
     const [patternAssignments, setPatternAssignments] = useState<Map<string, PatternOption>>(new Map());
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
-    const [activePartId, setActivePartId] = useState<string | null>(null);
+    
 
     useEffect(() => {
       if (imageUrl && !hasAnalyzed) {
