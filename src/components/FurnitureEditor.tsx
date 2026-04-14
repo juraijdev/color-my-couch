@@ -204,31 +204,53 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
               {/* Location markers - always show all parts */}
               {parts.map((part) => {
                 const assignedPattern = patternAssignments.get(part.id);
+                const loc = part.location;
+                if (!loc) return null;
                 
-                return part.location && (
+                // Determine if label should go below instead of above (for parts near top)
+                const labelAbove = loc.top > 8;
+                
+                return (
                   <div
                     key={part.id}
                     className={cn(
-                      "absolute border-2 rounded-lg cursor-pointer transition-all",
+                      "absolute cursor-pointer transition-all group",
                       assignedPattern
-                        ? "border-primary bg-primary/10"
-                        : "border-amber-500/70 bg-amber-500/15 hover:bg-amber-500/25"
+                        ? "border-[2.5px] border-primary"
+                        : "border-2 border-dashed border-amber-400 hover:border-amber-300"
                     )}
                     style={{
-                      top: `${part.location.top}%`,
-                      left: `${part.location.left}%`,
-                      width: `${part.location.width}%`,
-                      height: `${part.location.height}%`,
+                      top: `${loc.top}%`,
+                      left: `${loc.left}%`,
+                      width: `${loc.width}%`,
+                      height: `${loc.height}%`,
+                      boxShadow: assignedPattern 
+                        ? '0 0 0 1px rgba(9,66,35,0.3), inset 0 0 0 1px rgba(9,66,35,0.15)' 
+                        : '0 0 0 1px rgba(245,158,11,0.4), inset 0 0 0 1px rgba(245,158,11,0.1)',
+                      background: assignedPattern 
+                        ? 'rgba(9,66,35,0.08)' 
+                        : 'rgba(245,158,11,0.06)',
                     }}
                     onClick={() => handlePartClick(part.id)}
                   >
-                    <span className={cn(
-                      "absolute -top-7 left-1/2 -translate-x-1/2 text-xs px-2 py-1 rounded-full whitespace-nowrap font-medium shadow-lg",
-                      assignedPattern
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-amber-500 text-white"
-                    )}>
+                    {/* Corner dots for precision feel */}
+                    <span className={cn("absolute w-2 h-2 rounded-full -top-1 -left-1", assignedPattern ? "bg-primary" : "bg-amber-400")} />
+                    <span className={cn("absolute w-2 h-2 rounded-full -top-1 -right-1", assignedPattern ? "bg-primary" : "bg-amber-400")} />
+                    <span className={cn("absolute w-2 h-2 rounded-full -bottom-1 -left-1", assignedPattern ? "bg-primary" : "bg-amber-400")} />
+                    <span className={cn("absolute w-2 h-2 rounded-full -bottom-1 -right-1", assignedPattern ? "bg-primary" : "bg-amber-400")} />
+                    
+                    {/* Label */}
+                    <span 
+                      className={cn(
+                        "absolute left-1/2 -translate-x-1/2 text-[10px] leading-tight px-2 py-0.5 rounded whitespace-nowrap font-semibold shadow-md z-10 pointer-events-none",
+                        labelAbove ? "-top-6" : "-bottom-6",
+                        assignedPattern
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-amber-500 text-white"
+                      )}
+                    >
                       {part.name}
+                      {assignedPattern && ` ✓`}
                     </span>
                   </div>
                 );
