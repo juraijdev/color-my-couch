@@ -209,19 +209,18 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                 </div>
               )}
 
-              {/* Location markers */}
+              {/* Location markers - always show all parts */}
               {parts.map((part) => {
                 const assignedPattern = patternAssignments.get(part.id);
-                const isActive = activePartId === part.id;
                 
-                return part.location && (assignedPattern || isActive) && (
+                return part.location && (
                   <div
                     key={part.id}
                     className={cn(
-                      "absolute border-2 rounded-lg pointer-events-none transition-all",
-                      isActive 
-                        ? "border-yellow-400 bg-yellow-400/20 animate-pulse" 
-                        : "border-primary bg-primary/10"
+                      "absolute border-2 rounded-lg cursor-pointer transition-all",
+                      assignedPattern
+                        ? "border-primary bg-primary/10"
+                        : "border-amber-500/70 bg-amber-500/15 hover:bg-amber-500/25"
                     )}
                     style={{
                       top: `${part.location.top}%`,
@@ -229,8 +228,14 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                       width: `${part.location.width}%`,
                       height: `${part.location.height}%`,
                     }}
+                    onClick={() => handlePartClick(part.id)}
                   >
-                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs px-2 py-1 rounded-full whitespace-nowrap bg-primary text-primary-foreground font-medium shadow-lg">
+                    <span className={cn(
+                      "absolute -top-7 left-1/2 -translate-x-1/2 text-xs px-2 py-1 rounded-full whitespace-nowrap font-medium shadow-lg",
+                      assignedPattern
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-amber-500 text-white"
+                    )}>
                       {part.name}
                     </span>
                   </div>
