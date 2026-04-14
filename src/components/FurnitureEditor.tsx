@@ -56,16 +56,9 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
       setParts([]);
       setPatternAssignments(new Map());
       setHasAnalyzed(false);
-      setActivePartId(null);
       onSelectionChange?.(false);
     }, [imageUrl]);
 
-    useEffect(() => {
-      if (selectedPattern && activePartId) {
-        assignPattern(activePartId, selectedPattern);
-        setActivePartId(null);
-      }
-    }, [selectedPattern]);
 
     const analyzeImage = async () => {
       setIsAnalyzing(true);
@@ -125,7 +118,6 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
 
     const clearAllAssignments = () => {
       setPatternAssignments(new Map());
-      setActivePartId(null);
       onSelectionChange?.(false);
     };
 
