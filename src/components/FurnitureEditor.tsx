@@ -272,16 +272,13 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                 <div className="space-y-2">
                   {parts.map((part) => {
                     const assignedPattern = patternAssignments.get(part.id);
-                    const isActive = activePartId === part.id;
                     
                     return (
                       <div
                         key={part.id}
                         className={cn(
                           "relative flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all",
-                          isActive
-                            ? "border-yellow-400 bg-yellow-400/10 shadow-[0_0_15px_hsl(45_100%_50%/0.3)]"
-                            : assignedPattern
+                          assignedPattern
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-muted-foreground/50 bg-card"
                         )}
