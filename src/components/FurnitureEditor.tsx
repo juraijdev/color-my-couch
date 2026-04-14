@@ -44,7 +44,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
     const [patternAssignments, setPatternAssignments] = useState<Map<string, PatternOption>>(new Map());
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
-    const [activePartId, setActivePartId] = useState<string | null>(null);
+    
 
     useEffect(() => {
       if (imageUrl && !hasAnalyzed) {
@@ -56,16 +56,9 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
       setParts([]);
       setPatternAssignments(new Map());
       setHasAnalyzed(false);
-      setActivePartId(null);
       onSelectionChange?.(false);
     }, [imageUrl]);
 
-    useEffect(() => {
-      if (selectedPattern && activePartId) {
-        assignPattern(activePartId, selectedPattern);
-        setActivePartId(null);
-      }
-    }, [selectedPattern]);
 
     const analyzeImage = async () => {
       setIsAnalyzing(true);
@@ -125,7 +118,6 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
 
     const clearAllAssignments = () => {
       setPatternAssignments(new Map());
-      setActivePartId(null);
       onSelectionChange?.(false);
     };
 
@@ -133,10 +125,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
       if (selectedPattern) {
         assignPattern(partId, selectedPattern);
       } else {
-        setActivePartId(partId === activePartId ? null : partId);
-        if (partId !== activePartId) {
-          toast.info("Now select a pattern from below");
-        }
+        toast.info("Please select a pattern/color first, then click on a part");
       }
     };
 
@@ -212,19 +201,18 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                 </div>
               )}
 
-              {/* Location markers */}
+              {/* Location markers - always show all parts */}
               {parts.map((part) => {
                 const assignedPattern = patternAssignments.get(part.id);
-                const isActive = activePartId === part.id;
                 
-                return part.location && (assignedPattern || isActive) && (
+                return part.location && (
                   <div
                     key={part.id}
                     className={cn(
-                      "absolute border-2 rounded-lg pointer-events-none transition-all",
-                      isActive 
-                        ? "border-yellow-400 bg-yellow-400/20 animate-pulse" 
-                        : "border-primary bg-primary/10"
+                      "absolute border-2 rounded-lg cursor-pointer transition-all",
+                      assignedPattern
+                        ? "border-primary bg-primary/10"
+                        : "border-amber-500/70 bg-amber-500/15 hover:bg-amber-500/25"
                     )}
                     style={{
                       top: `${part.location.top}%`,
@@ -232,8 +220,14 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                       width: `${part.location.width}%`,
                       height: `${part.location.height}%`,
                     }}
+                    onClick={() => handlePartClick(part.id)}
                   >
-                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs px-2 py-1 rounded-full whitespace-nowrap bg-primary text-primary-foreground font-medium shadow-lg">
+                    <span className={cn(
+                      "absolute -top-7 left-1/2 -translate-x-1/2 text-xs px-2 py-1 rounded-full whitespace-nowrap font-medium shadow-lg",
+                      assignedPattern
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-amber-500 text-white"
+                    )}>
                       {part.name}
                     </span>
                   </div>
@@ -250,8 +244,8 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                 {!hasAnalyzed 
                   ? "Detecting parts..." 
                   : selectedPattern 
-                    ? `Click a part to apply "${selectedPattern.name}"`
-                    : "Select a part, then choose a pattern"
+                    ? `Now click a part to apply "${selectedPattern.name}"`
+                    : "① Select a pattern below → ② Click a part to apply"
                 }
               </p>
 
@@ -260,7 +254,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20 mb-4">
                   <MousePointerClick className="w-5 h-5 text-primary shrink-0" />
                   <p className="text-sm">
-                    <span className="font-medium text-primary">Tip:</span> Click a part below, then select a material pattern
+                    <span className="font-medium text-primary">Step 1:</span> Choose a material pattern from the palette, then click on a furniture part
                   </p>
                 </div>
               )}
@@ -278,16 +272,13 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                 <div className="space-y-2">
                   {parts.map((part) => {
                     const assignedPattern = patternAssignments.get(part.id);
-                    const isActive = activePartId === part.id;
                     
                     return (
                       <div
                         key={part.id}
                         className={cn(
                           "relative flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all",
-                          isActive
-                            ? "border-yellow-400 bg-yellow-400/10 shadow-[0_0_15px_hsl(45_100%_50%/0.3)]"
-                            : assignedPattern
+                          assignedPattern
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-muted-foreground/50 bg-card"
                         )}
@@ -309,11 +300,6 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{part.name}</span>
-                            {isActive && (
-                              <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-medium">
-                                Select pattern ↓
-                              </span>
-                            )}
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5">
                             {part.material} • {part.currentColor}
