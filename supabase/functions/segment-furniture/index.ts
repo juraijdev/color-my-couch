@@ -110,7 +110,17 @@ CRITICAL ANALYSIS RULES:
    - The descriptions for "Top Surface" and "Stainless Steel Trim & Edges" must clearly explain that they are different parts
    - If the top side edge and the divider strips are the same visible metal system, the user must be able to recolor them together from one metal part
 
-12. For each part, describe its approximate location as a percentage of the image (top/bottom/left/right)
+12. PRECISE BOUNDING BOX RULE (CRITICAL):
+    - For each part, you MUST provide a TIGHT, PIXEL-ACCURATE bounding box as percentages of the FULL image dimensions
+    - "top" = the Y-coordinate of the TOP edge of the part as a percentage of image height (0 = very top of image, 100 = very bottom)
+    - "left" = the X-coordinate of the LEFT edge of the part as a percentage of image width (0 = very left of image, 100 = very right)
+    - "width" = the horizontal span of the part as a percentage of image width
+    - "height" = the vertical span of the part as a percentage of image height
+    - The bounding box MUST tightly wrap the actual visible pixels of that part — do NOT use loose/padded boxes
+    - For thin parts like trim strips, the height or width should be correspondingly small (e.g., a thin horizontal strip might have height: 2-5)
+    - For wide parts like the top surface, width should span the full extent of that surface
+    - Double-check: if a part visually starts at 10% from the top and ends at 30% from the top, then top=10, height=20
+    - The rectangle should overlay EXACTLY on the part when drawn on the image — accuracy is critical for user interaction
 13. Identify the current color/material of each part
 
 Return your analysis as JSON with this exact structure:
