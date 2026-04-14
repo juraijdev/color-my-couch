@@ -133,10 +133,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
       if (selectedPattern) {
         assignPattern(partId, selectedPattern);
       } else {
-        setActivePartId(partId === activePartId ? null : partId);
-        if (partId !== activePartId) {
-          toast.info("Now select a pattern from below");
-        }
+        toast.info("Please select a pattern/color first, then click on a part");
       }
     };
 
