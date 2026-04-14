@@ -252,8 +252,8 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                 {!hasAnalyzed 
                   ? "Detecting parts..." 
                   : selectedPattern 
-                    ? `Click a part to apply "${selectedPattern.name}"`
-                    : "Select a part, then choose a pattern"
+                    ? `Now click a part to apply "${selectedPattern.name}"`
+                    : "① Select a pattern below → ② Click a part to apply"
                 }
               </p>
 
@@ -262,7 +262,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20 mb-4">
                   <MousePointerClick className="w-5 h-5 text-primary shrink-0" />
                   <p className="text-sm">
-                    <span className="font-medium text-primary">Tip:</span> Click a part below, then select a material pattern
+                    <span className="font-medium text-primary">Step 1:</span> Choose a material pattern from the palette, then click on a furniture part
                   </p>
                 </div>
               )}
