@@ -205,13 +205,39 @@ function isMetalLikePart(text: string, materialText: string) {
 }
 
 function canonicalizePartName(part: any, fallback: string) {
-  const text = getNormalizedText(part?.name, part?.description);
+  const nameText = getNormalizedText(part?.name);
+  const fullText = getNormalizedText(part?.name, part?.description);
   const materialText = getNormalizedText(part?.material, part?.currentColor);
 
-  if (!text) return fallback;
+  if (!fullText) return fallback;
 
+  // PRIORITY 1: Check the part NAME first for exact canonical matches
+  // This prevents descriptions from hijacking the classification
+  if (hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"])) {
+    return "Front Panel";
+  }
+  if (hasAnyKeyword(nameText, ["shelf"])) {
+    return "Shelf Wood";
+  }
+  if (hasAnyKeyword(nameText, ["caster", "wheel"])) {
+    return "Casters / Wheels";
+  }
+  if (hasAnyKeyword(nameText, ["side panel"])) {
+    return "Side Panels";
+  }
+  if (hasAnyKeyword(nameText, ["back panel"])) {
+    return "Back Panel";
+  }
+  if (hasAnyKeyword(nameText, ["door", "drawer"])) {
+    return String(part?.name ?? "").trim() || fallback;
+  }
+  if (hasAnyKeyword(nameText, ["hardware", "handle", "knob", "hinge"])) {
+    return "Hardware";
+  }
+
+  // PRIORITY 2: Metal trim detection (uses full text for thoroughness)
   if (
-    hasAnyKeyword(text, [
+    hasAnyKeyword(fullText, [
       "stainless steel trim",
       "trim edges",
       "trim and edges",
@@ -232,29 +258,27 @@ function canonicalizePartName(part: any, fallback: string) {
       "top trim",
       "metal edge",
     ]) &&
-    isMetalLikePart(text, materialText)
+    isMetalLikePart(fullText, materialText)
   ) {
     return TRIM_NAME;
   }
 
+  // PRIORITY 3: Top surface (only if name suggests it, not just description)
   if (
-    hasAnyKeyword(text, ["top surface", "countertop", "counter top", "table top"]) ||
-    (text.includes("top") &&
-      hasAnyKeyword(text, ["surface", "panel", "wood", "stone", "module"]) &&
-      !isMetalLikePart(text, materialText))
+    hasAnyKeyword(nameText, ["top surface", "countertop", "counter top", "table top"]) ||
+    (nameText.includes("top") &&
+      hasAnyKeyword(nameText, ["surface", "panel", "wood", "stone", "module"]) &&
+      !isMetalLikePart(nameText, materialText))
   ) {
     return TOP_SURFACE_NAME;
   }
 
-  if (hasAnyKeyword(text, ["front panel", "front fascia", "front apron"])) {
-    return "Front Panel";
-  }
-
-  if (text.includes("shelf")) return "Shelf Wood";
-  if (hasAnyKeyword(text, ["frame", "legs", "leg", "base frame", "support bar"])) {
+  // PRIORITY 4: Frame/legs (check name only to avoid catching casters/wheels by description)
+  if (hasAnyKeyword(nameText, ["frame", "legs", "leg", "base frame", "support bar"])) {
     return "Frame / Legs";
   }
 
+  // PRIORITY 5: Fallback — use original name
   return String(part?.name ?? "").trim() || fallback;
 }
 
@@ -264,6 +288,10 @@ function getCanonicalId(partName: string, fallback: unknown) {
   if (partName === "Front Panel") return "front_panel";
   if (partName === "Shelf Wood") return "shelf_wood";
   if (partName === "Frame / Legs") return "frame_legs";
+  if (partName === "Casters / Wheels") return "casters_wheels";
+  if (partName === "Side Panels") return "side_panels";
+  if (partName === "Back Panel") return "back_panel";
+  if (partName === "Hardware") return "hardware";
 
   const normalized = getNormalizedText(partName).replace(/\s+/g, "_");
   return normalized || String(fallback ?? "part");
@@ -318,6 +346,10 @@ const MERGEABLE_CANONICAL_PARTS = new Set([
   "Front Panel",
   "Shelf Wood",
   "Frame / Legs",
+  "Casters / Wheels",
+  "Side Panels",
+  "Back Panel",
+  "Hardware",
 ]);
 
 function normalizeParts(parts: any[]) {
