@@ -288,6 +288,10 @@ function getCanonicalId(partName: string, fallback: unknown) {
   if (partName === "Front Panel") return "front_panel";
   if (partName === "Shelf Wood") return "shelf_wood";
   if (partName === "Frame / Legs") return "frame_legs";
+  if (partName === "Casters / Wheels") return "casters_wheels";
+  if (partName === "Side Panels") return "side_panels";
+  if (partName === "Back Panel") return "back_panel";
+  if (partName === "Hardware") return "hardware";
 
   const normalized = getNormalizedText(partName).replace(/\s+/g, "_");
   return normalized || String(fallback ?? "part");
@@ -342,6 +346,10 @@ const MERGEABLE_CANONICAL_PARTS = new Set([
   "Front Panel",
   "Shelf Wood",
   "Frame / Legs",
+  "Casters / Wheels",
+  "Side Panels",
+  "Back Panel",
+  "Hardware",
 ]);
 
 function normalizeParts(parts: any[]) {
