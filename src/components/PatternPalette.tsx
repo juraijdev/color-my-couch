@@ -16,7 +16,7 @@ import SS27GreenBronze from "@/assets/patterns/SS27-Green-Bronze.jpg";
 import PC011White from "@/assets/patterns/PC011-White.jpg";
 import PC038Gold from "@/assets/patterns/PC038-Gold.jpg";
 import PC051Silver from "@/assets/patterns/PC051-Silver.jpg";
-import PC053BrownGold from "@/assets/patterns/PC053-Brown-Gold.jpg";
+import PC053BrownGold from "@/assets/patterns/brown_gold.jpeg";
 import PC056Champagne from "@/assets/patterns/PC056-Champagne.jpg";
 import PC058CrackBlack from "@/assets/patterns/PC058-Crack-Black.jpg";
 import PC059MattBlack from "@/assets/patterns/PC059-Matt-Black.jpg";
