@@ -236,7 +236,10 @@ function canonicalizePartName(part: any, fallback: string) {
   }
 
   // PRIORITY 2: Metal trim detection (uses full text for thoroughness)
+  // GUARD: Skip trim detection if name clearly indicates Top Surface — descriptions often mention "metal trim" as exclusion text
+  const isTopSurfaceByName = hasAnyKeyword(nameText, ["top surface", "countertop", "counter top", "table top"]);
   if (
+    !isTopSurfaceByName &&
     hasAnyKeyword(fullText, [
       "stainless steel trim",
       "trim edges",
