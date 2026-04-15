@@ -22,10 +22,10 @@ interface PatternAssignment {
   patternImageUrl: string;
 }
 
-function formatPartLocation(location?: PartLocation) {
-  if (!location) return "Approximate location: not provided.";
+function formatPartLocation(partName: string, location?: PartLocation) {
+  if (!location) return `Approximate location for "${partName}": not provided.`;
 
-  return `Approximate location in photo — top ${location.top}%, left ${location.left}%, width ${location.width}%, height ${location.height}%`;
+  return `Approximate location envelope in photo for "${partName}" — top ${location.top}%, left ${location.left}%, width ${location.width}%, height ${location.height}%. Use this only as guidance and follow the exact visible boundaries of this part, not the whole rectangle.`;
 }
 
 function findAssignment(assignments: PatternAssignment[], partName: string) {
@@ -36,6 +36,8 @@ function findAssignment(assignments: PatternAssignment[], partName: string) {
 
 function buildConsistencyLocks(assignments: PatternAssignment[]) {
   const locks = [
+    "Each listed part location is only a guidance envelope. Recolor ONLY the exact visible pixels of that named part, never the whole rectangle.",
+    "Preserve crisp original boundaries between touching parts. No bleed, halo, soft blending, or shared tint across part borders.",
     "Never blend, average, or compromise two different assigned finishes into one shared look.",
     "Keep each assigned reference pattern faithful in color, contrast, material feel, and visible texture scale.",
     "Preserve the original furniture shading and geometry, and only change the specified surface finish.",
@@ -48,8 +50,12 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
     locks.unshift(
       `Apply "${topSurface.patternName}" ONLY to the broad upper horizontal top wood/stone faces.`,
       `Apply "${trim.patternName}" ONLY to the thin front lip, thin side lip, perimeter edge caps, divider strips between top modules, and every small vertical top side panel / side return / outer end cap.`,
+      `Treat "Stainless Steel Trim & Edges" as a sparse distributed trim system made of thin metal pieces, not one solid slab or panel.`,
+      `Within the "Stainless Steel Trim & Edges" guidance envelope, recolor ONLY the visible divider strips, perimeter lips, edge caps, and top side-return / outer end-cap metal pieces.`,
       `The top side edge panels and the divider strips are one continuous metal trim system and must all render in the SAME "${trim.patternName}" finish.`,
       `The broad horizontal top wood/stone faces must NOT take on "${trim.patternName}", and the metal trim system must NOT take on "${topSurface.patternName}".`,
+      `Do NOT flood-fill or tint the broad top wood area just because it sits inside or touches the trim envelope.`,
+      `Where "Top Surface" touches "Stainless Steel Trim & Edges", keep a sharp boundary that follows the original product photo exactly.`,
       `"Top Surface" and "Stainless Steel Trim & Edges" are different parts and must stay visibly separate in the final image.`,
     );
 
@@ -102,7 +108,7 @@ serve(async (req) => {
       const partDetails = a.partDescription
         ? `Existing part details: ${a.partDescription}`
         : "Existing part details: not provided.";
-      const partLocation = formatPartLocation(a.partLocation);
+      const partLocation = formatPartLocation(a.partName, a.partLocation);
 
       return `- "${a.partName}" (${a.partMaterial}): Apply "${a.patternName}" - ${a.patternDescription}. ${partDetails} ${partLocation}`;
     }).join("\n");
@@ -155,6 +161,10 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 18. NO ARTISTIC INTERPRETATION: Do NOT "improve" the image, change the style, add effects, change resolution, or make any creative modifications. This is a strict mechanical recoloring task.
 
+19. LOCATION ENVELOPE RULE: Location rectangles are only guidance envelopes. When a part is thin or distributed, such as trim, recolor only the exact existing visible pixels of that part — never the entire box.
+
+20. SHARP PART BOUNDARY RULE: If two assigned parts touch each other, preserve the original edge between them with a crisp transition and zero color bleed.
+
 THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
 
     console.log("Generating image with pattern application prompt:", prompt)
@@ -198,7 +208,7 @@ THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real p
       },
       body: JSON.stringify({
         model: "google/gemini-3-pro-image-preview",
-        temperature: 0.1,
+        temperature: 0,
         messages: [
           {
             role: "user",

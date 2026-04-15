@@ -176,55 +176,159 @@ function extractPartsFromContent(content: string) {
   }
 }
 
-function canonicalizePartName(name: unknown, fallback: string) {
-  const normalized = String(name ?? "")
+function getNormalizedText(...values: unknown[]) {
+  return values
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join(" ")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
 
-  if (!normalized) return fallback;
-  if (normalized.includes("top surface")) return TOP_SURFACE_NAME;
+function hasAnyKeyword(text: string, keywords: string[]) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
+function isMetalLikePart(text: string, materialText: string) {
+  return hasAnyKeyword(`${text} ${materialText}`, [
+    "metal",
+    "stainless",
+    "steel",
+    "chrome",
+    "silver",
+    "gold",
+    "brass",
+    "bronze",
+    "gunmetal",
+    "powder coat",
+  ]);
+}
+
+function canonicalizePartName(part: any, fallback: string) {
+  const text = getNormalizedText(part?.name, part?.description);
+  const materialText = getNormalizedText(part?.material, part?.currentColor);
+
+  if (!text) return fallback;
+
   if (
-    normalized.includes("stainless steel trim") ||
-    normalized.includes("trim edges") ||
-    normalized.includes("trim and edges")
+    hasAnyKeyword(text, [
+      "stainless steel trim",
+      "trim edges",
+      "trim and edges",
+      "divider",
+      "separator",
+      "edge cap",
+      "perimeter lip",
+      "perimeter trim",
+      "front lip",
+      "side lip",
+      "side return",
+      "top side edge",
+      "top edge",
+      "outer end cap",
+      "end cap",
+      "fascia",
+      "bezel",
+      "top trim",
+      "metal edge",
+    ]) &&
+    isMetalLikePart(text, materialText)
   ) {
     return TRIM_NAME;
   }
-  if (normalized.includes("front panel") || normalized.includes("front fascia") || normalized.includes("front apron")) {
+
+  if (
+    hasAnyKeyword(text, ["top surface", "countertop", "counter top", "table top"]) ||
+    (text.includes("top") &&
+      hasAnyKeyword(text, ["surface", "panel", "wood", "stone", "module"]) &&
+      !isMetalLikePart(text, materialText))
+  ) {
+    return TOP_SURFACE_NAME;
+  }
+
+  if (hasAnyKeyword(text, ["front panel", "front fascia", "front apron"])) {
     return "Front Panel";
   }
-  if (normalized.includes("shelf")) return "Shelf Wood";
-  if (normalized.includes("frame") || normalized.includes("legs")) return "Frame / Legs";
 
-  return String(name).trim() || fallback;
+  if (text.includes("shelf")) return "Shelf Wood";
+  if (hasAnyKeyword(text, ["frame", "legs", "leg", "base frame", "support bar"])) {
+    return "Frame / Legs";
+  }
+
+  return String(part?.name ?? "").trim() || fallback;
+}
+
+function getCanonicalId(partName: string, fallback: unknown) {
+  if (partName === TOP_SURFACE_NAME) return "top_surface";
+  if (partName === TRIM_NAME) return "stainless_steel_trim_edges";
+  if (partName === "Front Panel") return "front_panel";
+  if (partName === "Shelf Wood") return "shelf_wood";
+  if (partName === "Frame / Legs") return "frame_legs";
+
+  const normalized = getNormalizedText(partName).replace(/\s+/g, "_");
+  return normalized || String(fallback ?? "part");
 }
 
 function getCanonicalDescription(partName: string, fallback: string, hasTopSurface: boolean, hasTrim: boolean) {
   if (partName === TOP_SURFACE_NAME) {
     return hasTrim
-      ? 'The broad, upper, horizontal wood or stone faces of the top assembly only. This part excludes the thin front lip, thin side lip, perimeter edge caps, divider strips between top modules, and every small vertical top side panel / side return / outer end cap, which belong to "Stainless Steel Trim & Edges".'
-      : "The broad, upper, horizontal wood or stone faces of the top assembly only, excluding any trim, lips, dividers, or side-return panels.";
+      ? 'Only the broad, upper, horizontal wood or stone faces of the top assembly. This part stops exactly where the thin metal trim system begins, and it excludes every divider strip, front lip, side lip, perimeter edge cap, and every small vertical top side panel / side return / outer end cap that belongs to "Stainless Steel Trim & Edges".'
+      : "Only the broad, upper, horizontal wood or stone faces of the top assembly, excluding any trim, lips, dividers, or side-return panels.";
   }
 
   if (partName === TRIM_NAME) {
     return hasTopSurface
-      ? 'All matching metal divider strips between top modules, perimeter top trim, thin front and side lips directly below or wrapping the top, and every small vertical top side panel / side return / outer end cap. This metal system stays separate from the broad horizontal top wood or stone faces, which belong to "Top Surface".'
-      : "All matching metal trim and edge components, including divider strips, perimeter edging, thin lips, and small side-return panels that share the same finish.";
+      ? 'A distributed set of matching thin metal pieces: all divider strips between top modules, perimeter top trim, thin front and side lips directly below or wrapping the top, and every small vertical top side panel / side return / outer end cap. This grouped metal system stays separate from the broad horizontal top wood or stone faces of "Top Surface".'
+      : "A distributed set of matching metal trim and edge components, including divider strips, perimeter edging, thin lips, and small side-return panels that share the same finish.";
   }
 
   return fallback;
 }
 
+function isValidLocation(location: any): location is { top: number; left: number; width: number; height: number } {
+  return [location?.top, location?.left, location?.width, location?.height].every(
+    (value) => typeof value === "number" && Number.isFinite(value),
+  );
+}
+
+function clampPercent(value: number) {
+  return Math.min(100, Math.max(0, Number(value.toFixed(1))));
+}
+
+function mergeLocations(a: any, b: any) {
+  if (!isValidLocation(a)) return isValidLocation(b) ? b : undefined;
+  if (!isValidLocation(b)) return a;
+
+  const top = Math.min(a.top, b.top);
+  const left = Math.min(a.left, b.left);
+  const right = Math.max(a.left + a.width, b.left + b.width);
+  const bottom = Math.max(a.top + a.height, b.top + b.height);
+
+  return {
+    top: clampPercent(top),
+    left: clampPercent(left),
+    width: clampPercent(right - left),
+    height: clampPercent(bottom - top),
+  };
+}
+
+const MERGEABLE_CANONICAL_PARTS = new Set([
+  TOP_SURFACE_NAME,
+  TRIM_NAME,
+  "Front Panel",
+  "Shelf Wood",
+  "Frame / Legs",
+]);
+
 function normalizeParts(parts: any[]) {
   const canonicalNames = parts.map((part, index) =>
-    canonicalizePartName(part?.name, `Part ${index + 1}`)
+    canonicalizePartName(part, `Part ${index + 1}`)
   );
 
   const hasTopSurface = canonicalNames.includes(TOP_SURFACE_NAME);
   const hasTrim = canonicalNames.includes(TRIM_NAME);
 
-  return parts.map((part, index) => {
+  const canonicalizedParts = parts.map((part, index) => {
     const name = canonicalNames[index];
     const description = getCanonicalDescription(
       name,
@@ -235,7 +339,7 @@ function normalizeParts(parts: any[]) {
 
     return {
       ...part,
-      id: String(part?.id ?? `part_${index + 1}`),
+      id: getCanonicalId(name, part?.id ?? `part_${index + 1}`),
       name,
       description,
       material:
@@ -248,6 +352,30 @@ function normalizeParts(parts: any[]) {
               : "other",
     };
   });
+
+  return canonicalizedParts.reduce((acc: any[], part) => {
+    if (!MERGEABLE_CANONICAL_PARTS.has(part.name)) {
+      acc.push(part);
+      return acc;
+    }
+
+    const existingIndex = acc.findIndex((existing) => existing.name === part.name);
+    if (existingIndex === -1) {
+      acc.push(part);
+      return acc;
+    }
+
+    const existing = acc[existingIndex];
+    acc[existingIndex] = {
+      ...existing,
+      id: getCanonicalId(existing.name, existing.id),
+      description: getCanonicalDescription(existing.name, existing.description || part.description || "", hasTopSurface, hasTrim),
+      currentColor: existing.currentColor || part.currentColor,
+      location: mergeLocations(existing.location, part.location),
+    };
+
+    return acc;
+  }, []);
 }
 
 serve(async (req) => {
@@ -289,7 +417,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        temperature: 0.1,
+        temperature: 0,
         messages: [
           {
             role: "system",
