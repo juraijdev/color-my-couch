@@ -40,8 +40,6 @@ export function GeneratePanel({
   const [format, setFormat] = useState("png");
   const [showExport, setShowExport] = useState(false);
   const [showBackgroundPlacer, setShowBackgroundPlacer] = useState(false);
-  const [transparentBg, setTransparentBg] = useState(true);
-  const [isRemovingBg, setIsRemovingBg] = useState(false);
 
   const triggerDownload = (dataUrl: string, ext: string) => {
     const link = document.createElement("a");
