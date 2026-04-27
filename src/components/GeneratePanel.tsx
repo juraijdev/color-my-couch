@@ -56,44 +56,8 @@ export function GeneratePanel({
 
   const handleDownload = async () => {
     if (!generatedImage) return;
-
-    // For PNG with transparent background toggle ON, run background removal first
-    if (transparentBg && format === "png") {
-      try {
-        setIsRemovingBg(true);
-        toast.info("Removing background for transparent PNG...");
-        const compressed = await compressImage(generatedImage, 1400, 0.92);
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({ image: compressed }),
-          }
-        );
-
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(err.error || "Background removal failed");
-        }
-        const result = await response.json();
-        if (result.error || !result.output) {
-          throw new Error(result.error || "No transparent image returned");
-        }
-        triggerDownload(result.output, "png");
-        toast.success("Transparent PNG downloaded!");
-      } catch (err) {
-        console.error("Transparent download error:", err);
-        toast.error(err instanceof Error ? err.message : "Failed to remove background");
-      } finally {
-        setIsRemovingBg(false);
-      }
-      return;
-    }
-
+    // The generated image is already on a transparent background (auto-removed
+    // right after generation), so we can download it directly in any format.
     triggerDownload(generatedImage, format);
   };
 
