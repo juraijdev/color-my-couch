@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -10,7 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { BackgroundPlacer } from "@/components/BackgroundPlacer";
+import { compressImage } from "@/lib/imageUtils";
 
 interface GeneratePanelProps {
   originalImage: string | null;
@@ -39,16 +42,59 @@ export function GeneratePanel({
   const [format, setFormat] = useState("png");
   const [showExport, setShowExport] = useState(false);
   const [showBackgroundPlacer, setShowBackgroundPlacer] = useState(false);
+  const [transparentBg, setTransparentBg] = useState(true);
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
 
-  const handleDownload = () => {
-    if (!generatedImage) return;
-
+  const triggerDownload = (dataUrl: string, ext: string) => {
     const link = document.createElement("a");
-    link.href = generatedImage;
-    link.download = `${fileName}.${format}`;
+    link.href = dataUrl;
+    link.download = `${fileName}.${ext}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDownload = async () => {
+    if (!generatedImage) return;
+
+    // For PNG with transparent background toggle ON, run background removal first
+    if (transparentBg && format === "png") {
+      try {
+        setIsRemovingBg(true);
+        toast.info("Removing background for transparent PNG...");
+        const compressed = await compressImage(generatedImage, 1400, 0.92);
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ image: compressed }),
+          }
+        );
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.error || "Background removal failed");
+        }
+        const result = await response.json();
+        if (result.error || !result.output) {
+          throw new Error(result.error || "No transparent image returned");
+        }
+        triggerDownload(result.output, "png");
+        toast.success("Transparent PNG downloaded!");
+      } catch (err) {
+        console.error("Transparent download error:", err);
+        toast.error(err instanceof Error ? err.message : "Failed to remove background");
+      } finally {
+        setIsRemovingBg(false);
+      }
+      return;
+    }
+
+    triggerDownload(generatedImage, format);
   };
 
   // Build the list of furniture images for background placement
@@ -250,12 +296,40 @@ export function GeneratePanel({
                   </Select>
                 </div>
 
-                <Button 
-                  className="w-full" 
+                {format === "png" && (
+                  <div className="flex items-start gap-3 p-2.5 rounded-md bg-background/60 border border-border/60">
+                    <Switch
+                      id="transparent-bg"
+                      checked={transparentBg}
+                      onCheckedChange={setTransparentBg}
+                      disabled={isRemovingBg}
+                    />
+                    <label htmlFor="transparent-bg" className="flex-1 cursor-pointer">
+                      <div className="text-sm font-medium leading-tight">Transparent background</div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                        Download furniture only (no background). Takes ~15s.
+                      </p>
+                    </label>
+                  </div>
+                )}
+
+                <Button
+                  className="w-full"
                   onClick={handleDownload}
+                  disabled={isRemovingBg}
                 >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download {format.toUpperCase()}
+                  {isRemovingBg ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Preparing transparent PNG...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download {format.toUpperCase()}
+                      {transparentBg && format === "png" ? " (Transparent)" : ""}
+                    </>
+                  )}
                 </Button>
               </div>
             )}

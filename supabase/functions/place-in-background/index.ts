@@ -47,27 +47,31 @@ serve(async (req) => {
 
 ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
 
-1. PIXEL-PERFECT FURNITURE PRESERVATION: Each furniture piece must appear EXACTLY as it is in its source image. IDENTICAL shape, silhouette, outline, contours, edges, curves, angles, proportions, dimensions, color, material, texture, pattern, grain, and every single visual detail. Do NOT redraw, reimagine, regenerate, or artistically interpret ANY furniture. Each must be a direct copy-paste — not a recreation.
+1. FULL BACKGROUND PRESERVATION (MOST IMPORTANT): The output image MUST show the COMPLETE, FULL background scene exactly as provided — same framing, same camera position, same composition, same aspect ratio, and same field of view. DO NOT crop, zoom in, pan, tilt, re-frame, or cut off ANY part of the background. Every wall, ceiling, floor, window, door, and existing object visible in the background image must remain visible in the same position in the output. The output's edges/borders must match the background's edges/borders.
 
-2. ZERO MODIFICATIONS: Do NOT change, add, remove, reshape, resize, stretch, compress, recolor, retexture, smooth, sharpen, stylize, or alter ANY furniture in ANY way. The colors, materials, textures, and finishes of each piece must remain EXACTLY as they are.
+2. SAME ASPECT RATIO & DIMENSIONS: The output image must have the SAME aspect ratio and the SAME visible area as the background image. Do NOT change orientation (landscape stays landscape, portrait stays portrait). Do NOT zoom in on the furniture — the room must be shown in full just like the background image.
 
-3. PLACE ALL ${furnitureImages.length} PIECES: Every single furniture piece provided must appear in the final output. Do NOT omit any piece.
+3. PIXEL-PERFECT FURNITURE PRESERVATION: Each furniture piece must appear EXACTLY as it is in its source image. IDENTICAL shape, silhouette, outline, contours, edges, curves, angles, proportions, dimensions, color, material, texture, pattern, grain, and every single visual detail. Do NOT redraw, reimagine, regenerate, or artistically interpret ANY furniture. Each must be a direct copy-paste — not a recreation.
 
-4. NATURAL ARRANGEMENT: Arrange all furniture pieces naturally in the room as an interior designer would. They should NOT overlap. Space them logically — e.g., chairs near a table, separate items along walls, etc. Use the room's existing layout as a guide.
+4. ZERO MODIFICATIONS: Do NOT change, add, remove, reshape, resize, stretch, compress, recolor, retexture, smooth, sharpen, stylize, or alter ANY furniture in ANY way. The colors, materials, textures, and finishes of each piece must remain EXACTLY as they are.
 
-5. PROPORTION MATCHING: Each piece must be scaled to match real-world proportions relative to the room and to each other. Use existing objects (doors, windows, other furniture in the background) as scale references.
+5. PLACE ALL ${furnitureImages.length} PIECES: Every single furniture piece provided must appear fully visible (not cut off by the frame edges) in the final output. Do NOT omit any piece. Scale them DOWN if necessary so that all pieces fit naturally inside the existing background frame without requiring the camera to zoom in or crop the room.
 
-6. PLACEMENT RULES for each piece:
+6. NATURAL ARRANGEMENT: Arrange all furniture pieces naturally in the room as an interior designer would. They should NOT overlap. Space them logically — e.g., chairs near a table, separate items along walls, etc. Use the room's existing layout as a guide. If the room is small relative to the furniture, make the furniture smaller — NEVER crop the room to fit them.
+
+7. PROPORTION MATCHING: Each piece must be scaled to match real-world proportions relative to the room and to each other. Use existing objects (doors, windows, other furniture in the background) as scale references.
+
+8. PLACEMENT RULES for each piece:
    - Correct scale relative to the room AND to other placed furniture
    - Proper grounding on the floor/surface
    - Natural shadows beneath and around each piece
    - Lighting adjusted to match ambient direction and color temperature
 
-7. BACKGROUND PRESERVATION: Do NOT modify, remove, or rearrange anything in the background scene. Only ADD the furniture into it.
+9. BACKGROUND PRESERVATION: Do NOT modify, remove, rearrange, recolor, or re-light anything in the background scene. Only ADD the furniture into it. The background pixels outside the furniture must remain identical to the input background.
 
-8. COLOR & DESIGN PRESERVATION: Each furniture piece's colors, materials, textures, patterns, and finishes must be preserved EXACTLY. The only adjustments allowed are lighting/shadow integration.
+10. COLOR & DESIGN PRESERVATION: Each furniture piece's colors, materials, textures, patterns, and finishes must be preserved EXACTLY. The only adjustments allowed are lighting/shadow integration.
 
-Output a single photorealistic image with ALL furniture pieces naturally placed in the room.`
+Output a single photorealistic image showing the COMPLETE original room with ALL furniture pieces naturally placed inside it. The background must NOT be cropped or zoomed in any way.`
       : `You are a professional interior design compositor. Your ONLY task is to take the EXACT furniture from image 1 and place it into the room/scene in the background image.
 
 ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
@@ -86,13 +90,17 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
    - Natural shadows beneath and around the furniture to anchor it in the scene
    - Lighting on the furniture adjusted to match the ambient lighting direction and color temperature of the room
 
-6. BACKGROUND PRESERVATION: Do NOT modify, remove, or rearrange anything in the background scene. Only ADD the furniture into it.
+6. FULL BACKGROUND PRESERVATION (CRITICAL): The output image MUST show the COMPLETE, FULL background scene exactly as provided — same framing, same camera angle, same composition, same aspect ratio, and same field of view. DO NOT crop, zoom in, pan, tilt, re-frame, or cut off ANY part of the background. Every wall, ceiling, floor, window, door, and existing object visible in the background image must remain visible in the same position in the output. The output's edges/borders must match the background's edges/borders. If the furniture is too large, scale it DOWN — do NOT crop the room.
 
-7. COLOR & DESIGN PRESERVATION: The furniture's colors, materials, textures, patterns, and finishes from image 1 must be preserved EXACTLY in the output. Do NOT change any color, do NOT change any material appearance. The only adjustments allowed are lighting/shadow integration with the environment.
+7. SAME ASPECT RATIO & DIMENSIONS: The output image must have the SAME aspect ratio as the background image. Do NOT change orientation. Do NOT zoom in on the furniture.
 
-8. The result should look like a professional interior design photograph where the furniture was physically placed in the room and photographed.
+8. BACKGROUND PRESERVATION: Do NOT modify, remove, rearrange, recolor, or re-light anything in the background scene. Only ADD the furniture into it. Background pixels outside the furniture must remain identical to the input background.
 
-Output a single photorealistic image.`;
+9. COLOR & DESIGN PRESERVATION: The furniture's colors, materials, textures, patterns, and finishes from image 1 must be preserved EXACTLY in the output. Do NOT change any color, do NOT change any material appearance. The only adjustments allowed are lighting/shadow integration with the environment.
+
+10. The result should look like a professional interior design photograph of the COMPLETE original room with the furniture physically placed inside it.
+
+Output a single photorealistic image showing the COMPLETE original room (no cropping, no zooming) with the furniture placed inside it.`;
 
     // Build message content with all furniture images
     const messageContent: any[] = [
