@@ -90,13 +90,17 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
    - Natural shadows beneath and around the furniture to anchor it in the scene
    - Lighting on the furniture adjusted to match the ambient lighting direction and color temperature of the room
 
-6. BACKGROUND PRESERVATION: Do NOT modify, remove, or rearrange anything in the background scene. Only ADD the furniture into it.
+6. FULL BACKGROUND PRESERVATION (CRITICAL): The output image MUST show the COMPLETE, FULL background scene exactly as provided — same framing, same camera angle, same composition, same aspect ratio, and same field of view. DO NOT crop, zoom in, pan, tilt, re-frame, or cut off ANY part of the background. Every wall, ceiling, floor, window, door, and existing object visible in the background image must remain visible in the same position in the output. The output's edges/borders must match the background's edges/borders. If the furniture is too large, scale it DOWN — do NOT crop the room.
 
-7. COLOR & DESIGN PRESERVATION: The furniture's colors, materials, textures, patterns, and finishes from image 1 must be preserved EXACTLY in the output. Do NOT change any color, do NOT change any material appearance. The only adjustments allowed are lighting/shadow integration with the environment.
+7. SAME ASPECT RATIO & DIMENSIONS: The output image must have the SAME aspect ratio as the background image. Do NOT change orientation. Do NOT zoom in on the furniture.
 
-8. The result should look like a professional interior design photograph where the furniture was physically placed in the room and photographed.
+8. BACKGROUND PRESERVATION: Do NOT modify, remove, rearrange, recolor, or re-light anything in the background scene. Only ADD the furniture into it. Background pixels outside the furniture must remain identical to the input background.
 
-Output a single photorealistic image.`;
+9. COLOR & DESIGN PRESERVATION: The furniture's colors, materials, textures, patterns, and finishes from image 1 must be preserved EXACTLY in the output. Do NOT change any color, do NOT change any material appearance. The only adjustments allowed are lighting/shadow integration with the environment.
+
+10. The result should look like a professional interior design photograph of the COMPLETE original room with the furniture physically placed inside it.
+
+Output a single photorealistic image showing the COMPLETE original room (no cropping, no zooming) with the furniture placed inside it.`;
 
     // Build message content with all furniture images
     const messageContent: any[] = [
