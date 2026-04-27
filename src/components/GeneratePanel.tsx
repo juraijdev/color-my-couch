@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -10,7 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { BackgroundPlacer } from "@/components/BackgroundPlacer";
+import { compressImage } from "@/lib/imageUtils";
 
 interface GeneratePanelProps {
   originalImage: string | null;
