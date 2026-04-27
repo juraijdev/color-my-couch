@@ -269,40 +269,14 @@ export function GeneratePanel({
                   </Select>
                 </div>
 
-                {format === "png" && (
-                  <div className="flex items-start gap-3 p-2.5 rounded-md bg-background/60 border border-border/60">
-                    <Switch
-                      id="transparent-bg"
-                      checked={transparentBg}
-                      onCheckedChange={setTransparentBg}
-                      disabled={isRemovingBg}
-                    />
-                    <label htmlFor="transparent-bg" className="flex-1 cursor-pointer">
-                      <div className="text-sm font-medium leading-tight">Transparent background</div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        Download furniture only (no background). Takes ~15s.
-                      </p>
-                    </label>
-                  </div>
-                )}
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Furniture is already isolated on a transparent background. PNG/WebP
+                  preserve transparency; JPG will save with a white background.
+                </p>
 
-                <Button
-                  className="w-full"
-                  onClick={handleDownload}
-                  disabled={isRemovingBg}
-                >
-                  {isRemovingBg ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Preparing transparent PNG...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4 mr-2" />
-                      Download {format.toUpperCase()}
-                      {transparentBg && format === "png" ? " (Transparent)" : ""}
-                    </>
-                  )}
+                <Button className="w-full" onClick={handleDownload}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download {format.toUpperCase()}
                 </Button>
               </div>
             )}
