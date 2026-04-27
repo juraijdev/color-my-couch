@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -13,7 +12,6 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BackgroundPlacer } from "@/components/BackgroundPlacer";
-import { compressImage } from "@/lib/imageUtils";
 
 interface GeneratePanelProps {
   originalImage: string | null;
@@ -42,8 +40,6 @@ export function GeneratePanel({
   const [format, setFormat] = useState("png");
   const [showExport, setShowExport] = useState(false);
   const [showBackgroundPlacer, setShowBackgroundPlacer] = useState(false);
-  const [transparentBg, setTransparentBg] = useState(true);
-  const [isRemovingBg, setIsRemovingBg] = useState(false);
 
   const triggerDownload = (dataUrl: string, ext: string) => {
     const link = document.createElement("a");
@@ -56,44 +52,8 @@ export function GeneratePanel({
 
   const handleDownload = async () => {
     if (!generatedImage) return;
-
-    // For PNG with transparent background toggle ON, run background removal first
-    if (transparentBg && format === "png") {
-      try {
-        setIsRemovingBg(true);
-        toast.info("Removing background for transparent PNG...");
-        const compressed = await compressImage(generatedImage, 1400, 0.92);
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({ image: compressed }),
-          }
-        );
-
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(err.error || "Background removal failed");
-        }
-        const result = await response.json();
-        if (result.error || !result.output) {
-          throw new Error(result.error || "No transparent image returned");
-        }
-        triggerDownload(result.output, "png");
-        toast.success("Transparent PNG downloaded!");
-      } catch (err) {
-        console.error("Transparent download error:", err);
-        toast.error(err instanceof Error ? err.message : "Failed to remove background");
-      } finally {
-        setIsRemovingBg(false);
-      }
-      return;
-    }
-
+    // The generated image is already on a transparent background (auto-removed
+    // right after generation), so we can download it directly in any format.
     triggerDownload(generatedImage, format);
   };
 
@@ -149,7 +109,16 @@ export function GeneratePanel({
           </div>
         ) : generatedImage ? (
           <div className="w-full h-full flex flex-col items-center gap-4">
-            <div className="relative flex-1 w-full flex items-center justify-center">
+            <div
+              className="relative flex-1 w-full flex items-center justify-center rounded-xl"
+              style={{
+                backgroundColor: "#ffffff",
+                backgroundImage:
+                  "linear-gradient(45deg, #e5e7eb 25%, transparent 25%), linear-gradient(-45deg, #e5e7eb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e7eb 75%), linear-gradient(-45deg, transparent 75%, #e5e7eb 75%)",
+                backgroundSize: "20px 20px",
+                backgroundPosition: "0 0, 0 10px, 10px -10px, 10px 0",
+              }}
+            >
               <img
                 src={generatedImage}
                 alt="Generated preview"
@@ -296,40 +265,14 @@ export function GeneratePanel({
                   </Select>
                 </div>
 
-                {format === "png" && (
-                  <div className="flex items-start gap-3 p-2.5 rounded-md bg-background/60 border border-border/60">
-                    <Switch
-                      id="transparent-bg"
-                      checked={transparentBg}
-                      onCheckedChange={setTransparentBg}
-                      disabled={isRemovingBg}
-                    />
-                    <label htmlFor="transparent-bg" className="flex-1 cursor-pointer">
-                      <div className="text-sm font-medium leading-tight">Transparent background</div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                        Download furniture only (no background). Takes ~15s.
-                      </p>
-                    </label>
-                  </div>
-                )}
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Furniture is already isolated on a transparent background. PNG/WebP
+                  preserve transparency; JPG will save with a white background.
+                </p>
 
-                <Button
-                  className="w-full"
-                  onClick={handleDownload}
-                  disabled={isRemovingBg}
-                >
-                  {isRemovingBg ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Preparing transparent PNG...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4 mr-2" />
-                      Download {format.toUpperCase()}
-                      {transparentBg && format === "png" ? " (Transparent)" : ""}
-                    </>
-                  )}
+                <Button className="w-full" onClick={handleDownload}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download {format.toUpperCase()}
                 </Button>
               </div>
             )}
