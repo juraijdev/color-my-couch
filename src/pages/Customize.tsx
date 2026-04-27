@@ -119,11 +119,42 @@ export default function Customize() {
       }
 
       if (result.output) {
-        setGeneratedImage(result.output);
+        // Auto-remove background so the customized furniture is shown on transparent
+        // background in the preview, downloads, and "Place in Background" flow.
+        let finalImage: string = result.output;
+        try {
+          toast.info("Isolating furniture (transparent background)...");
+          const compressed = await compressImage(result.output, 1400, 0.92);
+          const bgResp = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({ image: compressed }),
+            }
+          );
+          if (bgResp.ok) {
+            const bgResult = await bgResp.json();
+            if (bgResult?.output) {
+              finalImage = bgResult.output;
+            } else {
+              console.warn("remove-background returned no output, using original recolored image");
+            }
+          } else {
+            console.warn("remove-background failed", bgResp.status);
+          }
+        } catch (bgErr) {
+          console.warn("Background removal skipped:", bgErr);
+        }
+
+        setGeneratedImage(finalImage);
         // Add to collection automatically
         setAllFurnitureImages((prev) => {
-          if (prev.includes(result.output)) return prev;
-          return [...prev, result.output];
+          if (prev.includes(finalImage)) return prev;
+          return [...prev, finalImage];
         });
         toast.success("Design generated successfully!");
       } else {
