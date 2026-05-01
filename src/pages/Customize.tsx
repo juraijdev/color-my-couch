@@ -233,6 +233,7 @@ export default function Customize() {
                   assignmentCount={hasSelection ? assignmentCount : 0}
                   allFurnitureImages={allFurnitureImages}
                   onAddMoreFurniture={handleAddMoreFurniture}
+                  onRemoveFurniture={handleRemoveFurniture}
                 />
               </div>
             </div>
