@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BackgroundPlacer } from "@/components/BackgroundPlacer";
+import { resizeTransparentPng } from "@/lib/imageUtils";
 
 interface GeneratePanelProps {
   originalImage: string | null;
@@ -55,8 +56,12 @@ export function GeneratePanel({
 
   const handleDownload = async () => {
     if (!generatedImage) return;
-    // The generated image is already on a transparent background (auto-removed
-    // right after generation), so we can download it directly in any format.
+    if (format === "png") {
+      const transparentPng = await resizeTransparentPng(generatedImage, 2400);
+      triggerDownload(transparentPng, "png");
+      return;
+    }
+
     triggerDownload(generatedImage, format);
   };
 
@@ -115,13 +120,6 @@ export function GeneratePanel({
           <div className="w-full h-full flex flex-col items-center gap-4">
             <div
               className="relative flex-1 w-full flex items-center justify-center rounded-xl"
-              style={{
-                backgroundColor: "#ffffff",
-                backgroundImage:
-                  "linear-gradient(45deg, #e5e7eb 25%, transparent 25%), linear-gradient(-45deg, #e5e7eb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e7eb 75%), linear-gradient(-45deg, transparent 75%, #e5e7eb 75%)",
-                backgroundSize: "20px 20px",
-                backgroundPosition: "0 0, 0 10px, 10px -10px, 10px 0",
-              }}
             >
               <img
                 src={generatedImage}
