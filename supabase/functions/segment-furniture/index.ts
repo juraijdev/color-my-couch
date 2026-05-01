@@ -69,11 +69,18 @@ CRITICAL ANALYSIS RULES:
    - Even if there are multiple shelves at different levels, they are ONE part — the user will assign ONE color/material to all shelves together
    - Do NOT create separate parts like "Lower Shelf", "Middle Shelf", etc.
  
-7. FRONT PANEL RULE (CRITICAL):
-   - If the furniture has front panels, fascia boards, front skirts, or any vertical front-facing decorative/structural panels below the top surface, they MUST be identified as a separate part called "Front Panel"
-   - This includes: front apron, front rail, decorative front board, kick plate, or any vertical surface facing the user on the front side
-   - Front panels are commonly found between the top surface and the lower shelf on buffet tables, sideboards, and serving stations
-   - Do NOT skip or merge front panels into other parts — they are a distinct recolorable surface
+7. FRONT PANEL RULE (CRITICAL — INCLUDES SUB-PARTS WITH DIFFERENT PATTERNS/COLORS):
+   - If the furniture has front panels, fascia boards, front skirts, or any vertical front-facing panels below the top surface, identify the MAIN plain wood/stone front panel as "Front Panel"
+   - HOWEVER — many buffet tables and sideboards have DECORATIVE SUB-ELEMENTS on the front that have a DIFFERENT pattern, material, color, or finish from the main front panel. These MUST be identified as SEPARATE parts so the user can recolor / re-pattern them independently. Examples:
+     * "Front Decorative Screen" — slatted screen, lattice, perforated metal screen, woven panel, rattan/cane insert behind a cut-out or as an inlay
+     * "Front Decorative Inlay" — contrasting wood inlay, marquetry, veneer panel with a different grain
+     * "Front Fluted Panel" — vertical fluted/reeded section that contrasts with smooth wood
+     * "Front Accent Panel" — any colored, painted, mirrored, fabric, leather, or metal accent panel on the front
+     * "Front Door Panel" / "Front Drawer Panel" — when doors/drawers have a distinct face from the surrounding fascia
+   - The plain surrounding wood/fascia is "Front Panel". The contrasting decorative element(s) inside or beside it are SEPARATE parts.
+   - If the front has TWO or more visibly different finishes/patterns side-by-side (e.g., wood + slatted screen, or two different wood tones), each must be its own part.
+   - Do NOT merge a decorative front sub-element into "Front Panel" just because they share the same area — different pattern/material = different part.
+   - Do NOT skip front panels or their decorative sub-parts.
 
 8. OTHER PARTS TO IDENTIFY (DO NOT SKIP ANY):
    - **Frame / Legs**: Legs, base frame, support bars — group as one "Frame / Legs" part if same material
@@ -159,7 +166,7 @@ SUMMARY OF RULES:
 
 IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, top side-return panels, vertical top side fascia panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. The furniture silhouette and shape must remain exact. NEVER include background/room elements as furniture parts.`;
 
-const userPrompt = "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part, but EXCLUDE any metal side panels, side-return panels, vertical top fascia, perimeter lips, side lips, front lips, edge caps, or divider strips from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips, small vertical top side panels, side-return panels, outer end caps, and perimeter top trim into ONE 'Stainless Steel Trim & Edges' part if they share the same finish. Do NOT split identical dividers into multiple parts. (3) The thin top front/side metal lip and the small vertical top side panel / side-return panel must always be grouped with the divider strips when they visually belong to the same trim system. (4) The top side edge metal and the divider metal must stay in the same grouped part so the user can recolor them together. (5) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (6) IMPORTANT: Identify FRONT PANELS separately — any vertical front-facing panel/fascia must be listed as 'Front Panel'. (7) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims and the small top side panel are critical parts and must not be skipped. (8) If the broad top wood/stone and the surrounding side/divider trim are visibly different materials, they MUST be returned as different parts every time. Do NOT skip any visible furniture part. Preserve the exact furniture shape and construction logic. Aim for 4-10 well-grouped parts. Return the JSON structure.";
+const userPrompt = "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part, but EXCLUDE any metal side panels, side-return panels, vertical top fascia, perimeter lips, side lips, front lips, edge caps, or divider strips from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips, small vertical top side panels, side-return panels, outer end caps, and perimeter top trim into ONE 'Stainless Steel Trim & Edges' part if they share the same finish. Do NOT split identical dividers into multiple parts. (3) The thin top front/side metal lip and the small vertical top side panel / side-return panel must always be grouped with the divider strips when they visually belong to the same trim system. (4) The top side edge metal and the divider metal must stay in the same grouped part so the user can recolor them together. (5) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (6) IMPORTANT: Identify FRONT PANELS separately — the plain wood/stone front fascia is 'Front Panel'. BUT if the front has DECORATIVE SUB-ELEMENTS with a DIFFERENT pattern, material, color, or finish (slatted screen, lattice, perforated panel, rattan/cane insert, contrasting wood inlay, marquetry, fluted/reeded section, painted accent panel, mirror panel, fabric/leather panel, distinct door/drawer faces), each of those MUST be returned as its OWN separate part (e.g. 'Front Decorative Screen', 'Front Inlay', 'Front Fluted Panel', 'Front Accent Panel'). Two visibly different finishes on the front = two parts. Do NOT merge them. (7) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims and the small top side panel are critical parts and must not be skipped. (8) If the broad top wood/stone and the surrounding side/divider trim are visibly different materials, they MUST be returned as different parts every time. Do NOT skip any visible furniture part or any decorative sub-part on the front. Preserve the exact furniture shape and construction logic. Aim for 5-12 well-grouped parts. Return the JSON structure.";
 
 function extractPartsFromContent(content: string) {
   try {
@@ -213,7 +220,32 @@ function canonicalizePartName(part: any, fallback: string) {
 
   // PRIORITY 1: Check the part NAME first for exact canonical matches
   // This prevents descriptions from hijacking the classification
-  if (hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"])) {
+  // Decorative front sub-parts MUST stay separate from the plain "Front Panel"
+  const isDecorativeFrontSubPart =
+    hasAnyKeyword(fullText, [
+      "decorative screen",
+      "slatted",
+      "lattice",
+      "perforated",
+      "rattan",
+      "cane",
+      "woven",
+      "inlay",
+      "marquetry",
+      "veneer panel",
+      "fluted",
+      "reeded",
+      "accent panel",
+      "mirror panel",
+      "fabric panel",
+      "leather panel",
+    ]) ||
+    hasAnyKeyword(nameText, ["screen", "inlay", "fluted", "accent", "decorative"]);
+
+  if (
+    hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"]) &&
+    !isDecorativeFrontSubPart
+  ) {
     return "Front Panel";
   }
   if (hasAnyKeyword(nameText, ["shelf"])) {
@@ -474,7 +506,7 @@ serve(async (req) => {
             ],
           },
         ],
-        max_tokens: 2000,
+        max_tokens: 3000,
       }),
     });
 
