@@ -69,11 +69,18 @@ CRITICAL ANALYSIS RULES:
    - Even if there are multiple shelves at different levels, they are ONE part — the user will assign ONE color/material to all shelves together
    - Do NOT create separate parts like "Lower Shelf", "Middle Shelf", etc.
  
-7. FRONT PANEL RULE (CRITICAL):
-   - If the furniture has front panels, fascia boards, front skirts, or any vertical front-facing decorative/structural panels below the top surface, they MUST be identified as a separate part called "Front Panel"
-   - This includes: front apron, front rail, decorative front board, kick plate, or any vertical surface facing the user on the front side
-   - Front panels are commonly found between the top surface and the lower shelf on buffet tables, sideboards, and serving stations
-   - Do NOT skip or merge front panels into other parts — they are a distinct recolorable surface
+7. FRONT PANEL RULE (CRITICAL — INCLUDES SUB-PARTS WITH DIFFERENT PATTERNS/COLORS):
+   - If the furniture has front panels, fascia boards, front skirts, or any vertical front-facing panels below the top surface, identify the MAIN plain wood/stone front panel as "Front Panel"
+   - HOWEVER — many buffet tables and sideboards have DECORATIVE SUB-ELEMENTS on the front that have a DIFFERENT pattern, material, color, or finish from the main front panel. These MUST be identified as SEPARATE parts so the user can recolor / re-pattern them independently. Examples:
+     * "Front Decorative Screen" — slatted screen, lattice, perforated metal screen, woven panel, rattan/cane insert behind a cut-out or as an inlay
+     * "Front Decorative Inlay" — contrasting wood inlay, marquetry, veneer panel with a different grain
+     * "Front Fluted Panel" — vertical fluted/reeded section that contrasts with smooth wood
+     * "Front Accent Panel" — any colored, painted, mirrored, fabric, leather, or metal accent panel on the front
+     * "Front Door Panel" / "Front Drawer Panel" — when doors/drawers have a distinct face from the surrounding fascia
+   - The plain surrounding wood/fascia is "Front Panel". The contrasting decorative element(s) inside or beside it are SEPARATE parts.
+   - If the front has TWO or more visibly different finishes/patterns side-by-side (e.g., wood + slatted screen, or two different wood tones), each must be its own part.
+   - Do NOT merge a decorative front sub-element into "Front Panel" just because they share the same area — different pattern/material = different part.
+   - Do NOT skip front panels or their decorative sub-parts.
 
 8. OTHER PARTS TO IDENTIFY (DO NOT SKIP ANY):
    - **Frame / Legs**: Legs, base frame, support bars — group as one "Frame / Legs" part if same material
