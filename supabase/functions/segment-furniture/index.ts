@@ -19,11 +19,14 @@ CRITICAL ANALYSIS RULES:
    - Walls, floors, tables behind, curtains, shadows on walls, etc. are NOT furniture parts
    - If the furniture is placed in a room/scene, IGNORE everything that is not the furniture piece itself
 
-1. FULL FURNITURE COVERAGE RULE (CRITICAL):
-   - You MUST analyze the ENTIRE furniture piece from edge to edge — do NOT cut it in half or only analyze a portion
-   - The location bounding boxes should cover the FULL extent of each part across the entire furniture
-   - If the furniture spans the full width of the image, your parts should reflect that
-   - NEVER return parts that only cover half or a section of the furniture — always cover the COMPLETE piece
+1. FULL FURNITURE COVERAGE RULE (CRITICAL — APPLIES TO ALL SIZES, ESPECIALLY LARGE / LANDSCAPE / WIDE BUFFET TABLES):
+   - You MUST analyze the ENTIRE furniture piece from the LEFT-MOST edge to the RIGHT-MOST edge and from the TOP edge to the BOTTOM edge — do NOT cut, crop, or skip any portion
+   - This applies equally to SMALL buffet tables AND to LARGE / LANDSCAPE / WIDE / LONG buffet tables that span the full width of the image
+   - For wide / landscape buffet tables: the "Top Surface" bounding box width MUST span essentially the full horizontal extent of the top (often width 80-100% of the image). Do NOT return a top that only covers the left half or the center portion
+   - For wide / landscape buffet tables: the "Stainless Steel Trim & Edges", "Front Panel", "Shelf Wood", and "Frame / Legs" bounding boxes MUST also span the full horizontal extent of those parts — do NOT return half-width boxes
+   - Every decorative front sub-part (screens, inlays, fluted panels, accent panels, doors, drawers) on a LARGE buffet table MUST be identified just like on a small one — large size is NEVER an excuse to skip or merge sub-parts
+   - If a large buffet table has 4, 5, 6 or more front door/drawer/screen modules across its width, you MUST still identify every distinct decorative sub-part group (group identical ones together but do NOT drop them)
+   - NEVER return parts that only cover half or a section of the furniture — always cover the COMPLETE piece across its FULL width and height
 
 2. IDENTIFY EVERY DISTINCT MATERIAL ZONE: Look carefully at the furniture and identify ALL distinct parts based on material, finish, and function. You MUST identify every visible part — do not skip any. Apply the GROUPING RULES below:
 
