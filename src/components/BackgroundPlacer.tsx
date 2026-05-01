@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { compressImage } from "@/lib/imageUtils";
+import { resizeTransparentPng } from "@/lib/imageUtils";
 
 interface BackgroundPlacerProps {
   /** Array of customized furniture images (base64 data URLs) */
@@ -92,10 +92,10 @@ export function BackgroundPlacer({
     );
 
     try {
-      // Compress all images to reduce payload
-      const compressedBackground = await compressImage(backgroundImage, 1200, 0.8);
+      // Keep the background untouched so the final scene can preserve its exact frame/aspect.
+      const compressedBackground = backgroundImage;
       const compressedFurniture = await Promise.all(
-        furnitureImages.map((img) => compressImage(img, 1200, 0.85))
+        furnitureImages.map((img) => resizeTransparentPng(img, 1800))
       );
 
       const response = await fetch(
