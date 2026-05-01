@@ -19,12 +19,15 @@ interface BackgroundPlacerProps {
   onClose: () => void;
   /** Called when user wants to add another furniture before placing */
   onAddMoreFurniture?: () => void;
+  /** Remove a single furniture piece by index */
+  onRemoveFurniture?: (index: number) => void;
 }
 
 export function BackgroundPlacer({
   furnitureImages,
   onClose,
   onAddMoreFurniture,
+  onRemoveFurniture,
 }: BackgroundPlacerProps) {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [compositedImage, setCompositedImage] = useState<string | null>(null);
@@ -183,13 +186,28 @@ export function BackgroundPlacer({
             {furnitureImages.map((img, idx) => (
               <div
                 key={idx}
-                className="w-20 h-20 shrink-0 rounded-lg border border-border overflow-hidden bg-muted/50"
+                className="relative w-20 h-20 shrink-0 rounded-lg border border-border overflow-hidden bg-muted/50 group"
               >
                 <img
                   src={img}
                   alt={`Furniture ${idx + 1}`}
                   className="w-full h-full object-contain"
                 />
+                {onRemoveFurniture && furnitureImages.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveFurniture(idx);
+                      setCompositedImage(null);
+                      toast.success("Furniture removed");
+                    }}
+                    title="Remove this furniture"
+                    className="absolute top-1 right-1 p-0.5 rounded-full bg-background/90 hover:bg-destructive hover:text-destructive-foreground shadow-sm transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             ))}
             {/* Add more furniture button */}
