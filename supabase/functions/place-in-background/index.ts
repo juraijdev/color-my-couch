@@ -42,7 +42,50 @@ serve(async (req) => {
 
     const isMultiple = furnitureImages.length > 1
 
-    const prompt = isMultiple
+    // Detect background dimensions to enforce exact aspect ratio in the output
+    let bgWidth = 0;
+    let bgHeight = 0;
+    let bgAspect = "";
+    let bgOrientation = "";
+    try {
+      const m = backgroundImage.match(/^data:image\/[^;]+;base64,(.+)$/);
+      if (m) {
+        const bin = atob(m[1].slice(0, 4096));
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        // PNG
+        if (bytes[0] === 0x89 && bytes[1] === 0x50) {
+          bgWidth = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
+          bgHeight = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
+        } else if (bytes[0] === 0xFF && bytes[1] === 0xD8) {
+          // JPEG: scan for SOF marker
+          let i = 2;
+          while (i < bytes.length - 9) {
+            if (bytes[i] !== 0xFF) { i++; continue; }
+            const marker = bytes[i + 1];
+            const len = (bytes[i + 2] << 8) | bytes[i + 3];
+            if (marker >= 0xC0 && marker <= 0xCF && marker !== 0xC4 && marker !== 0xC8 && marker !== 0xCC) {
+              bgHeight = (bytes[i + 5] << 8) | bytes[i + 6];
+              bgWidth = (bytes[i + 7] << 8) | bytes[i + 8];
+              break;
+            }
+            i += 2 + len;
+          }
+        }
+        if (bgWidth && bgHeight) {
+          bgAspect = (bgWidth / bgHeight).toFixed(4);
+          bgOrientation = bgWidth > bgHeight ? "LANDSCAPE (wider than tall)" : bgWidth < bgHeight ? "PORTRAIT (taller than wide)" : "SQUARE";
+        }
+      }
+    } catch (e) {
+      console.warn("Could not parse background dimensions", e);
+    }
+
+    const dimensionsRule = bgWidth && bgHeight
+      ? `\n\nBACKGROUND IMAGE EXACT DIMENSIONS — MUST MATCH:\n- Width: ${bgWidth}px\n- Height: ${bgHeight}px\n- Aspect ratio: ${bgAspect} (${bgOrientation})\n- The OUTPUT image MUST have the EXACT SAME aspect ratio (${bgAspect}) and orientation (${bgOrientation}). Do NOT change to square. Do NOT change to a different aspect ratio. Do NOT add letterbox/pillarbox bars. Do NOT crop the background to fit a different ratio.\n`
+      : "";
+
+    const prompt = (isMultiple
       ? `You are a professional interior design compositor. Your task is to take ALL ${furnitureImages.length} furniture pieces from the provided furniture images and place ALL of them together into the room/scene in the background image.
 
 ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
@@ -100,7 +143,7 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
 
 10. The result should look like a professional interior design photograph of the COMPLETE original room with the furniture physically placed inside it.
 
-Output a single photorealistic image showing the COMPLETE original room (no cropping, no zooming) with the furniture placed inside it.`;
+Output a single photorealistic image showing the COMPLETE original room (no cropping, no zooming) with the furniture placed inside it.`) + dimensionsRule;
 
     // Build message content with all furniture images
     const messageContent: any[] = [
@@ -115,7 +158,7 @@ Output a single photorealistic image showing the COMPLETE original room (no crop
     });
 
     messageContent.push(
-      { type: "text", text: "BACKGROUND/ROOM IMAGE (place furniture into this scene):" },
+      { type: "text", text: `BACKGROUND/ROOM IMAGE (place furniture into this scene${bgWidth && bgHeight ? ` — output MUST be exactly ${bgWidth}x${bgHeight} pixels, aspect ratio ${bgAspect}, ${bgOrientation}, NO cropping or resizing of this background` : ""}):` },
       { type: "image_url", image_url: { url: backgroundImage } }
     );
 
