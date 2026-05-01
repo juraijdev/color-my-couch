@@ -75,6 +75,7 @@ export function GeneratePanel({
           furnitureImages={furnitureForPlacement}
           onClose={() => setShowBackgroundPlacer(false)}
           onAddMoreFurniture={onAddMoreFurniture}
+          onRemoveFurniture={onRemoveFurniture}
         />
       </div>
     );
