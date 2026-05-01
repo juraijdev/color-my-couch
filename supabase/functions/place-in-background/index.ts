@@ -143,7 +143,7 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION IS UNACCEPTABLE:
 
 10. The result should look like a professional interior design photograph of the COMPLETE original room with the furniture physically placed inside it.
 
-Output a single photorealistic image showing the COMPLETE original room (no cropping, no zooming) with the furniture placed inside it.`;
+Output a single photorealistic image showing the COMPLETE original room (no cropping, no zooming) with the furniture placed inside it.`) + dimensionsRule;
 
     // Build message content with all furniture images
     const messageContent: any[] = [
