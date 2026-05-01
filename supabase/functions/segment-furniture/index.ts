@@ -34,7 +34,8 @@ CRITICAL ANALYSIS RULES:
    - ALL top surface modules/compartments must be grouped into ONE SINGLE PART called "Top Surface"
    - Even if the top has 3 or 4 separate compartments/modules, they are ONE part — the user will assign ONE color/material to all of them together
    - Do NOT create separate parts like "Top Module 1", "Top Module 2", etc.
-   - The "Top Surface" includes ONLY the broad, upper, horizontal wood/stone faces where items are placed
+    - The "Top Surface" includes ONLY the broad, upper, horizontal wood/stone/marble/granite/quartz faces where items are placed
+    - If a big buffet table has a stone, marble, granite, quartz, terrazzo, or solid-surface countertop, it MUST still be identified as the single "Top Surface" part across the full visible top area
    - The "Top Surface" does NOT include any vertical side face, outer side panel, side return, fascia, end cap, front lip, side lip, divider strip, separator band, bezel, edge cap, or trim band even if it is attached directly to the top wood/stone
    - If a visible side face of the top assembly is metal, it MUST stay out of "Top Surface"
    - If the top wood/stone and the surrounding trim are visibly different materials, you MUST return them as different parts every single time
@@ -155,7 +156,7 @@ Return your analysis as JSON with this exact structure:
 SUMMARY OF RULES:
 - EXCLUDE all background elements (walls, floors, scenery) — only identify the FURNITURE ITSELF
 - Cover the FULL furniture — never cut it in half
-- All top surface modules → ONE "Top Surface" part containing ONLY the broad upper horizontal wood/stone faces
+- All top surface modules → ONE "Top Surface" part containing ONLY the broad upper horizontal wood/stone/marble/granite/quartz faces
 - For buffet tops with multiple modules, all stainless divider strips + perimeter top lip + thin front/side top edge lip/cap + every small vertical top side panel / side return / outer end cap + matching front-side top metal → ONE "Stainless Steel Trim & Edges" part
 - The thin front/side top edge lip, the small vertical top side panel / side return, and the divider strips must ALWAYS share the same grouped metal part and same recolor result
 - Do NOT create three or four separate divider parts if they are the same finish
