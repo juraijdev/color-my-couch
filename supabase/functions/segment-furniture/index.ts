@@ -242,8 +242,15 @@ function canonicalizePartName(part: any, fallback: string) {
       "mirror panel",
       "fabric panel",
       "leather panel",
+      "carved",
+      "geometric pattern",
+      "pattern panel",
+      "door panel",
+      "drawer panel",
+      "door front",
+      "drawer front",
     ]) ||
-    hasAnyKeyword(nameText, ["screen", "inlay", "fluted", "accent", "decorative"]);
+    hasAnyKeyword(nameText, ["screen", "inlay", "fluted", "accent", "decorative", "carved", "door", "drawer"]);
 
   if (
     hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"]) &&
