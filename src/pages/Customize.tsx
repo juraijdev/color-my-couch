@@ -62,6 +62,19 @@ export default function Customize() {
     toast.info("Upload another furniture to customize. All pieces will be placed together.");
   }, [generatedImage, allFurnitureImages]);
 
+  /** Remove a single customized furniture from the collection */
+  const handleRemoveFurniture = useCallback((index: number) => {
+    setAllFurnitureImages((prev) => {
+      const removed = prev[index];
+      const next = prev.filter((_, i) => i !== index);
+      // If we removed the currently-previewed generated image, clear preview
+      if (removed && removed === generatedImage) {
+        setGeneratedImage(next[next.length - 1] ?? null);
+      }
+      return next;
+    });
+  }, [generatedImage]);
+
   const handleGenerate = useCallback(async () => {
     if (!uploadedImage) {
       toast.error("Please upload an image first");
