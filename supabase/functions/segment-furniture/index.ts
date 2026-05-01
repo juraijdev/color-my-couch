@@ -220,7 +220,32 @@ function canonicalizePartName(part: any, fallback: string) {
 
   // PRIORITY 1: Check the part NAME first for exact canonical matches
   // This prevents descriptions from hijacking the classification
-  if (hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"])) {
+  // Decorative front sub-parts MUST stay separate from the plain "Front Panel"
+  const isDecorativeFrontSubPart =
+    hasAnyKeyword(fullText, [
+      "decorative screen",
+      "slatted",
+      "lattice",
+      "perforated",
+      "rattan",
+      "cane",
+      "woven",
+      "inlay",
+      "marquetry",
+      "veneer panel",
+      "fluted",
+      "reeded",
+      "accent panel",
+      "mirror panel",
+      "fabric panel",
+      "leather panel",
+    ]) ||
+    hasAnyKeyword(nameText, ["screen", "inlay", "fluted", "accent", "decorative"]);
+
+  if (
+    hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"]) &&
+    !isDecorativeFrontSubPart
+  ) {
     return "Front Panel";
   }
   if (hasAnyKeyword(nameText, ["shelf"])) {
