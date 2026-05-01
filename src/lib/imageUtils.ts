@@ -73,3 +73,41 @@ export function compressImage(
     img.src = dataUrl;
   });
 }
+
+/**
+ * Resize an image while preserving real transparency for isolated furniture PNGs.
+ * Unlike compressImage, this never converts transparent areas to black/white JPEG pixels.
+ */
+export function resizeTransparentPng(
+  dataUrl: string,
+  maxDimension = 1600
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      let { naturalWidth: w, naturalHeight: h } = img;
+
+      if (w > maxDimension || h > maxDimension) {
+        const ratio = Math.min(maxDimension / w, maxDimension / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Failed to resize transparent image'));
+    img.src = dataUrl;
+  });
+}
