@@ -36,13 +36,13 @@ ABSOLUTE IRON-CLAD RULES:
 
 4. CLEAN EDGES: Cut precisely along the true silhouette of the furniture. Preserve fine details and thin parts (legs, handles, trim). Do NOT leave background halos, fringes, or color spill around the furniture.
 
-5. SAME FRAMING: Keep the same camera angle, perspective, and approximate framing. Do NOT zoom in or crop the furniture itself. The furniture should sit in roughly the same position within the frame.
+5. SAME FRAMING AND FULL OBJECT: Keep the same camera angle, perspective, full object size ratio, and approximate framing. Do NOT zoom in or crop the furniture itself. For wide/landscape buffet tables, preserve the entire left-to-right width, top surface, legs, front panels, handles, and every edge exactly. The furniture should sit in roughly the same position within the frame, with transparent pixels around it if needed.
 
 6. NO NEW CONTENT: Do NOT add a new background, gradient, drop shadow, reflection, floor, surface, or any decorative element. The area outside the furniture must be 100% transparent.
 
 7. NO ARTISTIC INTERPRETATION: This is a strict mechanical background-removal task. Output the same furniture, isolated, on transparent background.
 
-Output a single PNG image of the furniture with a fully transparent background.`;
+Output a single PNG image of the furniture with a fully transparent alpha channel. Do not render checkerboard, black, white, dots, or any visible background pattern — those areas must be truly transparent pixels.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
