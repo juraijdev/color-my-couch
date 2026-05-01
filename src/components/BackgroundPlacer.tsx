@@ -92,8 +92,8 @@ export function BackgroundPlacer({
     );
 
     try {
-      // Compress all images to reduce payload
-      const compressedBackground = await compressImage(backgroundImage, 1600, 0.9);
+      // Keep the background untouched so the final scene can preserve its exact frame/aspect.
+      const compressedBackground = backgroundImage;
       const compressedFurniture = await Promise.all(
         furnitureImages.map((img) => resizeTransparentPng(img, 1800))
       );
