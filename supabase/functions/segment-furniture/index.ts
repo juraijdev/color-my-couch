@@ -346,8 +346,8 @@ function getCanonicalId(partName: string, fallback: unknown) {
 function getCanonicalDescription(partName: string, fallback: string, hasTopSurface: boolean, hasTrim: boolean) {
   if (partName === TOP_SURFACE_NAME) {
     return hasTrim
-      ? 'Only the broad, upper, horizontal wood or stone faces of the top assembly. This part stops exactly where the thin metal trim system begins, and it excludes every divider strip, front lip, side lip, perimeter edge cap, and every small vertical top side panel / side return / outer end cap that belongs to "Stainless Steel Trim & Edges".'
-      : "Only the broad, upper, horizontal wood or stone faces of the top assembly, excluding any trim, lips, dividers, or side-return panels.";
+      ? 'Only the broad, upper, horizontal wood, stone, marble, granite, quartz, terrazzo, or solid-surface faces of the top assembly. This part stops exactly where the thin metal trim system begins, and it excludes every divider strip, front lip, side lip, perimeter edge cap, and every small vertical top side panel / side return / outer end cap that belongs to "Stainless Steel Trim & Edges".'
+      : "Only the broad, upper, horizontal wood, stone, marble, granite, quartz, terrazzo, or solid-surface faces of the top assembly, excluding any trim, lips, dividers, or side-return panels.";
   }
 
   if (partName === TRIM_NAME) {
