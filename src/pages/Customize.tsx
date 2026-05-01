@@ -7,7 +7,7 @@ import { PatternOption } from "@/components/PatternPalette";
 import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
-import { imageUrlToBase64, compressImage } from "@/lib/imageUtils";
+import { imageUrlToBase64, resizeTransparentPng } from "@/lib/imageUtils";
 
 export default function Customize() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -137,7 +137,7 @@ export default function Customize() {
         let finalImage: string = result.output;
         try {
           toast.info("Isolating furniture (transparent background)...");
-          const compressed = await compressImage(result.output, 1400, 0.92);
+          const transparentReadyImage = await resizeTransparentPng(result.output, 1600);
           const bgResp = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
             {
@@ -146,7 +146,7 @@ export default function Customize() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
               },
-              body: JSON.stringify({ image: compressed }),
+              body: JSON.stringify({ image: transparentReadyImage }),
             }
           );
           if (bgResp.ok) {
