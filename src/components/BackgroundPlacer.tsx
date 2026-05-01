@@ -19,12 +19,15 @@ interface BackgroundPlacerProps {
   onClose: () => void;
   /** Called when user wants to add another furniture before placing */
   onAddMoreFurniture?: () => void;
+  /** Remove a single furniture piece by index */
+  onRemoveFurniture?: (index: number) => void;
 }
 
 export function BackgroundPlacer({
   furnitureImages,
   onClose,
   onAddMoreFurniture,
+  onRemoveFurniture,
 }: BackgroundPlacerProps) {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [compositedImage, setCompositedImage] = useState<string | null>(null);
