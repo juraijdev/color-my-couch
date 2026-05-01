@@ -250,14 +250,46 @@ function canonicalizePartName(part: any, fallback: string) {
       "drawer panel",
       "door front",
       "drawer front",
+      "wavy",
+      "cut-out",
+      "cutout",
+      "cut out",
+      "contrasting",
+      "darker wood",
+      "darker finish",
+      "dark wood finish",
     ]) ||
-    hasAnyKeyword(nameText, ["screen", "inlay", "fluted", "accent", "decorative", "carved", "door", "drawer"]);
+    hasAnyKeyword(nameText, [
+      "screen",
+      "inlay",
+      "fluted",
+      "accent",
+      "decorative",
+      "carved",
+      "door",
+      "drawer",
+      "upper",
+      "lower",
+      "top section",
+      "bottom section",
+      "left section",
+      "right section",
+      "section",
+      "insert",
+    ]);
 
   if (
     hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"]) &&
     !isDecorativeFrontSubPart
   ) {
     return "Front Panel";
+  }
+
+  // Front panel variants with positional/sectional suffixes (e.g. "Front Panel Upper",
+  // "Front Panel Lower", "Front Panel Insert") indicate visually distinct sub-parts —
+  // keep them as their own separate parts so the user can recolor them independently.
+  if (hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"])) {
+    return String(part?.name ?? "").trim() || fallback;
   }
   if (hasAnyKeyword(nameText, ["shelf"])) {
     return "Shelf Wood";
