@@ -24,6 +24,8 @@ interface GeneratePanelProps {
   allFurnitureImages?: string[];
   /** Called when user wants to add another furniture */
   onAddMoreFurniture?: () => void;
+  /** Remove one customized furniture by index */
+  onRemoveFurniture?: (index: number) => void;
 }
 
 export function GeneratePanel({
@@ -35,6 +37,7 @@ export function GeneratePanel({
   assignmentCount,
   allFurnitureImages = [],
   onAddMoreFurniture,
+  onRemoveFurniture,
 }: GeneratePanelProps) {
   const [fileName, setFileName] = useState("customized-furniture");
   const [format, setFormat] = useState("png");
