@@ -19,11 +19,14 @@ CRITICAL ANALYSIS RULES:
    - Walls, floors, tables behind, curtains, shadows on walls, etc. are NOT furniture parts
    - If the furniture is placed in a room/scene, IGNORE everything that is not the furniture piece itself
 
-1. FULL FURNITURE COVERAGE RULE (CRITICAL):
-   - You MUST analyze the ENTIRE furniture piece from edge to edge — do NOT cut it in half or only analyze a portion
-   - The location bounding boxes should cover the FULL extent of each part across the entire furniture
-   - If the furniture spans the full width of the image, your parts should reflect that
-   - NEVER return parts that only cover half or a section of the furniture — always cover the COMPLETE piece
+1. FULL FURNITURE COVERAGE RULE (CRITICAL — APPLIES TO ALL SIZES, ESPECIALLY LARGE / LANDSCAPE / WIDE BUFFET TABLES):
+   - You MUST analyze the ENTIRE furniture piece from the LEFT-MOST edge to the RIGHT-MOST edge and from the TOP edge to the BOTTOM edge — do NOT cut, crop, or skip any portion
+   - This applies equally to SMALL buffet tables AND to LARGE / LANDSCAPE / WIDE / LONG buffet tables that span the full width of the image
+   - For wide / landscape buffet tables: the "Top Surface" bounding box width MUST span essentially the full horizontal extent of the top (often width 80-100% of the image). Do NOT return a top that only covers the left half or the center portion
+   - For wide / landscape buffet tables: the "Stainless Steel Trim & Edges", "Front Panel", "Shelf Wood", and "Frame / Legs" bounding boxes MUST also span the full horizontal extent of those parts — do NOT return half-width boxes
+   - Every decorative front sub-part (screens, inlays, fluted panels, accent panels, doors, drawers) on a LARGE buffet table MUST be identified just like on a small one — large size is NEVER an excuse to skip or merge sub-parts
+   - If a large buffet table has 4, 5, 6 or more front door/drawer/screen modules across its width, you MUST still identify every distinct decorative sub-part group (group identical ones together but do NOT drop them)
+   - NEVER return parts that only cover half or a section of the furniture — always cover the COMPLETE piece across its FULL width and height
 
 2. IDENTIFY EVERY DISTINCT MATERIAL ZONE: Look carefully at the furniture and identify ALL distinct parts based on material, finish, and function. You MUST identify every visible part — do not skip any. Apply the GROUPING RULES below:
 
@@ -166,7 +169,7 @@ SUMMARY OF RULES:
 
 IMPORTANT: Aim for 4-10 well-grouped parts. You MUST identify ALL visible furniture parts — do not skip front panels, side panels, top side-return panels, vertical top side fascia panels, or any other visible surface. Preserve the exact furniture shape and construction logic in analysis. Metal is SEPARATE from wood — never merge stainless steel into wooden parts. The furniture silhouette and shape must remain exact. NEVER include background/room elements as furniture parts.`;
 
-const userPrompt = "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from edge to edge, do NOT cut it in half. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part, but EXCLUDE any metal side panels, side-return panels, vertical top fascia, perimeter lips, side lips, front lips, edge caps, or divider strips from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips, small vertical top side panels, side-return panels, outer end caps, and perimeter top trim into ONE 'Stainless Steel Trim & Edges' part if they share the same finish. Do NOT split identical dividers into multiple parts. (3) The thin top front/side metal lip and the small vertical top side panel / side-return panel must always be grouped with the divider strips when they visually belong to the same trim system. (4) The top side edge metal and the divider metal must stay in the same grouped part so the user can recolor them together. (5) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part. (6) IMPORTANT: Identify FRONT PANELS separately — the plain wood/stone front fascia is 'Front Panel'. BUT if the front has DECORATIVE SUB-ELEMENTS with a DIFFERENT pattern, material, color, or finish (slatted screen, lattice, perforated panel, rattan/cane insert, contrasting wood inlay, marquetry, fluted/reeded section, painted accent panel, mirror panel, fabric/leather panel, distinct door/drawer faces), each of those MUST be returned as its OWN separate part (e.g. 'Front Decorative Screen', 'Front Inlay', 'Front Fluted Panel', 'Front Accent Panel'). Two visibly different finishes on the front = two parts. Do NOT merge them. (7) Identify ALL other parts: frame/legs, side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims and the small top side panel are critical parts and must not be skipped. (8) If the broad top wood/stone and the surrounding side/divider trim are visibly different materials, they MUST be returned as different parts every time. Do NOT skip any visible furniture part or any decorative sub-part on the front. Preserve the exact furniture shape and construction logic. Aim for 5-12 well-grouped parts. Return the JSON structure.";
+const userPrompt = "Analyze this furniture image and identify ALL distinct parts of THE FURNITURE ONLY — exclude any background (walls, floors, scenery). Cover the FULL furniture from LEFT-MOST edge to RIGHT-MOST edge and from top to bottom — do NOT cut, crop, or skip any portion, regardless of whether the buffet table is small, medium, large, wide, long, or landscape-oriented. For LARGE / LANDSCAPE / WIDE buffet tables, the Top Surface, Front Panel, Shelf Wood, Frame/Legs, and Stainless Steel Trim & Edges bounding boxes MUST span the FULL horizontal extent of those parts (often 80-100% of the image width) — never return half-width boxes. Apply these GROUPING RULES: (1) Combine ALL top surface modules into ONE 'Top Surface' part across the full width, but EXCLUDE any metal side panels, side-return panels, vertical top fascia, perimeter lips, side lips, front lips, edge caps, or divider strips from the top surface. (2) For buffet tables and serving stations, group ALL top divider strips plus the matching front/side top metal edge lips, small vertical top side panels, side-return panels, outer end caps, and perimeter top trim into ONE 'Stainless Steel Trim & Edges' part if they share the same finish — even on long landscape buffet tables with many modules. Do NOT split identical dividers into multiple parts. (3) The thin top front/side metal lip and the small vertical top side panel / side-return panel must always be grouped with the divider strips when they visually belong to the same trim system. (4) The top side edge metal and the divider metal must stay in the same grouped part so the user can recolor them together. (5) Combine ALL wooden shelves FULLY (all faces — top, front edge, bottom, sides) into ONE 'Shelf Wood' part across the full width. (6) IMPORTANT — FRONT PANEL DECORATIVE SUB-PARTS APPLY TO LARGE BUFFET TABLES TOO: The plain wood/stone front fascia is 'Front Panel'. BUT if the front has DECORATIVE SUB-ELEMENTS with a DIFFERENT pattern, material, color, or finish (slatted screen, lattice, perforated panel, rattan/cane insert, contrasting wood inlay, marquetry, fluted/reeded section, painted accent panel, mirror panel, fabric/leather panel, distinct door/drawer faces, carved panel, geometric pattern panel), each MUST be returned as its OWN separate part (e.g. 'Front Decorative Screen', 'Front Inlay', 'Front Fluted Panel', 'Front Accent Panel', 'Front Carved Panel'). This applies whether the buffet table is small OR large/wide/landscape. If a long buffet table has the same decorative pattern repeated across multiple modules, group them as ONE part covering the full horizontal span. If there are TWO or more visibly different decorative finishes side-by-side, each is its own part. Do NOT merge them into 'Front Panel'. (7) Identify ALL other parts: frame/legs (full width), side panels, back panel, hardware, wheels, doors, drawers, decorative elements. Thin metal trims and the small top side panel are critical parts and must not be skipped. (8) If the broad top wood/stone and the surrounding side/divider trim are visibly different materials, they MUST be returned as different parts every time. Do NOT skip any visible furniture part or any decorative sub-part on the front, regardless of furniture size. Preserve the exact furniture shape and construction logic. Aim for 5-12 well-grouped parts. Return the JSON structure.";
 
 function extractPartsFromContent(content: string) {
   try {
@@ -239,8 +242,15 @@ function canonicalizePartName(part: any, fallback: string) {
       "mirror panel",
       "fabric panel",
       "leather panel",
+      "carved",
+      "geometric pattern",
+      "pattern panel",
+      "door panel",
+      "drawer panel",
+      "door front",
+      "drawer front",
     ]) ||
-    hasAnyKeyword(nameText, ["screen", "inlay", "fluted", "accent", "decorative"]);
+    hasAnyKeyword(nameText, ["screen", "inlay", "fluted", "accent", "decorative", "carved", "door", "drawer"]);
 
   if (
     hasAnyKeyword(nameText, ["front panel", "front fascia", "front apron", "front skirt"]) &&
@@ -506,7 +516,7 @@ serve(async (req) => {
             ],
           },
         ],
-        max_tokens: 3000,
+        max_tokens: 4000,
       }),
     });
 
