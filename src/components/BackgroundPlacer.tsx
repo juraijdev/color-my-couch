@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { compressImage, resizeTransparentPng } from "@/lib/imageUtils";
+import { resizeTransparentPng } from "@/lib/imageUtils";
 
 interface BackgroundPlacerProps {
   /** Array of customized furniture images (base64 data URLs) */
