@@ -158,7 +158,7 @@ Output a single photorealistic image showing the COMPLETE original room (no crop
     });
 
     messageContent.push(
-      { type: "text", text: "BACKGROUND/ROOM IMAGE (place furniture into this scene):" },
+      { type: "text", text: `BACKGROUND/ROOM IMAGE (place furniture into this scene${bgWidth && bgHeight ? ` — output MUST be exactly ${bgWidth}x${bgHeight} pixels, aspect ratio ${bgAspect}, ${bgOrientation}, NO cropping or resizing of this background` : ""}):` },
       { type: "image_url", image_url: { url: backgroundImage } }
     );
 
