@@ -117,6 +117,9 @@ serve(async (req) => {
     
     const prompt = `You are a product photo retouching assistant. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed.
 
+⚠️ TOP-PRIORITY RULE — CAMERA, VIEW & SHAPE LOCK ⚠️
+The output MUST be the SAME PHOTOGRAPH as the input, captured from the EXACT SAME camera viewpoint. Do NOT rotate the furniture. Do NOT change the viewing angle. Do NOT switch from a front view to a side/3-quarter/perspective/isometric/top-down view, or vice-versa. Do NOT re-orient, re-pose, re-stage, or re-render the furniture from a different angle. If the input shows the furniture from the front, the output must show it from the front. If the input shows it head-on / straight-on / orthographic, the output must remain head-on / straight-on / orthographic. The silhouette, outline, perspective lines, vanishing points, foreshortening, and pixel footprint of the furniture in the output must MATCH the input exactly. This applies especially to LARGE / WIDE / LANDSCAPE buffet tables — never re-render them at an angle. Treat the input as a fixed photograph being repainted in place; the camera does not move, the furniture does not turn.
+
 PARTS TO RECOLOR:
 ${patternChangesList}
 
