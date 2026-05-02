@@ -104,6 +104,71 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
   return locks.map((lock, index) => `${index + 1}. ${lock}`).join("\n");
 }
 
+async function generateRecoloredImage(
+  apiKey: string,
+  messageContent: any[],
+) {
+  const models = [
+    "google/gemini-3.1-flash-image-preview",
+    "google/gemini-2.5-flash-image",
+  ];
+
+  let lastDetails = "No content returned";
+
+  for (const model of models) {
+    console.log(`Trying recolor image model: ${model}`);
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.1,
+        messages: [{ role: "user", content: messageContent }],
+        modalities: ["image", "text"],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI gateway error:", model, response.status, errorText);
+      if (response.status === 429 || response.status === 402) {
+        return { status: response.status, error: errorText };
+      }
+      lastDetails = errorText;
+      continue;
+    }
+
+    const aiResult = await response.json();
+    const choice = aiResult.choices?.[0];
+    const message = choice?.message;
+    lastDetails = choice?.error?.message || message?.content || message?.reasoning || lastDetails;
+
+    console.log("AI response structure:", JSON.stringify({
+      model,
+      hasChoices: !!aiResult.choices,
+      choicesLength: aiResult.choices?.length,
+      hasChoiceError: !!choice?.error,
+      choiceError: choice?.error?.message,
+      hasImages: !!message?.images,
+      imagesLength: message?.images?.length,
+    }));
+
+    if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
+      const firstImage = message.images[0];
+      const imageUrl = firstImage.image_url?.url || firstImage.url;
+      if (imageUrl) {
+        console.log("Found recolored image in response", model);
+        return { output: imageUrl, model };
+      }
+    }
+  }
+
+  return { error: lastDetails };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
