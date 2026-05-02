@@ -34,6 +34,41 @@ function findAssignment(assignments: PatternAssignment[], partName: string) {
   );
 }
 
+function getDataImageDimensions(dataUrl: string) {
+  try {
+    const match = dataUrl.match(/^data:image\/[^;]+;base64,(.+)$/);
+    if (!match) return null;
+
+    const bin = atob(match[1].slice(0, 131072));
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+
+    if (bytes[0] === 0x89 && bytes[1] === 0x50) {
+      const width = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
+      const height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
+      return { width, height, aspectRatio: width / height };
+    }
+
+    if (bytes[0] === 0xff && bytes[1] === 0xd8) {
+      let i = 2;
+      while (i < bytes.length - 9) {
+        if (bytes[i] !== 0xff) { i++; continue; }
+        const marker = bytes[i + 1];
+        const len = (bytes[i + 2] << 8) | bytes[i + 3];
+        if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+          const height = (bytes[i + 5] << 8) | bytes[i + 6];
+          const width = (bytes[i + 7] << 8) | bytes[i + 8];
+          return { width, height, aspectRatio: width / height };
+        }
+        i += 2 + len;
+      }
+    }
+  } catch (error) {
+    console.warn("Could not parse source image dimensions", error);
+  }
+  return null;
+}
+
 function buildConsistencyLocks(assignments: PatternAssignment[]) {
   const locks = [
     "Each listed part location is only a guidance envelope. Recolor ONLY the exact visible pixels of that named part, never the whole rectangle.",
