@@ -312,70 +312,27 @@ THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real p
       }
     }
 
-    // Use Lovable AI with image editing capabilities
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
-        temperature: 0,
-        messages: [
-          {
-            role: "user",
-            content: messageContent
-          }
-        ],
-        modalities: ["image", "text"]
-      }),
-    });
+    const generation = await generateRecoloredImage(LOVABLE_API_KEY, messageContent);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add more credits." }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
-      throw new Error(`AI generation failed: ${response.status}`);
+    if (generation.status === 429) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const aiResult = await response.json();
-    console.log("AI response structure:", JSON.stringify({
-      hasChoices: !!aiResult.choices,
-      choicesLength: aiResult.choices?.length,
-      hasImages: !!aiResult.choices?.[0]?.message?.images,
-      imagesLength: aiResult.choices?.[0]?.message?.images?.length
-    }));
-
-    // Extract the generated image from the response
-    const message = aiResult.choices?.[0]?.message;
-    let imageUrl = null;
-    
-    if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
-      const firstImage = message.images[0];
-      imageUrl = firstImage.image_url?.url || firstImage.url;
-      console.log("Found image in images array");
+    if (generation.status === 402) {
+      return new Response(JSON.stringify({ error: "AI credits exhausted. Please add more credits." }), {
+        status: 402,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    if (!imageUrl) {
-      console.log("No image found in response. Full response:", JSON.stringify(aiResult, null, 2).substring(0, 2000));
-      
+    if (!generation.output) {
+      console.log("No image found in any recolor response:", generation.error);
       return new Response(JSON.stringify({ 
         error: "Image generation failed. The AI couldn't generate the customized image. Please try again.",
-        details: message?.content || "No content returned"
+        details: generation.error || "No content returned"
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -383,7 +340,7 @@ THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real p
     }
 
     return new Response(JSON.stringify({ 
-      output: imageUrl,
+      output: generation.output,
       status: "succeeded" 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
