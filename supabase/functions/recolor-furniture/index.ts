@@ -104,6 +104,71 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
   return locks.map((lock, index) => `${index + 1}. ${lock}`).join("\n");
 }
 
+async function generateRecoloredImage(
+  apiKey: string,
+  messageContent: any[],
+) {
+  const models = [
+    "google/gemini-3.1-flash-image-preview",
+    "google/gemini-2.5-flash-image",
+  ];
+
+  let lastDetails = "No content returned";
+
+  for (const model of models) {
+    console.log(`Trying recolor image model: ${model}`);
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.1,
+        messages: [{ role: "user", content: messageContent }],
+        modalities: ["image", "text"],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI gateway error:", model, response.status, errorText);
+      if (response.status === 429 || response.status === 402) {
+        return { status: response.status, error: errorText };
+      }
+      lastDetails = errorText;
+      continue;
+    }
+
+    const aiResult = await response.json();
+    const choice = aiResult.choices?.[0];
+    const message = choice?.message;
+    lastDetails = choice?.error?.message || message?.content || message?.reasoning || lastDetails;
+
+    console.log("AI response structure:", JSON.stringify({
+      model,
+      hasChoices: !!aiResult.choices,
+      choicesLength: aiResult.choices?.length,
+      hasChoiceError: !!choice?.error,
+      choiceError: choice?.error?.message,
+      hasImages: !!message?.images,
+      imagesLength: message?.images?.length,
+    }));
+
+    if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
+      const firstImage = message.images[0];
+      const imageUrl = firstImage.image_url?.url || firstImage.url;
+      if (imageUrl) {
+        console.log("Found recolored image in response", model);
+        return { output: imageUrl, model };
+      }
+    }
+  }
+
+  return { error: lastDetails };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -156,7 +221,9 @@ serve(async (req) => {
       ? `\nSOURCE IMAGE FRAME LOCK — REQUIRED OUTPUT CANVAS:\n- Original input width: ${sourceDimensions.width}px\n- Original input height: ${sourceDimensions.height}px\n- Original aspect ratio: ${sourceDimensions.aspectRatio.toFixed(4)} (${isLandscapeFurniture ? "LANDSCAPE / WIDE BUFFET-SAFE" : "non-wide"})\n- Return the result with this SAME frame ratio and the FULL furniture visible. Do NOT output a square crop. Do NOT crop left, right, top, or bottom. Do NOT rotate or recompose the furniture to fit a different canvas.\n`
       : "";
 
-    const prompt = `You are a precision image-editing / in-place retouching assistant, NOT a product renderer. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed. The input image is the fixed master photo.
+    const prompt = `Edit the provided furniture photo in place. Return an edited IMAGE. Do not answer with text only.
+
+You are a precision image-editing / in-place retouching assistant, NOT a product renderer. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed. The input image is the fixed master photo.
 ${sourceFrameRule}
 
 ⚠️ TOP-PRIORITY RULE — CAMERA, VIEW & SHAPE LOCK ⚠️
@@ -213,7 +280,7 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 20. SHARP PART BOUNDARY RULE: If two assigned parts touch each other, preserve the original edge between them with a crisp transition and zero color bleed.
 
-THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
+Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
 
     console.log("Generating image with pattern application prompt:", prompt)
 
@@ -247,70 +314,27 @@ THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real p
       }
     }
 
-    // Use Lovable AI with image editing capabilities
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
-        temperature: 0,
-        messages: [
-          {
-            role: "user",
-            content: messageContent
-          }
-        ],
-        modalities: ["image", "text"]
-      }),
-    });
+    const generation = await generateRecoloredImage(LOVABLE_API_KEY, messageContent);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add more credits." }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
-      throw new Error(`AI generation failed: ${response.status}`);
+    if (generation.status === 429) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const aiResult = await response.json();
-    console.log("AI response structure:", JSON.stringify({
-      hasChoices: !!aiResult.choices,
-      choicesLength: aiResult.choices?.length,
-      hasImages: !!aiResult.choices?.[0]?.message?.images,
-      imagesLength: aiResult.choices?.[0]?.message?.images?.length
-    }));
-
-    // Extract the generated image from the response
-    const message = aiResult.choices?.[0]?.message;
-    let imageUrl = null;
-    
-    if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
-      const firstImage = message.images[0];
-      imageUrl = firstImage.image_url?.url || firstImage.url;
-      console.log("Found image in images array");
+    if (generation.status === 402) {
+      return new Response(JSON.stringify({ error: "AI credits exhausted. Please add more credits." }), {
+        status: 402,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    if (!imageUrl) {
-      console.log("No image found in response. Full response:", JSON.stringify(aiResult, null, 2).substring(0, 2000));
-      
+    if (!generation.output) {
+      console.log("No image found in any recolor response:", generation.error);
       return new Response(JSON.stringify({ 
         error: "Image generation failed. The AI couldn't generate the customized image. Please try again.",
-        details: message?.content || "No content returned"
+        details: generation.error || "No content returned"
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -318,7 +342,7 @@ THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real p
     }
 
     return new Response(JSON.stringify({ 
-      output: imageUrl,
+      output: generation.output,
       status: "succeeded" 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
