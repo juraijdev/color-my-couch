@@ -34,6 +34,41 @@ function findAssignment(assignments: PatternAssignment[], partName: string) {
   );
 }
 
+function getDataImageDimensions(dataUrl: string) {
+  try {
+    const match = dataUrl.match(/^data:image\/[^;]+;base64,(.+)$/);
+    if (!match) return null;
+
+    const bin = atob(match[1].slice(0, 131072));
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+
+    if (bytes[0] === 0x89 && bytes[1] === 0x50) {
+      const width = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
+      const height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
+      return { width, height, aspectRatio: width / height };
+    }
+
+    if (bytes[0] === 0xff && bytes[1] === 0xd8) {
+      let i = 2;
+      while (i < bytes.length - 9) {
+        if (bytes[i] !== 0xff) { i++; continue; }
+        const marker = bytes[i + 1];
+        const len = (bytes[i + 2] << 8) | bytes[i + 3];
+        if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+          const height = (bytes[i + 5] << 8) | bytes[i + 6];
+          const width = (bytes[i + 7] << 8) | bytes[i + 8];
+          return { width, height, aspectRatio: width / height };
+        }
+        i += 2 + len;
+      }
+    }
+  } catch (error) {
+    console.warn("Could not parse source image dimensions", error);
+  }
+  return null;
+}
+
 function buildConsistencyLocks(assignments: PatternAssignment[]) {
   const locks = [
     "Each listed part location is only a guidance envelope. Recolor ONLY the exact visible pixels of that named part, never the whole rectangle.",
@@ -103,6 +138,8 @@ serve(async (req) => {
 
     // Build detailed prompt for multi-pattern application
     const assignments: PatternAssignment[] = body.patternAssignments;
+    const sourceDimensions = typeof body.image === "string" ? getDataImageDimensions(body.image) : null;
+    const isLandscapeFurniture = !!sourceDimensions && sourceDimensions.aspectRatio >= 1.35;
     
     const patternChangesList = assignments.map((a: PatternAssignment) => {
       const partDetails = a.partDescription
@@ -115,13 +152,18 @@ serve(async (req) => {
 
     const consistencyLocks = buildConsistencyLocks(assignments);
     
+    const sourceFrameRule = sourceDimensions
+      ? `\nSOURCE IMAGE FRAME LOCK — REQUIRED OUTPUT CANVAS:\n- Original input width: ${sourceDimensions.width}px\n- Original input height: ${sourceDimensions.height}px\n- Original aspect ratio: ${sourceDimensions.aspectRatio.toFixed(4)} (${isLandscapeFurniture ? "LANDSCAPE / WIDE BUFFET-SAFE" : "non-wide"})\n- Return the result with this SAME frame ratio and the FULL furniture visible. Do NOT output a square crop. Do NOT crop left, right, top, or bottom. Do NOT rotate or recompose the furniture to fit a different canvas.\n`
+      : "";
+
     const prompt = `You are a precision image-editing / in-place retouching assistant, NOT a product renderer. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed. The input image is the fixed master photo.
+${sourceFrameRule}
 
 ⚠️ TOP-PRIORITY RULE — CAMERA, VIEW & SHAPE LOCK ⚠️
 The output MUST be the SAME PHOTOGRAPH as the input, captured from the EXACT SAME camera viewpoint. Do NOT rotate the furniture. Do NOT change the viewing angle. Do NOT switch from a front view to a side/3-quarter/perspective/isometric/top-down view, or vice-versa. Do NOT re-orient, re-pose, re-stage, or re-render the furniture from a different angle. If the input shows the furniture from the front, the output must show it from the front. If the input shows it head-on / straight-on / orthographic, the output must remain head-on / straight-on / orthographic. The silhouette, outline, perspective lines, vanishing points, foreshortening, and pixel footprint of the furniture in the output must MATCH the input exactly. This applies especially to LARGE / WIDE / LANDSCAPE buffet tables — never re-render them at an angle, never reveal a side view that was not visible, never shorten the table, never crop either end, and never change the visible length-to-height ratio. Treat the input as a fixed photograph being repainted in place; the camera does not move, the furniture does not turn. If a finish cannot be applied while preserving exact geometry, leave that area closer to the original instead of redrawing or regenerating furniture.
 
 ⚠️ LONG BUFFET TABLE PRESERVATION LOCK ⚠️
-For wide buffet / sideboard tables, preserve the full original landscape footprint exactly: same left end, same right end, same top line, same bottom line, same legs/plinth, same front-facing orientation, and same canvas aspect ratio. Do NOT make the table look like a different model, do NOT compress it, do NOT stretch it, do NOT crop it, do NOT add perspective depth, and do NOT convert it into a side-angle render. This is strictly texture replacement on the existing pixels.
+For wide buffet / sideboard tables, preserve the full original landscape footprint exactly: same left end, same right end, same top line, same bottom line, same legs/plinth, same front-facing orientation, same full-width front face, and same canvas aspect ratio. The final image must remain landscape if the input is landscape. Do NOT make a square output, do NOT make a vertical output, do NOT make the table look like a different model, do NOT compress it, do NOT stretch it, do NOT crop it, do NOT add perspective depth, do NOT reveal side faces that were not visible, and do NOT convert it into a side-angle render. This is strictly texture replacement on the existing front-view pixels.
 
 PARTS TO RECOLOR:
 ${patternChangesList}

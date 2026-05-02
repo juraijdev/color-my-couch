@@ -7,7 +7,7 @@ import { PatternOption } from "@/components/PatternPalette";
 import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
-import { imageUrlToBase64, resizeTransparentPng } from "@/lib/imageUtils";
+import { containImageInTransparentCanvas, getImageDimensions, imageUrlToBase64, resizeTransparentPng } from "@/lib/imageUtils";
 
 export default function Customize() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -93,6 +93,7 @@ export default function Customize() {
     toast.info("AI is applying the selected patterns...");
 
     try {
+      const sourceDimensions = await getImageDimensions(uploadedImage);
       const assignmentsWithBase64 = await Promise.all(
         patternAssignments.map(async (pa: PartPatternAssignment) => ({
           partName: pa.part.name,
@@ -137,7 +138,9 @@ export default function Customize() {
         let finalImage: string = result.output;
         try {
           toast.info("Isolating furniture (transparent background)...");
-          const transparentReadyImage = await resizeTransparentPng(result.output, 1600);
+          const transparentReadyImage = sourceDimensions.orientation === "landscape" && sourceDimensions.aspectRatio >= 1.35
+            ? await containImageInTransparentCanvas(result.output, sourceDimensions.width, sourceDimensions.height, 2400)
+            : await resizeTransparentPng(result.output, 1600);
           const bgResp = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
             {
@@ -152,7 +155,9 @@ export default function Customize() {
           if (bgResp.ok) {
             const bgResult = await bgResp.json();
             if (bgResult?.output) {
-              finalImage = bgResult.output;
+              finalImage = sourceDimensions.orientation === "landscape" && sourceDimensions.aspectRatio >= 1.35
+                ? await containImageInTransparentCanvas(bgResult.output, sourceDimensions.width, sourceDimensions.height, 2400)
+                : bgResult.output;
             } else {
               console.warn("remove-background returned no output, using original recolored image");
             }

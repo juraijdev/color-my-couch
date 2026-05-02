@@ -36,7 +36,7 @@ ABSOLUTE IRON-CLAD RULES:
 
 4. CLEAN EDGES: Cut precisely along the true silhouette of the furniture. Preserve fine details and thin parts (legs, handles, trim). Do NOT leave background halos, fringes, or color spill around the furniture.
 
-5. SAME FRAMING AND FULL OBJECT: Keep the same camera angle, perspective, full object size ratio, and approximate framing. Do NOT zoom in or crop the furniture itself. For wide/landscape buffet tables, preserve the entire left-to-right width, top surface, legs, front panels, handles, and every edge exactly. The furniture should sit in roughly the same position within the frame, with transparent pixels around it if needed.
+5. SAME FRAMING AND FULL OBJECT: Keep the same camera angle, perspective, full object size ratio, original canvas orientation, and original aspect ratio. Do NOT zoom in or crop the furniture itself. For wide/landscape/front-view buffet tables, the output must remain wide landscape and must preserve the entire left-to-right width, top surface, legs, front panels, handles, and every edge exactly. Never convert a front-view buffet table into a side view or 3/4 view. The furniture should sit in roughly the same position within the frame, with transparent pixels around it if needed.
 
 6. NO NEW CONTENT: Do NOT add a new background, gradient, drop shadow, reflection, floor, surface, or any decorative element. The area outside the furniture must be 100% transparent.
 
