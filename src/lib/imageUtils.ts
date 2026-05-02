@@ -111,3 +111,75 @@ export function resizeTransparentPng(
     img.src = dataUrl;
   });
 }
+
+export interface ImageDimensions {
+  width: number;
+  height: number;
+  aspectRatio: number;
+  orientation: "landscape" | "portrait" | "square";
+}
+
+export function getImageDimensions(dataUrl: string): Promise<ImageDimensions> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+      resolve({
+        width,
+        height,
+        aspectRatio: width / height,
+        orientation: width > height ? "landscape" : width < height ? "portrait" : "square",
+      });
+    };
+    img.onerror = () => reject(new Error('Failed to read image dimensions'));
+    img.src = dataUrl;
+  });
+}
+
+/**
+ * Place an image on a transparent canvas with the exact source aspect ratio.
+ * This prevents wide buffet outputs from being delivered as square/cropped canvases.
+ */
+export function containImageInTransparentCanvas(
+  dataUrl: string,
+  targetWidth: number,
+  targetHeight: number,
+  maxDimension = 2400
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      let canvasWidth = targetWidth;
+      let canvasHeight = targetHeight;
+
+      if (canvasWidth > maxDimension || canvasHeight > maxDimension) {
+        const scale = Math.min(maxDimension / canvasWidth, maxDimension / canvasHeight);
+        canvasWidth = Math.round(canvasWidth * scale);
+        canvasHeight = Math.round(canvasHeight * scale);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      const scale = Math.min(canvasWidth / img.naturalWidth, canvasHeight / img.naturalHeight);
+      const drawWidth = Math.round(img.naturalWidth * scale);
+      const drawHeight = Math.round(img.naturalHeight * scale);
+      const dx = Math.round((canvasWidth - drawWidth) / 2);
+      const dy = Math.round((canvasHeight - drawHeight) / 2);
+      ctx.drawImage(img, dx, dy, drawWidth, drawHeight);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Failed to fit image to transparent canvas'));
+    img.src = dataUrl;
+  });
+}
