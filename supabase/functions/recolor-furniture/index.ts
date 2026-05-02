@@ -221,7 +221,9 @@ serve(async (req) => {
       ? `\nSOURCE IMAGE FRAME LOCK — REQUIRED OUTPUT CANVAS:\n- Original input width: ${sourceDimensions.width}px\n- Original input height: ${sourceDimensions.height}px\n- Original aspect ratio: ${sourceDimensions.aspectRatio.toFixed(4)} (${isLandscapeFurniture ? "LANDSCAPE / WIDE BUFFET-SAFE" : "non-wide"})\n- Return the result with this SAME frame ratio and the FULL furniture visible. Do NOT output a square crop. Do NOT crop left, right, top, or bottom. Do NOT rotate or recompose the furniture to fit a different canvas.\n`
       : "";
 
-    const prompt = `You are a precision image-editing / in-place retouching assistant, NOT a product renderer. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed. The input image is the fixed master photo.
+    const prompt = `Edit the provided furniture photo in place. Return an edited IMAGE. Do not answer with text only.
+
+You are a precision image-editing / in-place retouching assistant, NOT a product renderer. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed. The input image is the fixed master photo.
 ${sourceFrameRule}
 
 ⚠️ TOP-PRIORITY RULE — CAMERA, VIEW & SHAPE LOCK ⚠️
@@ -278,7 +280,7 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 20. SHARP PART BOUNDARY RULE: If two assigned parts touch each other, preserve the original edge between them with a crisp transition and zero color bleed.
 
-THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
+Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
 
     console.log("Generating image with pattern application prompt:", prompt)
 
