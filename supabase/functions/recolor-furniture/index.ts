@@ -115,10 +115,13 @@ serve(async (req) => {
 
     const consistencyLocks = buildConsistencyLocks(assignments);
     
-    const prompt = `You are a product photo retouching assistant. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed.
+    const prompt = `You are a precision image-editing / in-place retouching assistant, NOT a product renderer. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed. The input image is the fixed master photo.
 
 ⚠️ TOP-PRIORITY RULE — CAMERA, VIEW & SHAPE LOCK ⚠️
-The output MUST be the SAME PHOTOGRAPH as the input, captured from the EXACT SAME camera viewpoint. Do NOT rotate the furniture. Do NOT change the viewing angle. Do NOT switch from a front view to a side/3-quarter/perspective/isometric/top-down view, or vice-versa. Do NOT re-orient, re-pose, re-stage, or re-render the furniture from a different angle. If the input shows the furniture from the front, the output must show it from the front. If the input shows it head-on / straight-on / orthographic, the output must remain head-on / straight-on / orthographic. The silhouette, outline, perspective lines, vanishing points, foreshortening, and pixel footprint of the furniture in the output must MATCH the input exactly. This applies especially to LARGE / WIDE / LANDSCAPE buffet tables — never re-render them at an angle. Treat the input as a fixed photograph being repainted in place; the camera does not move, the furniture does not turn.
+The output MUST be the SAME PHOTOGRAPH as the input, captured from the EXACT SAME camera viewpoint. Do NOT rotate the furniture. Do NOT change the viewing angle. Do NOT switch from a front view to a side/3-quarter/perspective/isometric/top-down view, or vice-versa. Do NOT re-orient, re-pose, re-stage, or re-render the furniture from a different angle. If the input shows the furniture from the front, the output must show it from the front. If the input shows it head-on / straight-on / orthographic, the output must remain head-on / straight-on / orthographic. The silhouette, outline, perspective lines, vanishing points, foreshortening, and pixel footprint of the furniture in the output must MATCH the input exactly. This applies especially to LARGE / WIDE / LANDSCAPE buffet tables — never re-render them at an angle, never reveal a side view that was not visible, never shorten the table, never crop either end, and never change the visible length-to-height ratio. Treat the input as a fixed photograph being repainted in place; the camera does not move, the furniture does not turn. If a finish cannot be applied while preserving exact geometry, leave that area closer to the original instead of redrawing or regenerating furniture.
+
+⚠️ LONG BUFFET TABLE PRESERVATION LOCK ⚠️
+For wide buffet / sideboard tables, preserve the full original landscape footprint exactly: same left end, same right end, same top line, same bottom line, same legs/plinth, same front-facing orientation, and same canvas aspect ratio. Do NOT make the table look like a different model, do NOT compress it, do NOT stretch it, do NOT crop it, do NOT add perspective depth, and do NOT convert it into a side-angle render. This is strictly texture replacement on the existing pixels.
 
 PARTS TO RECOLOR:
 ${patternChangesList}
@@ -134,7 +137,7 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 3. NO NEW DETAILS: Never add any new divider, border, frame, groove, strip, seam, panel, handle, shelf, cutout, metal band, or decorative detail that is not already visible in the original photo. Use ONLY the existing geometry and existing visible part boundaries.
 
-4. IDENTICAL CAMERA & COMPOSITION: Same exact camera angle, perspective, focal length, distance, framing, crop, and composition. The furniture must occupy the EXACT same pixels in the frame.
+4. IDENTICAL CAMERA & COMPOSITION: Same exact camera angle, perspective, focal length, distance, framing, crop, canvas aspect ratio, and composition. The furniture must occupy the EXACT same pixels in the frame. Do NOT zoom in or out. Do NOT recenter. Do NOT crop the left or right ends of long buffet tables.
 
 5. IDENTICAL BACKGROUND: The background, floor, shadows, reflections, and surrounding environment must be completely unchanged.
 
