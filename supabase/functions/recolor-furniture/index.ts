@@ -138,6 +138,8 @@ serve(async (req) => {
 
     // Build detailed prompt for multi-pattern application
     const assignments: PatternAssignment[] = body.patternAssignments;
+    const sourceDimensions = typeof body.image === "string" ? getDataImageDimensions(body.image) : null;
+    const isLandscapeFurniture = !!sourceDimensions && sourceDimensions.aspectRatio >= 1.35;
     
     const patternChangesList = assignments.map((a: PatternAssignment) => {
       const partDetails = a.partDescription
@@ -150,13 +152,18 @@ serve(async (req) => {
 
     const consistencyLocks = buildConsistencyLocks(assignments);
     
+    const sourceFrameRule = sourceDimensions
+      ? `\nSOURCE IMAGE FRAME LOCK — REQUIRED OUTPUT CANVAS:\n- Original input width: ${sourceDimensions.width}px\n- Original input height: ${sourceDimensions.height}px\n- Original aspect ratio: ${sourceDimensions.aspectRatio.toFixed(4)} (${isLandscapeFurniture ? "LANDSCAPE / WIDE BUFFET-SAFE" : "non-wide"})\n- Return the result with this SAME frame ratio and the FULL furniture visible. Do NOT output a square crop. Do NOT crop left, right, top, or bottom. Do NOT rotate or recompose the furniture to fit a different canvas.\n`
+      : "";
+
     const prompt = `You are a precision image-editing / in-place retouching assistant, NOT a product renderer. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed. The input image is the fixed master photo.
+${sourceFrameRule}
 
 ⚠️ TOP-PRIORITY RULE — CAMERA, VIEW & SHAPE LOCK ⚠️
 The output MUST be the SAME PHOTOGRAPH as the input, captured from the EXACT SAME camera viewpoint. Do NOT rotate the furniture. Do NOT change the viewing angle. Do NOT switch from a front view to a side/3-quarter/perspective/isometric/top-down view, or vice-versa. Do NOT re-orient, re-pose, re-stage, or re-render the furniture from a different angle. If the input shows the furniture from the front, the output must show it from the front. If the input shows it head-on / straight-on / orthographic, the output must remain head-on / straight-on / orthographic. The silhouette, outline, perspective lines, vanishing points, foreshortening, and pixel footprint of the furniture in the output must MATCH the input exactly. This applies especially to LARGE / WIDE / LANDSCAPE buffet tables — never re-render them at an angle, never reveal a side view that was not visible, never shorten the table, never crop either end, and never change the visible length-to-height ratio. Treat the input as a fixed photograph being repainted in place; the camera does not move, the furniture does not turn. If a finish cannot be applied while preserving exact geometry, leave that area closer to the original instead of redrawing or regenerating furniture.
 
 ⚠️ LONG BUFFET TABLE PRESERVATION LOCK ⚠️
-For wide buffet / sideboard tables, preserve the full original landscape footprint exactly: same left end, same right end, same top line, same bottom line, same legs/plinth, same front-facing orientation, and same canvas aspect ratio. Do NOT make the table look like a different model, do NOT compress it, do NOT stretch it, do NOT crop it, do NOT add perspective depth, and do NOT convert it into a side-angle render. This is strictly texture replacement on the existing pixels.
+For wide buffet / sideboard tables, preserve the full original landscape footprint exactly: same left end, same right end, same top line, same bottom line, same legs/plinth, same front-facing orientation, same full-width front face, and same canvas aspect ratio. The final image must remain landscape if the input is landscape. Do NOT make a square output, do NOT make a vertical output, do NOT make the table look like a different model, do NOT compress it, do NOT stretch it, do NOT crop it, do NOT add perspective depth, do NOT reveal side faces that were not visible, and do NOT convert it into a side-angle render. This is strictly texture replacement on the existing front-view pixels.
 
 PARTS TO RECOLOR:
 ${patternChangesList}
