@@ -138,9 +138,12 @@ export default function Customize() {
         let finalImage: string = result.output;
         try {
           toast.info("Isolating furniture (transparent background)...");
-          const transparentReadyImage = sourceDimensions.orientation === "landscape" && sourceDimensions.aspectRatio >= 1.35
-            ? await containImageInTransparentCanvas(result.output, sourceDimensions.width, sourceDimensions.height, 2400)
-            : await resizeTransparentPng(result.output, 1600);
+          const transparentReadyImage = await containImageInTransparentCanvas(
+            result.output,
+            sourceDimensions.width,
+            sourceDimensions.height,
+            2400
+          );
           const bgResp = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
             {
@@ -155,9 +158,12 @@ export default function Customize() {
           if (bgResp.ok) {
             const bgResult = await bgResp.json();
             if (bgResult?.output) {
-              finalImage = sourceDimensions.orientation === "landscape" && sourceDimensions.aspectRatio >= 1.35
-                ? await containImageInTransparentCanvas(bgResult.output, sourceDimensions.width, sourceDimensions.height, 2400)
-                : bgResult.output;
+              finalImage = await containImageInTransparentCanvas(
+                bgResult.output,
+                sourceDimensions.width,
+                sourceDimensions.height,
+                2400
+              );
             } else {
               console.warn("remove-background returned no output, using original recolored image");
             }
