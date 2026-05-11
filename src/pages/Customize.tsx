@@ -7,7 +7,7 @@ import { PatternOption } from "@/components/PatternPalette";
 import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
-import { containImageInTransparentCanvas, getImageDimensions, imageUrlToBase64, resizeTransparentPng } from "@/lib/imageUtils";
+import { containImageInTransparentCanvas, getImageDimensions, imageUrlToBase64 } from "@/lib/imageUtils";
 
 export default function Customize() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
