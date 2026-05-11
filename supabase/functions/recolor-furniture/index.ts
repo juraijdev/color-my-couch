@@ -110,7 +110,7 @@ async function generateRecoloredImage(
 ) {
   const models = [
     "google/gemini-3.1-flash-image-preview",
-    "google/gemini-2.5-flash-image",
+    "google/gemini-3-pro-image-preview",
   ];
 
   let lastDetails = "No content returned";
@@ -218,7 +218,7 @@ serve(async (req) => {
     const consistencyLocks = buildConsistencyLocks(assignments);
     
     const sourceFrameRule = sourceDimensions
-      ? `\nSOURCE IMAGE FRAME LOCK — REQUIRED OUTPUT CANVAS:\n- Original input width: ${sourceDimensions.width}px\n- Original input height: ${sourceDimensions.height}px\n- Original aspect ratio: ${sourceDimensions.aspectRatio.toFixed(4)} (${isLandscapeFurniture ? "LANDSCAPE / WIDE BUFFET-SAFE" : "non-wide"})\n- Return the result with this SAME frame ratio and the FULL furniture visible. Do NOT output a square crop. Do NOT crop left, right, top, or bottom. Do NOT rotate or recompose the furniture to fit a different canvas.\n`
+      ? `\nSOURCE IMAGE FRAME LOCK — REQUIRED OUTPUT CANVAS:\n- Original input width: ${sourceDimensions.width}px\n- Original input height: ${sourceDimensions.height}px\n- Original aspect ratio: ${sourceDimensions.aspectRatio.toFixed(4)} (${isLandscapeFurniture ? "LANDSCAPE / WIDE BUFFET-SAFE" : "ALL-FURNITURE SAFE"})\n- Return the result with this SAME frame ratio and the FULL furniture visible. Do NOT output a square crop. Do NOT crop left, right, top, bottom, legs, backrests, arms, chair seats, table ends, or any edge. Do NOT rotate or recompose the furniture to fit a different canvas. If the input is portrait, keep portrait. If the input is square, keep square. If the input is landscape, keep landscape.\n`
       : "";
 
     const prompt = `Edit the provided furniture photo in place. Return an edited IMAGE. Do not answer with text only.
@@ -231,6 +231,9 @@ The output MUST be the SAME PHOTOGRAPH as the input, captured from the EXACT SAM
 
 ⚠️ LONG BUFFET TABLE PRESERVATION LOCK ⚠️
 For wide buffet / sideboard tables, preserve the full original landscape footprint exactly: same left end, same right end, same top line, same bottom line, same legs/plinth, same front-facing orientation, same full-width front face, and same canvas aspect ratio. The final image must remain landscape if the input is landscape. Do NOT make a square output, do NOT make a vertical output, do NOT make the table look like a different model, do NOT compress it, do NOT stretch it, do NOT crop it, do NOT add perspective depth, do NOT reveal side faces that were not visible, and do NOT convert it into a side-angle render. This is strictly texture replacement on the existing front-view pixels.
+
+⚠️ ALL FURNITURE SILHOUETTE LOCK ⚠️
+This same preservation rule applies to EVERY furniture type, including chairs, stools, sofas, benches, cabinets, tables, and small decorative pieces. For chairs, keep the exact original backrest height and curve, seat shape, armrests, leg count, leg thickness, leg angles, foot positions, gaps/open spaces, and visible edges. Do NOT make a chair taller, shorter, wider, slimmer, more rounded, more modern, angled differently, or partially cropped. Recolor only the already-existing pixels of the selected part; if exact recoloring is uncertain, preserve the original shape and leave difficult pixels closer to the input rather than regenerating any structure.
 
 PARTS TO RECOLOR:
 ${patternChangesList}
