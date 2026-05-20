@@ -164,8 +164,13 @@ export default function Customize() {
                 sourceDimensions.height,
                 3200
               );
+              // Flatten onto a solid white background so the preview and
+              // download always show a clean white backdrop (no grey/black
+              // letterbox bands, no leftover transparency).
+              finalImage = await flattenToWhiteBackground(finalImage);
             } else {
               console.warn("remove-background returned no output, using original recolored image");
+              finalImage = await flattenToWhiteBackground(finalImage);
             }
           } else {
             console.warn("remove-background failed", bgResp.status);
