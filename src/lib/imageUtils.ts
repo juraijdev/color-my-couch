@@ -201,7 +201,10 @@ export function containImageInTransparentCanvas(
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      // Fill with solid white so any transparent/empty areas (letterbox bands
+      // from aspect-ratio mismatch) render as white instead of grey/black.
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       const scale = Math.min(canvasWidth / imgW, canvasHeight / imgH);
       const drawWidth = Math.round(imgW * scale);
       const drawHeight = Math.round(imgH * scale);
