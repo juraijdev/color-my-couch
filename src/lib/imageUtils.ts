@@ -112,6 +112,37 @@ export function resizeTransparentPng(
   });
 }
 
+/**
+ * Flatten a (possibly transparent) image onto a solid white background.
+ * Returns a PNG data URL with no transparency.
+ */
+export function flattenToWhiteBackground(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Failed to flatten image onto white background'));
+    img.src = dataUrl;
+  });
+}
+
 export interface ImageDimensions {
   width: number;
   height: number;
