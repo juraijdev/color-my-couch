@@ -174,9 +174,13 @@ export default function Customize() {
             }
           } else {
             console.warn("remove-background failed", bgResp.status);
+            finalImage = await flattenToWhiteBackground(finalImage);
           }
         } catch (bgErr) {
           console.warn("Background removal skipped:", bgErr);
+          try {
+            finalImage = await flattenToWhiteBackground(finalImage);
+          } catch {}
         }
 
         setGeneratedImage(finalImage);
