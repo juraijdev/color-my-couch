@@ -7,7 +7,7 @@ import { PatternOption } from "@/components/PatternPalette";
 import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
-import { containImageInTransparentCanvas, getImageDimensions, imageUrlToBase64 } from "@/lib/imageUtils";
+import { containImageInTransparentCanvas, flattenToWhiteBackground, getImageDimensions, imageUrlToBase64 } from "@/lib/imageUtils";
 
 export default function Customize() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -164,14 +164,23 @@ export default function Customize() {
                 sourceDimensions.height,
                 3200
               );
+              // Flatten onto a solid white background so the preview and
+              // download always show a clean white backdrop (no grey/black
+              // letterbox bands, no leftover transparency).
+              finalImage = await flattenToWhiteBackground(finalImage);
             } else {
               console.warn("remove-background returned no output, using original recolored image");
+              finalImage = await flattenToWhiteBackground(finalImage);
             }
           } else {
             console.warn("remove-background failed", bgResp.status);
+            finalImage = await flattenToWhiteBackground(finalImage);
           }
         } catch (bgErr) {
           console.warn("Background removal skipped:", bgErr);
+          try {
+            finalImage = await flattenToWhiteBackground(finalImage);
+          } catch {}
         }
 
         setGeneratedImage(finalImage);
