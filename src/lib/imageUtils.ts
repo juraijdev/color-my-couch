@@ -139,24 +139,53 @@ export function getImageDimensions(dataUrl: string): Promise<ImageDimensions> {
 }
 
 /**
- * Place an image on a transparent canvas with the exact source aspect ratio.
- * This prevents wide buffet outputs from being delivered as square/cropped canvases.
+ * Place an image on a transparent canvas matching the source aspect ratio,
+ * WITHOUT downscaling the AI-generated image. The canvas is sized from the
+ * larger of (source dims, image natural dims) so high-quality outputs are
+ * preserved. Only enforces aspect ratio so wide buffet outputs stay landscape.
  */
 export function containImageInTransparentCanvas(
   dataUrl: string,
   targetWidth: number,
   targetHeight: number,
-  maxDimension = 2400
+  maxDimension = 3200
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      let canvasWidth = targetWidth;
-      let canvasHeight = targetHeight;
+      const targetAspect = targetWidth / targetHeight;
+      const imgW = img.naturalWidth;
+      const imgH = img.naturalHeight;
 
-      if (canvasWidth > maxDimension || canvasHeight > maxDimension) {
-        const scale = Math.min(maxDimension / canvasWidth, maxDimension / canvasHeight);
+      // Base the canvas on whichever dimensions are larger so we never
+      // downscale the AI output. Build a canvas that matches the source
+      // aspect ratio and fully contains the image at native resolution.
+      const baseLong = Math.max(imgW, imgH, targetWidth, targetHeight);
+
+      let canvasWidth: number;
+      let canvasHeight: number;
+      if (targetAspect >= 1) {
+        canvasWidth = baseLong;
+        canvasHeight = Math.round(baseLong / targetAspect);
+      } else {
+        canvasHeight = baseLong;
+        canvasWidth = Math.round(baseLong * targetAspect);
+      }
+
+      // Ensure the image still fits — if not, grow the canvas (don't shrink image).
+      if (imgW > canvasWidth || imgH > canvasHeight) {
+        const growW = imgW / canvasWidth;
+        const growH = imgH / canvasHeight;
+        const grow = Math.max(growW, growH);
+        canvasWidth = Math.round(canvasWidth * grow);
+        canvasHeight = Math.round(canvasHeight * grow);
+      }
+
+      // Cap only if both dimensions exceed the max (rare).
+      const longest = Math.max(canvasWidth, canvasHeight);
+      if (longest > maxDimension) {
+        const scale = maxDimension / longest;
         canvasWidth = Math.round(canvasWidth * scale);
         canvasHeight = Math.round(canvasHeight * scale);
       }
@@ -169,11 +198,13 @@ export function containImageInTransparentCanvas(
         reject(new Error('Failed to get canvas context'));
         return;
       }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
 
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-      const scale = Math.min(canvasWidth / img.naturalWidth, canvasHeight / img.naturalHeight);
-      const drawWidth = Math.round(img.naturalWidth * scale);
-      const drawHeight = Math.round(img.naturalHeight * scale);
+      const scale = Math.min(canvasWidth / imgW, canvasHeight / imgH);
+      const drawWidth = Math.round(imgW * scale);
+      const drawHeight = Math.round(imgH * scale);
       const dx = Math.round((canvasWidth - drawWidth) / 2);
       const dy = Math.round((canvasHeight - drawHeight) / 2);
       ctx.drawImage(img, dx, dy, drawWidth, drawHeight);

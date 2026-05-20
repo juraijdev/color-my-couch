@@ -142,7 +142,7 @@ export default function Customize() {
             result.output,
             sourceDimensions.width,
             sourceDimensions.height,
-            2400
+            3200
           );
           const bgResp = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
@@ -162,7 +162,7 @@ export default function Customize() {
                 bgResult.output,
                 sourceDimensions.width,
                 sourceDimensions.height,
-                2400
+                3200
               );
             } else {
               console.warn("remove-background returned no output, using original recolored image");
