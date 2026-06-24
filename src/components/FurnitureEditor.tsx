@@ -64,6 +64,15 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
     const analyzeImage = async () => {
       setIsAnalyzing(true);
       try {
+        // Compress the uploaded image to keep the request body small enough
+        // for the edge function (large raw PNGs cause "Failed to fetch").
+        let payloadImage = imageUrl;
+        try {
+          payloadImage = await compressImage(imageUrl, 1600, 0.85);
+        } catch (e) {
+          console.warn("Image compression failed, sending original", e);
+        }
+
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/segment-furniture`,
           {
@@ -72,7 +81,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
               "Content-Type": "application/json",
               "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
             },
-            body: JSON.stringify({ image: imageUrl }),
+            body: JSON.stringify({ image: payloadImage }),
           }
         );
 
