@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { PatternOption } from "@/components/PatternPalette";
 import { cn } from "@/lib/utils";
+import { compressImage } from "@/lib/imageUtils";
 
 export interface FurnitureEditorRef {
   getPatternAssignments: () => PartPatternAssignment[];
