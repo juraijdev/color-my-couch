@@ -76,10 +76,18 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
     "Never blend, average, or compromise two different assigned finishes into one shared look.",
     "Keep each assigned reference pattern faithful in color, contrast, material feel, and visible texture scale.",
     "Preserve the original furniture shading and geometry, and only change the specified surface finish.",
+    "EVERY part listed under PARTS TO RECOLOR is MANDATORY — its assigned finish MUST be visibly applied in the final image. You are NOT allowed to skip, ignore, or leave a listed part unchanged just because it is thin, small, narrow, or hard. If a listed part is difficult to repaint, you must still repaint its existing visible pixels with the assigned finish.",
   ];
 
   const topSurface = findAssignment(assignments, "Top Surface");
   const trim = findAssignment(assignments, "Stainless Steel Trim & Edges");
+
+  if (trim) {
+    locks.unshift(
+      `MANDATORY METAL TRIM RECOLOR: "${trim.patternName}" MUST visibly appear on EVERY thin metal piece of the top assembly — the front lip directly under the top, the side lip(s), every divider strip between top modules, every perimeter edge cap, and every small vertical top side panel / side return / outer end cap. Leaving any of these pieces in their original metal color is a WRONG result. Even if a piece is only a few pixels tall or wide, you MUST repaint it with the "${trim.patternName}" finish.`,
+      `The trim system is THIN and DISTRIBUTED. Thinness is NEVER a reason to leave it in its original color. If you can see the metal piece in the input image, you must recolor it in the output image.`,
+    );
+  }
 
   if (topSurface && trim) {
     locks.unshift(
@@ -96,7 +104,7 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
 
     if (topSurface.patternName !== trim.patternName) {
       locks.unshift(
-        `Because "${topSurface.patternName}" and "${trim.patternName}" are different assignments, the final result is WRONG if the top wood and the top trim system end up looking like the same color or material.`,
+        `Because "${topSurface.patternName}" and "${trim.patternName}" are different assignments, the final result is WRONG if the top wood and the top trim system end up looking like the same color or material, OR if the trim system stays in its original metal color while only the top wood changes.`,
       );
     }
   }
