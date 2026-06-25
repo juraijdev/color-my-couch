@@ -181,6 +181,14 @@ export default function Customize() {
           finalImage = await flattenToWhiteBackground(finalImage);
         }
 
+        // Tight-crop the white background so the furniture fills the frame
+        // (only small white margin remains) — does NOT alter furniture pixels.
+        try {
+          finalImage = await tightCropToWhiteCanvas(finalImage, 245, 0.03);
+        } catch (cropErr) {
+          console.warn("Tight crop skipped:", cropErr);
+        }
+
         setGeneratedImage(finalImage);
         // Add to collection automatically
         setAllFurnitureImages((prev) => {
