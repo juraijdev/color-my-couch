@@ -139,12 +139,21 @@ export function GeneratePanel({
           <div className="w-full h-full flex flex-col items-center gap-4">
             <div
               className="relative flex-1 w-full flex items-center justify-center rounded-xl"
+              style={{
+                backgroundImage:
+                  "linear-gradient(45deg, #e5e7eb 25%, transparent 25%), linear-gradient(-45deg, #e5e7eb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e7eb 75%), linear-gradient(-45deg, transparent 75%, #e5e7eb 75%)",
+                backgroundSize: "16px 16px",
+                backgroundPosition: "0 0, 0 8px, 8px -8px, -8px 0",
+              }}
             >
               <img
                 src={generatedImage}
                 alt="Generated preview"
                 className="max-w-full max-h-[300px] object-contain rounded-xl shadow-xl animate-scale-in"
               />
+              <div className="absolute top-2 left-2 px-2 py-1 rounded-full bg-background/80 backdrop-blur text-[10px] font-medium text-muted-foreground">
+                Transparent background
+              </div>
               <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
                 <Check className="w-3 h-3" />
                 Complete
