@@ -146,6 +146,7 @@ export interface PatternOption {
   name: string;
   description: string;
   imageUrl: string;
+  code?: string;
 }
 
 export interface PatternCategory {
@@ -160,49 +161,57 @@ export const patternCategories: PatternCategory[] = [
     name: "Hairline Stainless Steel",
     patterns: [
       { 
-        id: "ss02", 
+        id: "ss02",
+        code: "SS02", 
         name: "Brushed Steel", 
         description: "Hairline brushed stainless steel with silver finish",
         imageUrl: SS02HairlineSS 
       },
       { 
-        id: "ss03", 
+        id: "ss03",
+        code: "SS03", 
         name: "Rose Gold", 
         description: "Hairline brushed stainless steel with rose gold plating",
         imageUrl: SS03RoseGold 
       },
       { 
-        id: "ss04", 
+        id: "ss04",
+        code: "SS04", 
         name: "Black Titanium", 
         description: "Hairline brushed stainless steel with black titanium plating",
         imageUrl: SS04Black 
       },
       { 
-        id: "ss12", 
+        id: "ss12",
+        code: "SS12", 
         name: "Gold", 
         description: "Hairline brushed stainless steel with gold plating",
         imageUrl: SS12Gold 
       },
       { 
-        id: "ss13", 
+        id: "ss13",
+        code: "SS13", 
         name: "Champagne", 
         description: "Hairline brushed stainless steel with champagne plating",
         imageUrl: SS13Champagne 
       },
       { 
-        id: "ss25", 
+        id: "ss25",
+        code: "SS25", 
         name: "Gold Bronze", 
         description: "Hairline brushed stainless steel with gold bronze plating",
         imageUrl: SS25GoldBronze 
       },
       { 
-        id: "ss26", 
+        id: "ss26",
+        code: "SS26", 
         name: "Red Bronze", 
         description: "Hairline brushed stainless steel with red bronze plating",
         imageUrl: SS26RedBronze 
       },
       { 
-        id: "ss27", 
+        id: "ss27",
+        code: "SS27", 
         name: "Green Bronze", 
         description: "Hairline brushed stainless steel with green bronze plating",
         imageUrl: SS27GreenBronze 
@@ -214,49 +223,57 @@ export const patternCategories: PatternCategory[] = [
     name: "Powder Coat Finishes",
     patterns: [
       { 
-        id: "pc011", 
+        id: "pc011",
+        code: "PC-011", 
         name: "Matte White", 
         description: "Smooth matte white powder coat finish",
         imageUrl: PC011White 
       },
       { 
-        id: "pc038", 
+        id: "pc038",
+        code: "PC-038", 
         name: "Gold", 
         description: "Metallic gold powder coat finish",
         imageUrl: PC038Gold 
       },
       { 
-        id: "pc051", 
+        id: "pc051",
+        code: "PC-051", 
         name: "Silver", 
         description: "Metallic silver powder coat finish",
         imageUrl: PC051Silver 
       },
       { 
-        id: "pc053", 
+        id: "pc053",
+        code: "PC-053", 
         name: "Brown Gold", 
         description: "Speckled brown gold textured powder coat finish",
         imageUrl: PC053BrownGold 
       },
       { 
-        id: "pc056", 
+        id: "pc056",
+        code: "PC-056", 
         name: "Champagne", 
         description: "Champagne powder coat finish",
         imageUrl: PC056Champagne 
       },
       { 
-        id: "pc058", 
+        id: "pc058",
+        code: "PC-058", 
         name: "Crack Black", 
         description: "Textured crackle black powder coat finish",
         imageUrl: PC058CrackBlack 
       },
       { 
-        id: "pc059", 
+        id: "pc059",
+        code: "PC-059", 
         name: "Matte Black", 
         description: "Smooth matte black powder coat finish",
         imageUrl: PC059MattBlack 
       },
       { 
-        id: "pp061", 
+        id: "pp061",
+        code: "PP-061", 
         name: "Coffee", 
         description: "Metallic coffee brown powder coat finish",
         imageUrl: PP061Coffee 
@@ -268,37 +285,43 @@ export const patternCategories: PatternCategory[] = [
     name: "Wood Grain Finishes",
     patterns: [
       { 
-        id: "sq52", 
+        id: "sq52",
+        code: "SQ-52", 
         name: "Alice Walnut", 
         description: "Dark rich walnut wood grain with golden highlights",
         imageUrl: SQ52AliceWalnut 
       },
       { 
-        id: "sq53", 
+        id: "sq53",
+        code: "SQ-53", 
         name: "Lincoln Walnut", 
         description: "Grey-brown walnut wood grain with subtle texture",
         imageUrl: SQ53LincolnWalnut 
       },
       { 
-        id: "sq54", 
+        id: "sq54",
+        code: "SQ-54", 
         name: "Subtropical Oak", 
         description: "Light golden oak with distinctive grain pattern",
         imageUrl: SQ54SubtropicalOak 
       },
       { 
-        id: "sq55b", 
+        id: "sq55b",
+        code: "SQ-55b", 
         name: "Blond Cedar", 
         description: "Light natural cedar wood grain finish",
         imageUrl: SQ55BBlondCedar 
       },
       { 
-        id: "sq73", 
+        id: "sq73",
+        code: "SQ-73", 
         name: "Trendy Walnut", 
         description: "Natural walnut with flowing grain lines",
         imageUrl: SQ73TrendyWalnut 
       },
       { 
-        id: "sq731", 
+        id: "sq731",
+        code: "SQ-731", 
         name: "Dawn Cherry", 
         description: "Light cherry wood with fine vertical grain",
         imageUrl: SQ731DawnCherry 
@@ -310,121 +333,141 @@ export const patternCategories: PatternCategory[] = [
     name: "Wood Veneer Finishes",
     patterns: [
       { 
-        id: "wv0756", 
+        id: "wv0756",
+        code: "0756-60", 
         name: "Natural Maple", 
         description: "Light golden maple with elegant grain pattern",
         imageUrl: WV0756NaturalMaple 
       },
       { 
-        id: "wv9194", 
+        id: "wv9194",
+        code: "9194-60", 
         name: "Trendy Walnut", 
         description: "Warm walnut veneer with fine vertical lines",
         imageUrl: WV9194TrendyWalnut 
       },
       { 
-        id: "wv9205", 
+        id: "wv9205",
+        code: "9205-60", 
         name: "Legno Silver Oak", 
         description: "Silver-highlighted oak with distinctive texture",
         imageUrl: WV9205LegnoSilverOak 
       },
       { 
-        id: "wv9348", 
+        id: "wv9348",
+        code: "9348-60", 
         name: "Subtropical Oak", 
         description: "Golden oak veneer with natural grain",
         imageUrl: WV9348SubtropicalOak 
       },
       { 
-        id: "wv9834", 
+        id: "wv9834",
+        code: "9834-60", 
         name: "Ocean Vogue", 
         description: "Rich brown driftwood finish",
         imageUrl: WV9834OceanVogue 
       },
       { 
-        id: "wv9860", 
+        id: "wv9860",
+        code: "9860nt", 
         name: "Blond Cedar", 
         description: "Light blonde cedar with soft grain",
         imageUrl: WV9860BlondCedar 
       },
       { 
-        id: "wv9861", 
+        id: "wv9861",
+        code: "9861nt", 
         name: "Eternal Cedar", 
         description: "Grey-toned cedar with subtle warmth",
         imageUrl: WV9861EternalCedar 
       },
       { 
-        id: "wv9862", 
+        id: "wv9862",
+        code: "9862nt", 
         name: "Earth Cedar", 
         description: "Warm earth-toned cedar veneer",
         imageUrl: WV9862EarthCedar 
       },
       { 
-        id: "wv9870", 
+        id: "wv9870",
+        code: "9870nt", 
         name: "Dawn Cherry", 
         description: "Light cream cherry with delicate grain",
         imageUrl: WV9870DawnCherry 
       },
       { 
-        id: "wvt1246", 
+        id: "wvt1246",
+        code: "T1246", 
         name: "Costa Nogal", 
         description: "Golden-brown Spanish walnut finish",
         imageUrl: WVT1246CostaNogal 
       },
       { 
-        id: "wvt1270", 
+        id: "wvt1270",
+        code: "T1270", 
         name: "Karla Elm", 
         description: "Warm golden elm with elegant grain",
         imageUrl: WVT1270KarlaElm 
       },
       { 
-        id: "wvt5243", 
+        id: "wvt5243",
+        code: "T5243", 
         name: "Classic Walnut", 
         description: "Timeless medium brown walnut finish",
         imageUrl: WVT5243ClassicWalnut 
       },
       { 
-        id: "wv5439d", 
+        id: "wv5439d",
+        code: "5439D", 
         name: "Aged Alameda", 
         description: "Dark espresso wood with subtle grain",
         imageUrl: WV5439DAgedAlameda 
       },
       { 
-        id: "wv5997", 
+        id: "wv5997",
+        code: "5997-60", 
         name: "Alice Walnut", 
         description: "Deep reddish-brown walnut veneer",
         imageUrl: WV5997AliceWalnut 
       },
       { 
-        id: "wv6405", 
+        id: "wv6405",
+        code: "6405nt", 
         name: "Ivory Elm", 
         description: "Light creamy elm with soft grain pattern",
         imageUrl: WV6405IvoryElm 
       },
       { 
-        id: "wv6442", 
+        id: "wv6442",
+        code: "6442CT", 
         name: "Ash Washing Maple", 
         description: "Grey washed maple with rustic texture",
         imageUrl: WV6442AshWashingMaple 
       },
       { 
-        id: "wv7188", 
+        id: "wv7188",
+        code: "7188nt", 
         name: "Lincoln Walnut", 
         description: "Rich dark walnut with prominent grain",
         imageUrl: WV7188LincolnWalnut 
       },
       { 
-        id: "wv7860", 
+        id: "wv7860",
+        code: "7860nt", 
         name: "Vosges Teak", 
         description: "Natural grey-toned teak finish",
         imageUrl: WV7860VosgesTeak 
       },
       { 
-        id: "wv9848d", 
+        id: "wv9848d",
+        code: "9848D", 
         name: "Blacken Legno", 
         description: "Dark charcoal eucalyptus finish",
         imageUrl: WV9848DBlackenLegno 
       },
       { 
-        id: "wvt4222", 
+        id: "wvt4222",
+        code: "T4222", 
         name: "Stateroom Teak", 
         description: "Premium warm brown teak veneer",
         imageUrl: WVT4222StateroomTeak 
@@ -436,73 +479,85 @@ export const patternCategories: PatternCategory[] = [
     name: "Stone & Marble Finishes",
     patterns: [
       { 
-        id: "st2516", 
+        id: "st2516",
+        code: "2516-16", 
         name: "Karadolomite", 
         description: "Grey marble with flowing wave patterns",
         imageUrl: ST2516Karadolomite 
       },
       { 
-        id: "st4982", 
+        id: "st4982",
+        code: "4982ST", 
         name: "Red Rust Stone", 
         description: "Dark textured rust stone finish",
         imageUrl: ST4982RedRustStone 
       },
       { 
-        id: "st4983", 
+        id: "st4983",
+        code: "4983ST", 
         name: "Coffee Ice Cream", 
         description: "Dark charcoal textured stone surface",
         imageUrl: ST4983CoffeeIceCream 
       },
       { 
-        id: "st6306", 
+        id: "st6306",
+        code: "6306-06", 
         name: "Cloud River", 
         description: "Light grey-white marble with subtle veining",
         imageUrl: ST6306CloudRiver 
       },
       { 
-        id: "st7377", 
+        id: "st7377",
+        code: "7377-42", 
         name: "White Jade", 
         description: "Creamy white marble with golden veins",
         imageUrl: ST7377WhiteJade 
       },
       { 
-        id: "st7458", 
+        id: "st7458",
+        code: "7458-32", 
         name: "Travertine Grey", 
         description: "Silver-grey travertine with linear patterns",
         imageUrl: ST7458TravertineGrey 
       },
       { 
-        id: "st7888", 
+        id: "st7888",
+        code: "7888-32", 
         name: "White Rock", 
         description: "Pure white marble with dramatic grey veins",
         imageUrl: ST7888WhiteRock 
       },
       { 
-        id: "st8462", 
+        id: "st8462",
+        code: "8462-30", 
         name: "Slate Palm", 
         description: "Dark brown marble with golden veining",
         imageUrl: ST8462SlatePalm 
       },
       { 
-        id: "std476", 
+        id: "std476",
+        code: "D476CK", 
         name: "Natural Stone", 
         description: "Grey concrete-like natural stone texture",
         imageUrl: STD476NaturalStone 
       },
       { 
-        id: "stmb3476", 
+        id: "stmb3476",
+        code: "MB3476H", 
         name: "Black Granite", 
         description: "Deep black granite with white veining",
         imageUrl: STMB3476BlackGranite 
       },
       { 
-        id: "stt1329", 
+        id: "stt1329",
+        code: "T1329", 
         name: "Dario Ramblas", 
         description: "Light cream cement with aged patina",
         imageUrl: STT1329DarioRamblas 
       },
       { 
-        id: "stt1332", 
+        id: "stt1332",
+        code: "T1332", 
         name: "Goyo Ramblas", 
         description: "Dark grey cement with weathered texture",
         imageUrl: STT1332GoyoRamblas 
@@ -514,25 +569,29 @@ export const patternCategories: PatternCategory[] = [
     name: "Fabric & Textile Finishes",
     patterns: [
       { 
-        id: "fbgtl45", 
+        id: "fbgtl45",
+        code: "GTL-45", 
         name: "White Suede", 
         description: "Soft off-white suede fabric texture",
         imageUrl: FBGTL45White 
       },
       { 
-        id: "fbgtl51", 
+        id: "fbgtl51",
+        code: "GTL-51", 
         name: "Lime Grey", 
         description: "Warm taupe suede fabric texture",
         imageUrl: FBGTL51LimeGrey 
       },
       { 
-        id: "fbgtl56", 
+        id: "fbgtl56",
+        code: "GTL-56", 
         name: "Light Grey", 
         description: "Cool light grey suede fabric texture",
         imageUrl: FBGTL56LightGrey 
       },
       { 
-        id: "fbgtl59", 
+        id: "fbgtl59",
+        code: "GTL-59", 
         name: "Dark Grey", 
         description: "Charcoal dark grey suede fabric texture",
         imageUrl: FBGTL59DarkGrey 
@@ -544,25 +603,29 @@ export const patternCategories: PatternCategory[] = [
     name: "Quartz & Terrazzo Finishes",
     patterns: [
       { 
-        id: "gt3001", 
+        id: "gt3001",
+        code: "GT-3001", 
         name: "White Quartz", 
         description: "Sparkling white quartz with subtle aggregate",
         imageUrl: GT3001White 
       },
       { 
-        id: "gt3004", 
+        id: "gt3004",
+        code: "GT-3004", 
         name: "Black Quartz", 
         description: "Deep black quartz with mirror-like flecks",
         imageUrl: GT3004Black 
       },
       { 
-        id: "gt3005", 
+        id: "gt3005",
+        code: "GT-3005", 
         name: "Beige Quartz", 
         description: "Warm beige quartz with fine speckles",
         imageUrl: GT3005Beige 
       },
       { 
-        id: "gt3025", 
+        id: "gt3025",
+        code: "GT-3025", 
         name: "Grey Quartz", 
         description: "Cool grey quartz with crystalline texture",
         imageUrl: GT3025Grey 
@@ -574,25 +637,29 @@ export const patternCategories: PatternCategory[] = [
     name: "Grain Series Finishes",
     patterns: [
       { 
-        id: "gsbmp01", 
+        id: "gsbmp01",
+        code: "GS-BMP01", 
         name: "Formosa", 
         description: "Dark espresso wood with fine vertical grain",
         imageUrl: GSBMP01Formosa 
       },
       { 
-        id: "gsbmp02", 
+        id: "gsbmp02",
+        code: "GS-BMP02", 
         name: "Classic Oak", 
         description: "Light grey oak with elegant grain pattern",
         imageUrl: GSBMP02ClassicOak 
       },
       { 
-        id: "gsbmp03", 
+        id: "gsbmp03",
+        code: "GS-BMP03", 
         name: "Mixed Oil Gray", 
         description: "Warm olive-grey wood with subtle grain",
         imageUrl: GSBMP03MixedOilGray 
       },
       { 
-        id: "gsbmp04", 
+        id: "gsbmp04",
+        code: "GS-BMP04", 
         name: "Western European", 
         description: "Light blonde wood with soft linear texture",
         imageUrl: GSBMP04WesternEuropean 
@@ -604,61 +671,71 @@ export const patternCategories: PatternCategory[] = [
     name: "Tweed & Bouclé Finishes",
     patterns: [
       { 
-        id: "tw8308-7", 
+        id: "tw8308-7",
+        code: "TW-8308-7", 
         name: "Charcoal Tweed", 
         description: "Dark grey woven tweed with textured depth",
         imageUrl: TW8308_7Charcoal 
       },
       { 
-        id: "tw8308-9", 
+        id: "tw8308-9",
+        code: "TW-8308-9", 
         name: "Coral Tweed", 
         description: "Warm coral-salmon woven tweed texture",
         imageUrl: TW8308_9Coral 
       },
       { 
-        id: "tw8308-13", 
+        id: "tw8308-13",
+        code: "TW-8308-13", 
         name: "Crimson Tweed", 
         description: "Rich red woven tweed with subtle variation",
         imageUrl: TW8308_13Crimson 
       },
       { 
-        id: "tw8308-27", 
+        id: "tw8308-27",
+        code: "TW-8308-27", 
         name: "Denim Tweed", 
         description: "Classic blue woven tweed texture",
         imageUrl: TW8308_27Denim 
       },
       { 
-        id: "tw8308-30", 
+        id: "tw8308-30",
+        code: "TW-8308-30", 
         name: "Teal Tweed", 
         description: "Deep teal-green woven tweed fabric",
         imageUrl: TW8308_30Teal 
       },
       { 
-        id: "tw8308-42", 
+        id: "tw8308-42",
+        code: "TW-8308-42", 
         name: "Taupe Tweed", 
         description: "Warm taupe-brown woven tweed texture",
         imageUrl: TW8308_42Taupe 
       },
       { 
-        id: "tw8308-45", 
+        id: "tw8308-45",
+        code: "TW-8308-45", 
         name: "Dove Tweed", 
         description: "Soft dove grey woven tweed fabric",
         imageUrl: TW8308_45Dove 
       },
       { 
-        id: "tw8308-48", 
+        id: "tw8308-48",
+        code: "TW-8308-48", 
         name: "Onyx Tweed", 
         description: "Deep charcoal-black woven tweed texture",
         imageUrl: TW8308_48Onyx 
       },
       { 
-        id: "tw8410-7", 
+        id: "tw8410-7",
+        code: "TW-8410-7", 
         name: "Espresso Bouclé", 
         description: "Rich brown bouclé weave texture",
         imageUrl: TW8410_7Espresso 
       },
       { 
-        id: "tw8410-22", 
+        id: "tw8410-22",
+        code: "TW-8410-22", 
         name: "Oatmeal Bouclé", 
         description: "Light cream bouclé weave with subtle texture",
         imageUrl: TW8410_22Oatmeal 
@@ -670,85 +747,99 @@ export const patternCategories: PatternCategory[] = [
     name: "Linen & Woven Finishes",
     patterns: [
       { 
-        id: "ln8815-4", 
+        id: "ln8815-4",
+        code: "LN-8815-4", 
         name: "Cream Linen", 
         description: "Natural cream woven linen with chunky texture",
         imageUrl: LN8815_4Cream 
       },
       { 
-        id: "ln8815-17", 
+        id: "ln8815-17",
+        code: "LN-8815-17", 
         name: "Azure Linen", 
         description: "Rich blue woven linen texture",
         imageUrl: LN8815_17Azure 
       },
       { 
-        id: "kr1818-4", 
+        id: "kr1818-4",
+        code: "KR-1818-4", 
         name: "Taupe Weave", 
         description: "Neutral taupe woven fabric with fine texture",
         imageUrl: KR1818_4Taupe 
       },
       { 
-        id: "kr1818-9", 
+        id: "kr1818-9",
+        code: "KR-1818-9", 
         name: "Silver Weave", 
         description: "Cool silver-grey woven fabric texture",
         imageUrl: KR1818_9Silver 
       },
       { 
-        id: "kr1818-14", 
+        id: "kr1818-14",
+        code: "KR-1818-14", 
         name: "Terracotta Weave", 
         description: "Warm terracotta woven fabric texture",
         imageUrl: KR1818_14Terracotta 
       },
       { 
-        id: "kr1818-19", 
+        id: "kr1818-19",
+        code: "KR-1818-19", 
         name: "Sage Weave", 
         description: "Soft sage green woven fabric texture",
         imageUrl: KR1818_19Sage 
       },
       { 
-        id: "kr1818-27", 
+        id: "kr1818-27",
+        code: "KR-1818-27", 
         name: "Cobalt Weave", 
         description: "Deep cobalt blue woven fabric texture",
         imageUrl: KR1818_27Cobalt 
       },
       { 
-        id: "kr1818-29", 
+        id: "kr1818-29",
+        code: "KR-1818-29", 
         name: "Camel Weave", 
         description: "Warm camel tan woven fabric texture",
         imageUrl: KR1818_29Camel 
       },
       { 
-        id: "kr1818-31", 
+        id: "kr1818-31",
+        code: "KR-1818-31", 
         name: "Cocoa Weave", 
         description: "Rich cocoa brown woven fabric texture",
         imageUrl: KR1818_31Cocoa 
       },
       { 
-        id: "kr1818-37", 
+        id: "kr1818-37",
+        code: "KR-1818-37", 
         name: "Graphite Weave", 
         description: "Dark graphite woven fabric texture",
         imageUrl: KR1818_37Graphite 
       },
       { 
-        id: "kr1818-43", 
+        id: "kr1818-43",
+        code: "KR-1818-43", 
         name: "Oat Weave", 
         description: "Natural oat-colored woven fabric texture",
         imageUrl: KR1818_43Oat 
       },
       { 
-        id: "kr1818-49", 
+        id: "kr1818-49",
+        code: "KR-1818-49", 
         name: "Ash Weave", 
         description: "Cool ash grey woven fabric texture",
         imageUrl: KR1818_49Ash 
       },
       { 
-        id: "kr1818-57", 
+        id: "kr1818-57",
+        code: "KR-1818-57", 
         name: "Crimson Weave", 
         description: "Rich crimson red woven fabric texture",
         imageUrl: KR1818_57Crimson 
       },
       { 
-        id: "kr1818-62", 
+        id: "kr1818-62",
+        code: "KR-1818-62", 
         name: "Slate Blue Weave", 
         description: "Soft slate blue woven fabric texture",
         imageUrl: KR1818_62Slate 
@@ -760,49 +851,57 @@ export const patternCategories: PatternCategory[] = [
     name: "Canvas & Outdoor Fabrics",
     patterns: [
       { 
-        id: "bxb05", 
+        id: "bxb05",
+        code: "BXB05", 
         name: "Burgundy Canvas", 
         description: "Rich burgundy outdoor canvas with tight weave",
         imageUrl: BXB05Burgundy 
       },
       { 
-        id: "bxb08", 
+        id: "bxb08",
+        code: "BXB08", 
         name: "Ocean Blue Canvas", 
         description: "Bright ocean blue outdoor canvas texture",
         imageUrl: BXB08OceanBlue 
       },
       { 
-        id: "bxb11", 
+        id: "bxb11",
+        code: "BXB11", 
         name: "Navy Canvas", 
         description: "Deep navy blue outdoor canvas fabric",
         imageUrl: BXB11Navy 
       },
       { 
-        id: "bxb12", 
+        id: "bxb12",
+        code: "BXB12", 
         name: "Espresso Canvas", 
         description: "Dark espresso brown outdoor canvas",
         imageUrl: BXB12Espresso 
       },
       { 
-        id: "bxe01", 
+        id: "bxe01",
+        code: "BXE01", 
         name: "Natural Basketweave", 
         description: "Light natural beige basketweave texture",
         imageUrl: BXE01Natural 
       },
       { 
-        id: "bxe04", 
+        id: "bxe04",
+        code: "BXE04", 
         name: "Silver Basketweave", 
         description: "Cool silver grey basketweave fabric",
         imageUrl: BXE04Silver 
       },
       { 
-        id: "bxe05", 
+        id: "bxe05",
+        code: "BXE05", 
         name: "Lime Basketweave", 
         description: "Fresh lime green basketweave texture",
         imageUrl: BXE05Lime 
       },
       { 
-        id: "bxe06", 
+        id: "bxe06",
+        code: "BXE06", 
         name: "Turquoise Basketweave", 
         description: "Vibrant turquoise basketweave fabric",
         imageUrl: BXE06Turquoise 

@@ -118,44 +118,50 @@ export function PatternGrid({ selectedPattern, onPatternSelect, disabled }: Patt
                   <button
                     onClick={() => onPatternSelect(pattern)}
                     className={cn(
-                      "group relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
-                      gridSize === "large" ? "aspect-square" : "aspect-square",
+                      "group relative flex flex-col rounded-lg overflow-hidden border-2 bg-card transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
                       selectedPattern?.id === pattern.id 
                         ? "border-primary ring-2 ring-primary/50 scale-105" 
                         : "border-border hover:border-primary/50"
                     )}
                   >
-                    <img 
-                      src={pattern.imageUrl} 
-                      alt={pattern.name}
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    {/* Hover overlay */}
-                    <div className={cn(
-                      "absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity",
-                      selectedPattern?.id === pattern.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                    )}>
-                      <div className="absolute bottom-0 left-0 right-0 p-2">
-                        <span className={cn(
-                          "font-medium text-white block truncate",
-                          gridSize === "large" ? "text-xs" : "text-[10px]"
+                    {/* Always-visible label above image */}
+                    <div className="px-1.5 py-1 bg-secondary/80 border-b border-border text-left">
+                      {pattern.code && (
+                        <div className={cn(
+                          "font-mono font-semibold text-foreground leading-tight truncate",
+                          gridSize === "large" ? "text-[10px]" : "text-[9px]"
                         )}>
-                          {pattern.name}
-                        </span>
+                          {pattern.code}
+                        </div>
+                      )}
+                      <div className={cn(
+                        "text-muted-foreground leading-tight truncate",
+                        gridSize === "large" ? "text-[10px]" : "text-[9px]"
+                      )}>
+                        {pattern.name}
                       </div>
                     </div>
 
-                    {/* Selected indicator */}
-                    {selectedPattern?.id === pattern.id && (
-                      <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                        <Check className="w-4 h-4 text-primary-foreground" />
-                      </div>
-                    )}
+                    <div className="relative flex-1 aspect-square">
+                      <img 
+                        src={pattern.imageUrl} 
+                        alt={pattern.name}
+                        className="w-full h-full object-cover"
+                      />
+
+                      {/* Selected indicator */}
+                      {selectedPattern?.id === pattern.id && (
+                        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                          <Check className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-[200px]">
-                  <p className="font-medium">{pattern.name}</p>
+                  <p className="font-medium">
+                    {pattern.code ? `${pattern.code} — ${pattern.name}` : pattern.name}
+                  </p>
                   <p className="text-xs text-muted-foreground">{pattern.description}</p>
                 </TooltipContent>
               </Tooltip>
@@ -183,7 +189,7 @@ export function PatternGrid({ selectedPattern, onPatternSelect, disabled }: Patt
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-primary truncate">
-                Selected: {selectedPattern.name}
+                Selected: {selectedPattern.code ? `${selectedPattern.code} — ${selectedPattern.name}` : selectedPattern.name}
               </p>
               <p className="text-xs text-muted-foreground">
                 Click on a furniture part to apply
