@@ -138,14 +138,9 @@ export function GeneratePanel({
         ) : generatedImage ? (
           <div className="w-full h-full flex flex-col items-center gap-4">
             <div
-              className="relative flex-1 w-full flex items-center justify-center rounded-xl"
-              style={{
-                backgroundImage:
-                  "linear-gradient(45deg, #e5e7eb 25%, transparent 25%), linear-gradient(-45deg, #e5e7eb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e7eb 75%), linear-gradient(-45deg, transparent 75%, #e5e7eb 75%)",
-                backgroundSize: "16px 16px",
-                backgroundPosition: "0 0, 0 8px, 8px -8px, -8px 0",
-              }}
+              className="relative flex-1 w-full flex items-center justify-center rounded-xl bg-white"
             >
+
               <img
                 src={generatedImage}
                 alt="Generated preview"
