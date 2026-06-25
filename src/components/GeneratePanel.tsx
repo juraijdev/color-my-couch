@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus } from "lucide-react";
+import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -65,6 +65,25 @@ export function GeneratePanel({
     triggerDownload(generatedImage, format);
   };
 
+  const handleCopyToClipboard = async () => {
+    if (!generatedImage) return;
+    try {
+      const transparentPng = await resizeTransparentPng(generatedImage, 2400);
+      const blob = await (await fetch(transparentPng)).blob();
+      if (!navigator.clipboard || !(window as any).ClipboardItem) {
+        toast.error("Clipboard copy not supported in this browser. Use Download instead.");
+        return;
+      }
+      await navigator.clipboard.write([
+        new (window as any).ClipboardItem({ "image/png": blob }),
+      ]);
+      toast.success("Furniture copied (transparent PNG). Paste into Excel or Sheets.");
+    } catch (err) {
+      console.error("Copy failed:", err);
+      toast.error("Couldn't copy image. Try Download instead.");
+    }
+  };
+
   // Build the list of furniture images for background placement
   const furnitureForPlacement = allFurnitureImages.length > 0
     ? allFurnitureImages
@@ -120,12 +139,21 @@ export function GeneratePanel({
           <div className="w-full h-full flex flex-col items-center gap-4">
             <div
               className="relative flex-1 w-full flex items-center justify-center rounded-xl"
+              style={{
+                backgroundImage:
+                  "linear-gradient(45deg, #e5e7eb 25%, transparent 25%), linear-gradient(-45deg, #e5e7eb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e7eb 75%), linear-gradient(-45deg, transparent 75%, #e5e7eb 75%)",
+                backgroundSize: "16px 16px",
+                backgroundPosition: "0 0, 0 8px, 8px -8px, -8px 0",
+              }}
             >
               <img
                 src={generatedImage}
                 alt="Generated preview"
                 className="max-w-full max-h-[300px] object-contain rounded-xl shadow-xl animate-scale-in"
               />
+              <div className="absolute top-2 left-2 px-2 py-1 rounded-full bg-background/80 backdrop-blur text-[10px] font-medium text-muted-foreground">
+                Transparent background
+              </div>
               <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
                 <Check className="w-3 h-3" />
                 Complete
@@ -227,6 +255,15 @@ export function GeneratePanel({
               {allFurnitureImages.length > 1 && (
                 <span className="ml-1 text-xs">({allFurnitureImages.length} pieces)</span>
               )}
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full border-primary/30 text-primary hover:bg-primary/10"
+              onClick={handleCopyToClipboard}
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copy Furniture (Transparent PNG)
             </Button>
 
             <Button
