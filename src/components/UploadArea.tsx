@@ -41,9 +41,16 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
 
   const processFile = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const result = e.target?.result as string;
-      onImageUpload(result);
+      try {
+        const { normalizeToRasterImage } = await import("@/lib/imageUtils");
+        const safe = await normalizeToRasterImage(result);
+        onImageUpload(safe);
+      } catch (err) {
+        console.error("Failed to normalize image:", err);
+        toast.error("This image format isn't supported. Try a PNG or JPG.");
+      }
     };
     reader.readAsDataURL(file);
   };
