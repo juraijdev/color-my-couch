@@ -21,6 +21,8 @@ interface BackgroundPlacerProps {
   onAddMoreFurniture?: () => void;
   /** Remove a single furniture piece by index */
   onRemoveFurniture?: (index: number) => void;
+  /** Preselected background image (data URL) — e.g. from Suggest Colors flow */
+  initialBackgroundImage?: string | null;
 }
 
 export function BackgroundPlacer({
@@ -28,8 +30,9 @@ export function BackgroundPlacer({
   onClose,
   onAddMoreFurniture,
   onRemoveFurniture,
+  initialBackgroundImage = null,
 }: BackgroundPlacerProps) {
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(initialBackgroundImage);
   const [compositedImage, setCompositedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);

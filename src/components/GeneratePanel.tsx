@@ -27,6 +27,10 @@ interface GeneratePanelProps {
   onAddMoreFurniture?: () => void;
   /** Remove one customized furniture by index */
   onRemoveFurniture?: (index: number) => void;
+  /** Preselected background image to forward to BackgroundPlacer */
+  initialBackgroundImage?: string | null;
+  /** If true, auto-open the BackgroundPlacer once a generatedImage exists */
+  autoOpenPlacer?: boolean;
 }
 
 export function GeneratePanel({
@@ -39,11 +43,18 @@ export function GeneratePanel({
   allFurnitureImages = [],
   onAddMoreFurniture,
   onRemoveFurniture,
+  initialBackgroundImage = null,
+  autoOpenPlacer = false,
 }: GeneratePanelProps) {
   const [fileName, setFileName] = useState("customized-furniture");
   const [format, setFormat] = useState("png");
   const [showExport, setShowExport] = useState(false);
   const [showBackgroundPlacer, setShowBackgroundPlacer] = useState(false);
+
+  // Auto-open the background placer when requested (e.g., Suggest Colors flow)
+  useState(() => {
+    if (autoOpenPlacer && generatedImage) setShowBackgroundPlacer(true);
+  });
 
   const triggerDownload = (dataUrl: string, ext: string) => {
     const link = document.createElement("a");
