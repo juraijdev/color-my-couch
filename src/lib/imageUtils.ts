@@ -220,7 +220,8 @@ export function containImageInTransparentCanvas(
   dataUrl: string,
   targetWidth: number,
   targetHeight: number,
-  maxDimension = 3200
+  maxDimension = 3200,
+  backgroundFill: string | null = null
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
