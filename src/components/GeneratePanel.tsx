@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus } from "lucide-react";
+import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
