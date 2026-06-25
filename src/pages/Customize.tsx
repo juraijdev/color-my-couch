@@ -133,8 +133,10 @@ export default function Customize() {
       }
 
       if (result.output) {
-        // Auto-remove background so the customized furniture is shown on transparent
-        // background in the preview, downloads, and "Place in Background" flow.
+        // Auto-remove background so the customized furniture is shown on a
+        // truly TRANSPARENT background. This way the user can copy/paste or
+        // download the PNG into Excel / Google Sheets / docs without any
+        // grey, white, or checkerboard backdrop attached to the furniture.
         let finalImage: string = result.output;
         try {
           toast.info("Isolating furniture (transparent background)...");
@@ -142,7 +144,8 @@ export default function Customize() {
             result.output,
             sourceDimensions.width,
             sourceDimensions.height,
-            3200
+            3200,
+            null // keep transparent
           );
           const bgResp = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
@@ -158,29 +161,22 @@ export default function Customize() {
           if (bgResp.ok) {
             const bgResult = await bgResp.json();
             if (bgResult?.output) {
+              // Keep the alpha channel — do NOT flatten to white.
               finalImage = await containImageInTransparentCanvas(
                 bgResult.output,
                 sourceDimensions.width,
                 sourceDimensions.height,
-                3200
+                3200,
+                null
               );
-              // Flatten onto a solid white background so the preview and
-              // download always show a clean white backdrop (no grey/black
-              // letterbox bands, no leftover transparency).
-              finalImage = await flattenToWhiteBackground(finalImage);
             } else {
               console.warn("remove-background returned no output, using original recolored image");
-              finalImage = await flattenToWhiteBackground(finalImage);
             }
           } else {
             console.warn("remove-background failed", bgResp.status);
-            finalImage = await flattenToWhiteBackground(finalImage);
           }
         } catch (bgErr) {
           console.warn("Background removal skipped:", bgErr);
-          try {
-            finalImage = await flattenToWhiteBackground(finalImage);
-          } catch {}
         }
 
         setGeneratedImage(finalImage);
