@@ -24,7 +24,7 @@ serve(async (req) => {
       });
     }
 
-    const prompt = `You are a background removal tool. Your ONLY task is to remove the entire background from this furniture product photo and return a PNG with a fully TRANSPARENT background.
+    const prompt = `You are a background cleanup tool. Your ONLY task is to remove the entire original background from this furniture product photo and place the furniture on a plain solid white background (#ffffff).
 
 ABSOLUTE IRON-CLAD RULES:
 
@@ -32,17 +32,17 @@ ABSOLUTE IRON-CLAD RULES:
 
 2. ZERO STRUCTURAL CHANGES: Do NOT add, remove, reshape, resize, rotate, recolor, or alter any part of the furniture. Every leg, panel, handle, shelf, divider, trim strip, lip, edge cap, and caster must stay identical.
 
-3. FULL TRANSPARENT BACKGROUND: Replace EVERYTHING that is not the furniture (walls, floor, props, contact shadow on the floor, environment) with full transparency (alpha = 0). Output a PNG with a real alpha channel — not a white, gray, or checkered fill.
+3. FULL SOLID WHITE BACKGROUND: Replace EVERYTHING that is not the furniture (walls, floor, props, contact shadow on the floor, environment) with plain solid white (#ffffff). Do NOT use transparency, gray, black, checkerboard, dots, columns, pattern, texture, gradient, or any visible background design.
 
 4. CLEAN EDGES: Cut precisely along the true silhouette of the furniture. Preserve fine details and thin parts (legs, handles, trim). Do NOT leave background halos, fringes, or color spill around the furniture.
 
-5. SAME FRAMING AND FULL OBJECT: Keep the same camera angle, perspective, full object size ratio, original canvas orientation, and original aspect ratio. Do NOT zoom in or crop the furniture itself. For wide/landscape/front-view buffet tables, the output must remain wide landscape and must preserve the entire left-to-right width, top surface, legs, front panels, handles, and every edge exactly. Never convert a front-view buffet table into a side view or 3/4 view. The furniture should sit in roughly the same position within the frame, with transparent pixels around it if needed.
+5. SAME FRAMING AND FULL OBJECT: Keep the same camera angle, perspective, full object size ratio, original canvas orientation, and original aspect ratio. Do NOT zoom in or crop the furniture itself. For wide/landscape/front-view buffet tables, the output must remain wide landscape and must preserve the entire left-to-right width, top surface, legs, front panels, handles, and every edge exactly. Never convert a front-view buffet table into a side view or 3/4 view. The furniture should fill the image as much as possible while staying fully visible, with only a little white margin when needed.
 
-6. NO NEW CONTENT: Do NOT add a new background, gradient, drop shadow, reflection, floor, surface, or any decorative element. The area outside the furniture must be 100% transparent.
+6. NO NEW CONTENT: Do NOT add a new scene, gradient, checkerboard, drop shadow, reflection, floor, surface, or any decorative element. The area outside the furniture must be plain white only.
 
 7. NO ARTISTIC INTERPRETATION: This is a strict mechanical background-removal task. Output the same furniture, isolated, on transparent background.
 
-Output a single PNG image of the furniture with a fully transparent alpha channel. Do not render checkerboard, black, white, dots, or any visible background pattern — those areas must be truly transparent pixels.`;
+Output a single PNG image of the furniture on a clean solid white background. Never render checkerboard, black/gray columns, dots, or transparency preview patterns.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
