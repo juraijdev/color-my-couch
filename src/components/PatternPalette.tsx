@@ -146,6 +146,7 @@ export interface PatternOption {
   name: string;
   description: string;
   imageUrl: string;
+  code?: string;
 }
 
 export interface PatternCategory {
