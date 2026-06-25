@@ -133,10 +133,9 @@ export default function Customize() {
       }
 
       if (result.output) {
-        // Put the customized furniture onto a clean white canvas. This avoids
-        // any visible checkerboard/gray transparency preview when copying or
-        // downloading into Excel / Google Sheets while keeping the furniture
-        // shape, ratio, and customization result unchanged.
+        // Put the customized furniture onto a clean white canvas without any
+        // second AI/background-removal pass. This keeps the recolored furniture
+        // pixels exactly as returned by customization and avoids shape changes.
         let finalImage: string = result.output;
         try {
           toast.info("Preparing furniture on white background...");
@@ -147,44 +146,16 @@ export default function Customize() {
             3200,
             "#ffffff"
           );
-          const bgResp = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-              },
-              body: JSON.stringify({ image: whiteReadyImage }),
-            }
-          );
-          if (bgResp.ok) {
-            const bgResult = await bgResp.json();
-            if (bgResult?.output) {
-              finalImage = await flattenToWhiteBackground(await containImageInTransparentCanvas(
-                bgResult.output,
-                sourceDimensions.width,
-                sourceDimensions.height,
-                3200,
-                "#ffffff"
-              ));
-            } else {
-              console.warn("remove-background returned no output, using original recolored image");
-              finalImage = await flattenToWhiteBackground(whiteReadyImage);
-            }
-          } else {
-            console.warn("remove-background failed", bgResp.status);
-            finalImage = await flattenToWhiteBackground(whiteReadyImage);
-          }
+          finalImage = await flattenToWhiteBackground(whiteReadyImage);
         } catch (bgErr) {
-          console.warn("Background removal skipped:", bgErr);
+          console.warn("White background preparation skipped:", bgErr);
           finalImage = await flattenToWhiteBackground(finalImage);
         }
 
         // Tight-crop the white background so the furniture fills the frame
         // (only small white margin remains) — does NOT alter furniture pixels.
         try {
-          finalImage = await tightCropToWhiteCanvas(finalImage, 245, 0.03);
+          finalImage = await tightCropToWhiteCanvas(finalImage, 248, 0.015);
         } catch (cropErr) {
           console.warn("Tight crop skipped:", cropErr);
         }

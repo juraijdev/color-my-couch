@@ -264,9 +264,11 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 5. IDENTICAL BACKGROUND: The background, floor, shadows, reflections, and surrounding environment must be completely unchanged.
 
+5A. NO CUTOUT / NO BACKGROUND REMOVAL: Do NOT remove the background, do NOT create a product cutout, do NOT replace the background with white/transparent/checkerboard, and do NOT mask, extract, crop, resize, or recenter the furniture. The app will handle any final white export background separately. Your output must remain the same fixed photo with only the assigned part colors/materials changed.
+
 6. IDENTICAL LIGHTING: Same light direction, intensity, highlights, specular reflections, and ambient occlusion. Only the material's response to light changes.
 
-7. COLOR/TEXTURE CHANGE ONLY: Extract the color, grain pattern, and surface texture from each reference pattern image. Apply that finish ONLY to the surface of the specified existing part. The underlying 3D shading, form shadows, and highlight contours must remain — just recolored to match the new material.
+7. COLOR/TEXTURE CHANGE ONLY: Extract the color, grain pattern, and surface texture from each reference pattern image. Apply that finish ONLY to the surface of the specified existing part. The underlying 3D shading, form shadows, highlight contours, panel seams, holes, handles, legs, cutouts, and every furniture edge must remain pixel-aligned with the original — just recolored to match the new material.
 
 8. UNSPECIFIED PARTS UNTOUCHED: Any furniture part NOT listed above must remain 100% identical to the input — same color, same texture, same everything.
 
