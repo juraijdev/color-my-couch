@@ -110,11 +110,13 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
     };
 
     const assignPattern = (partId: string, pattern: PatternOption) => {
-      const newAssignments = new Map(patternAssignments);
-      newAssignments.set(partId, pattern);
-      setPatternAssignments(newAssignments);
-      onSelectionChange?.(newAssignments.size > 0);
-      
+      setPatternAssignments((prev) => {
+        const next = new Map(prev);
+        next.set(partId, pattern);
+        onSelectionChange?.(next.size > 0);
+        return next;
+      });
+
       const part = parts.find(p => p.id === partId);
       if (part) {
         toast.success(`Applied ${pattern.name} to ${part.name}`);
