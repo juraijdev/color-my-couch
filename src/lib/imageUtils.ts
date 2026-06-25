@@ -184,6 +184,89 @@ export function flattenToWhiteBackground(dataUrl: string): Promise<string> {
   });
 }
 
+/**
+ * Tightly crop a (mostly white-background) furniture image to the furniture
+ * silhouette and re-place it on a clean white canvas with only a small
+ * margin so the furniture fills the frame instead of floating in a sea of
+ * white. Does not alter the furniture pixels themselves.
+ *
+ * - whiteThreshold: pixels brighter than this (per channel) AND with alpha
+ *   ~opaque are treated as background.
+ * - marginRatio: fraction of the cropped longest side to keep as white
+ *   margin around the furniture (e.g. 0.04 = 4%).
+ */
+export function tightCropToWhiteCanvas(
+  dataUrl: string,
+  whiteThreshold = 245,
+  marginRatio = 0.04
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const src = document.createElement('canvas');
+      src.width = w;
+      src.height = h;
+      const sctx = src.getContext('2d');
+      if (!sctx) { reject(new Error('Failed to get canvas context')); return; }
+      sctx.fillStyle = '#ffffff';
+      sctx.fillRect(0, 0, w, h);
+      sctx.drawImage(img, 0, 0, w, h);
+      let data: Uint8ClampedArray;
+      try {
+        data = sctx.getImageData(0, 0, w, h).data;
+      } catch (e) {
+        // CORS or other read failure — fall back to original image.
+        resolve(dataUrl);
+        return;
+      }
+
+      let minX = w, minY = h, maxX = -1, maxY = -1;
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4;
+          const r = data[i], g = data[i + 1], b = data[i + 2];
+          // Non-white pixel = part of furniture
+          if (r < whiteThreshold || g < whiteThreshold || b < whiteThreshold) {
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      // No furniture detected — return original.
+      if (maxX < 0 || maxY < 0 || maxX <= minX || maxY <= minY) {
+        resolve(dataUrl);
+        return;
+      }
+
+      const cropW = maxX - minX + 1;
+      const cropH = maxY - minY + 1;
+      const margin = Math.round(Math.max(cropW, cropH) * marginRatio);
+      const outW = cropW + margin * 2;
+      const outH = cropH + margin * 2;
+
+      const out = document.createElement('canvas');
+      out.width = outW;
+      out.height = outH;
+      const octx = out.getContext('2d');
+      if (!octx) { reject(new Error('Failed to get canvas context')); return; }
+      octx.imageSmoothingEnabled = true;
+      octx.imageSmoothingQuality = 'high';
+      octx.fillStyle = '#ffffff';
+      octx.fillRect(0, 0, outW, outH);
+      octx.drawImage(src, minX, minY, cropW, cropH, margin, margin, cropW, cropH);
+      resolve(out.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Failed to tight-crop image'));
+    img.src = dataUrl;
+  });
+}
+
 export interface ImageDimensions {
   width: number;
   height: number;

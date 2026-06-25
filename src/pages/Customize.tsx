@@ -7,7 +7,7 @@ import { PatternOption } from "@/components/PatternPalette";
 import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
-import { containImageInTransparentCanvas, flattenToWhiteBackground, getImageDimensions, imageUrlToBase64 } from "@/lib/imageUtils";
+import { containImageInTransparentCanvas, flattenToWhiteBackground, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
 
 export default function Customize() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -179,6 +179,14 @@ export default function Customize() {
         } catch (bgErr) {
           console.warn("Background removal skipped:", bgErr);
           finalImage = await flattenToWhiteBackground(finalImage);
+        }
+
+        // Tight-crop the white background so the furniture fills the frame
+        // (only small white margin remains) — does NOT alter furniture pixels.
+        try {
+          finalImage = await tightCropToWhiteCanvas(finalImage, 245, 0.03);
+        } catch (cropErr) {
+          console.warn("Tight crop skipped:", cropErr);
         }
 
         setGeneratedImage(finalImage);
