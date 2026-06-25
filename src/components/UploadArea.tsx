@@ -1,7 +1,8 @@
-import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { Upload, ImagePlus, Sparkles, ArrowRight } from "lucide-react";
+import { useState, useRef, useEffect, DragEvent, ChangeEvent } from "react";
+import { Upload, ImagePlus, Sparkles, ArrowRight, Clipboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface UploadAreaProps {
   onImageUpload: (imageDataUrl: string) => void;
@@ -45,6 +46,51 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
       onImageUpload(result);
     };
     reader.readAsDataURL(file);
+  };
+
+  // Listen for paste anywhere on the page (Ctrl/Cmd+V from Google Sheets, screenshots, etc.)
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            e.preventDefault();
+            processFile(file);
+            toast.success("Image pasted from clipboard");
+            return;
+          }
+        }
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, []);
+
+  const handlePasteButton = async () => {
+    try {
+      if (!navigator.clipboard || !(navigator.clipboard as any).read) {
+        toast.info("Press Ctrl/Cmd+V to paste an image");
+        return;
+      }
+      const items = await (navigator.clipboard as any).read();
+      for (const item of items) {
+        const imageType = item.types.find((t: string) => t.startsWith("image/"));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const file = new File([blob], "pasted-image.png", { type: imageType });
+          processFile(file);
+          toast.success("Image pasted from clipboard");
+          return;
+        }
+      }
+      toast.error("No image found in clipboard");
+    } catch (err) {
+      toast.info("Press Ctrl/Cmd+V to paste an image");
+    }
   };
 
   return (
@@ -101,14 +147,27 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
               {isDragging ? "Drop your image here" : "Drag & drop your furniture image"}
             </h3>
             <p className="text-muted-foreground">
-              or <span className="text-primary font-medium">browse files</span> • PNG, JPG up to 10MB
+              or <span className="text-primary font-medium">browse files</span> • paste with Ctrl/Cmd+V • PNG, JPG up to 10MB
             </p>
           </div>
 
-          <Button variant="default" size="lg" className="mt-2">
-            <Upload className="w-5 h-5 mr-2" />
-            Choose Image
-          </Button>
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+            <Button variant="default" size="lg">
+              <Upload className="w-5 h-5 mr-2" />
+              Choose Image
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePasteButton();
+              }}
+            >
+              <Clipboard className="w-5 h-5 mr-2" />
+              Paste from Clipboard
+            </Button>
+          </div>
         </div>
       </div>
 
