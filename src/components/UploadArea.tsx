@@ -48,6 +48,51 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
     reader.readAsDataURL(file);
   };
 
+  // Listen for paste anywhere on the page (Ctrl/Cmd+V from Google Sheets, screenshots, etc.)
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            e.preventDefault();
+            processFile(file);
+            toast.success("Image pasted from clipboard");
+            return;
+          }
+        }
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, []);
+
+  const handlePasteButton = async () => {
+    try {
+      if (!navigator.clipboard || !(navigator.clipboard as any).read) {
+        toast.info("Press Ctrl/Cmd+V to paste an image");
+        return;
+      }
+      const items = await (navigator.clipboard as any).read();
+      for (const item of items) {
+        const imageType = item.types.find((t: string) => t.startsWith("image/"));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const file = new File([blob], "pasted-image.png", { type: imageType });
+          processFile(file);
+          toast.success("Image pasted from clipboard");
+          return;
+        }
+      }
+      toast.error("No image found in clipboard");
+    } catch (err) {
+      toast.info("Press Ctrl/Cmd+V to paste an image");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
       {/* Welcome message */}
