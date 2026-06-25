@@ -131,13 +131,15 @@ export default function Customize() {
             },
             body: JSON.stringify({
               backgroundImage,
-              parts: parts.map((p) => ({
-                id: p.id,
-                name: p.name,
-                material: p.material,
-                currentColor: p.currentColor,
-                description: p.description,
-              })),
+              parts: parts
+                .filter((p) => !/(wheel|caster|castor|roller|tyre|tire)/i.test(`${p.name} ${p.material} ${p.description ?? ""}`))
+                .map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  material: p.material,
+                  currentColor: p.currentColor,
+                  description: p.description,
+                })),
               availablePatterns: patternCategories.flatMap((cat) =>
                 cat.patterns.map((p) => ({
                   id: p.id,
