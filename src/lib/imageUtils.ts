@@ -38,6 +38,47 @@ export async function imageUrlToBase64(imageUrl: string): Promise<string> {
 }
 
 /**
+ * Normalize any uploaded/pasted image (including SVG, GIF, BMP, HEIC fallbacks)
+ * into a safe rasterized PNG data URL. The AI gateway rejects vector formats
+ * like image/svg+xml, so we always rasterize before sending.
+ */
+export function normalizeToRasterImage(
+  dataUrl: string,
+  maxDimension = 2400
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // Already a safe raster type? Pass through.
+    if (/^data:image\/(png|jpeg|jpg|webp);/i.test(dataUrl)) {
+      resolve(dataUrl);
+      return;
+    }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      let w = img.naturalWidth || 1024;
+      let h = img.naturalHeight || 1024;
+      if (w > maxDimension || h > maxDimension) {
+        const ratio = Math.min(maxDimension / w, maxDimension / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Failed to rasterize image'));
+    img.src = dataUrl;
+  });
+}
+
+/**
  * Compress/resize an image to reduce payload size for API calls.
  * Keeps aspect ratio, caps at maxDimension, uses JPEG quality.
  */
