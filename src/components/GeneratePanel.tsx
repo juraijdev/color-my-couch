@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BackgroundPlacer } from "@/components/BackgroundPlacer";
-import { resizeTransparentPng } from "@/lib/imageUtils";
+import { flattenToWhiteBackground, resizeTransparentPng } from "@/lib/imageUtils";
 
 interface GeneratePanelProps {
   originalImage: string | null;
@@ -57,8 +57,8 @@ export function GeneratePanel({
   const handleDownload = async () => {
     if (!generatedImage) return;
     if (format === "png") {
-      const transparentPng = await resizeTransparentPng(generatedImage, 2400);
-      triggerDownload(transparentPng, "png");
+      const whitePng = await flattenToWhiteBackground(await resizeTransparentPng(generatedImage, 2400));
+      triggerDownload(whitePng, "png");
       return;
     }
 
@@ -68,8 +68,8 @@ export function GeneratePanel({
   const handleCopyToClipboard = async () => {
     if (!generatedImage) return;
     try {
-      const transparentPng = await resizeTransparentPng(generatedImage, 2400);
-      const blob = await (await fetch(transparentPng)).blob();
+      const whitePng = await flattenToWhiteBackground(await resizeTransparentPng(generatedImage, 2400));
+      const blob = await (await fetch(whitePng)).blob();
       if (!navigator.clipboard || !(window as any).ClipboardItem) {
         toast.error("Clipboard copy not supported in this browser. Use Download instead.");
         return;
@@ -77,7 +77,7 @@ export function GeneratePanel({
       await navigator.clipboard.write([
         new (window as any).ClipboardItem({ "image/png": blob }),
       ]);
-      toast.success("Furniture copied (transparent PNG). Paste into Excel or Sheets.");
+      toast.success("Furniture copied on white background. Paste into Excel or Sheets.");
     } catch (err) {
       console.error("Copy failed:", err);
       toast.error("Couldn't copy image. Try Download instead.");
@@ -147,7 +147,7 @@ export function GeneratePanel({
                 className="max-w-full max-h-[300px] object-contain rounded-xl shadow-xl animate-scale-in"
               />
               <div className="absolute top-2 left-2 px-2 py-1 rounded-full bg-background/80 backdrop-blur text-[10px] font-medium text-muted-foreground">
-                Transparent background
+                White background
               </div>
               <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
                 <Check className="w-3 h-3" />
@@ -258,7 +258,7 @@ export function GeneratePanel({
               onClick={handleCopyToClipboard}
             >
               <Copy className="w-4 h-4 mr-2" />
-              Copy Furniture (Transparent PNG)
+              Copy Furniture (White Background)
             </Button>
 
             <Button
@@ -300,8 +300,8 @@ export function GeneratePanel({
                 </div>
 
                 <p className="text-[11px] text-muted-foreground leading-snug">
-                  Furniture is already isolated on a transparent background. PNG/WebP
-                  preserve transparency; JPG will save with a white background.
+                  Furniture is saved on a clean white background so it pastes cleanly
+                  into Excel or Google Sheets without checkerboard.
                 </p>
 
                 <Button className="w-full" onClick={handleDownload}>

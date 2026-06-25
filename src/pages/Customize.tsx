@@ -133,19 +133,19 @@ export default function Customize() {
       }
 
       if (result.output) {
-        // Auto-remove background so the customized furniture is shown on a
-        // truly TRANSPARENT background. This way the user can copy/paste or
-        // download the PNG into Excel / Google Sheets / docs without any
-        // grey, white, or checkerboard backdrop attached to the furniture.
+        // Put the customized furniture onto a clean white canvas. This avoids
+        // any visible checkerboard/gray transparency preview when copying or
+        // downloading into Excel / Google Sheets while keeping the furniture
+        // shape, ratio, and customization result unchanged.
         let finalImage: string = result.output;
         try {
-          toast.info("Isolating furniture (transparent background)...");
-          const transparentReadyImage = await containImageInTransparentCanvas(
+          toast.info("Preparing furniture on white background...");
+          const whiteReadyImage = await containImageInTransparentCanvas(
             result.output,
             sourceDimensions.width,
             sourceDimensions.height,
             3200,
-            null // keep transparent
+            "#ffffff"
           );
           const bgResp = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
@@ -155,28 +155,30 @@ export default function Customize() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
               },
-              body: JSON.stringify({ image: transparentReadyImage }),
+              body: JSON.stringify({ image: whiteReadyImage }),
             }
           );
           if (bgResp.ok) {
             const bgResult = await bgResp.json();
             if (bgResult?.output) {
-              // Keep the alpha channel — do NOT flatten to white.
-              finalImage = await containImageInTransparentCanvas(
+              finalImage = await flattenToWhiteBackground(await containImageInTransparentCanvas(
                 bgResult.output,
                 sourceDimensions.width,
                 sourceDimensions.height,
                 3200,
-                null
-              );
+                "#ffffff"
+              ));
             } else {
               console.warn("remove-background returned no output, using original recolored image");
+              finalImage = await flattenToWhiteBackground(whiteReadyImage);
             }
           } else {
             console.warn("remove-background failed", bgResp.status);
+            finalImage = await flattenToWhiteBackground(whiteReadyImage);
           }
         } catch (bgErr) {
           console.warn("Background removal skipped:", bgErr);
+          finalImage = await flattenToWhiteBackground(finalImage);
         }
 
         setGeneratedImage(finalImage);
