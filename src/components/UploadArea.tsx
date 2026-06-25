@@ -147,14 +147,27 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
               {isDragging ? "Drop your image here" : "Drag & drop your furniture image"}
             </h3>
             <p className="text-muted-foreground">
-              or <span className="text-primary font-medium">browse files</span> • PNG, JPG up to 10MB
+              or <span className="text-primary font-medium">browse files</span> • paste with Ctrl/Cmd+V • PNG, JPG up to 10MB
             </p>
           </div>
 
-          <Button variant="default" size="lg" className="mt-2">
-            <Upload className="w-5 h-5 mr-2" />
-            Choose Image
-          </Button>
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+            <Button variant="default" size="lg">
+              <Upload className="w-5 h-5 mr-2" />
+              Choose Image
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePasteButton();
+              }}
+            >
+              <Clipboard className="w-5 h-5 mr-2" />
+              Paste from Clipboard
+            </Button>
+          </div>
         </div>
       </div>
 
