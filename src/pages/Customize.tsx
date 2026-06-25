@@ -170,12 +170,30 @@ export default function Customize() {
 
   const acceptSuggestions = useCallback(() => {
     if (!suggestions || !furnitureEditorRef.current) return;
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const partsById = new Map(detectedParts.map((p) => [p.id, p]));
+    const partsByNorm = new Map(detectedParts.map((p) => [norm(p.id + p.name), p]));
+    const partsByName = new Map(detectedParts.map((p) => [norm(p.name), p]));
+    const patternsByNorm = new Map(allPatterns.map((p) => [norm(p.id), p]));
+    const patternsByCode = new Map(allPatterns.filter((p) => p.code).map((p) => [norm(p.code!), p]));
+    const patternsByName = new Map(allPatterns.map((p) => [norm(p.name), p]));
+
     let applied = 0;
     suggestions.forEach((s) => {
-      const pattern = patternsById.get(s.patternId);
-      if (pattern) {
-        furnitureEditorRef.current!.assignPatternToPart(s.partId, pattern);
+      const part =
+        partsById.get(s.partId) ||
+        partsByNorm.get(norm(s.partId)) ||
+        partsByName.get(norm(s.partId));
+      const pattern =
+        patternsById.get(s.patternId) ||
+        patternsByNorm.get(norm(s.patternId)) ||
+        patternsByCode.get(norm(s.patternId)) ||
+        patternsByName.get(norm(s.patternId));
+      if (part && pattern) {
+        furnitureEditorRef.current!.assignPatternToPart(part.id, pattern);
         applied++;
+      } else {
+        console.warn("Suggestion skipped — no match:", s, { part, pattern });
       }
     });
     if (applied === 0) {
@@ -184,12 +202,12 @@ export default function Customize() {
     }
     setSuggestionsApplied(true);
     setAutoOpenPlacerAfterGen(true);
-    toast.success(`Applied ${applied} suggested colors. Generating design...`);
+    toast.success(`Applied ${applied}/${suggestions.length} suggested colors. Generating design...`);
     // Defer to next tick so state updates flush before generating
     setTimeout(() => {
       handleGenerate();
-    }, 50);
-  }, [suggestions, patternsById]);
+    }, 100);
+  }, [suggestions, patternsById, detectedParts, allPatterns]);
 
   const denySuggestions = useCallback(() => {
     setSuggestions(null);
