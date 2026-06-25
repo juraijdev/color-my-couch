@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.place-in-background]
 verify_jwt = false
+
+[functions.suggest-colors]
+verify_jwt = false
