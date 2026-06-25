@@ -37,6 +37,7 @@ interface FurnitureEditorProps {
   selectedPattern: PatternOption | null;
   onSelectionChange?: (hasSelection: boolean) => void;
   onBack?: () => void;
+  onPartsDetected?: (parts: FurniturePart[]) => void;
 }
 
 export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorProps>(
