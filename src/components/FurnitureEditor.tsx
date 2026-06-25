@@ -11,6 +11,7 @@ export interface FurnitureEditorRef {
   hasSelection: () => boolean;
   clearSelection: () => void;
   assignPatternToPart: (partId: string, pattern: PatternOption) => void;
+  assignPatternsBulk: (entries: Array<{ partId: string; pattern: PatternOption }>) => number;
 }
 
 export interface FurniturePart {
