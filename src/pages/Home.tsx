@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Palette, Sparkles, Upload, Layers, Shield, Leaf } from "lucide-react";
+import { ArrowRight, Palette, Sparkles, Upload, Layers, Shield, Leaf, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -32,7 +32,13 @@ export default function Home() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="h-13 px-8 text-base rounded-lg">
+              <Button asChild size="lg" variant="outline" className="h-13 px-8 text-base rounded-lg border-primary/40 text-primary hover:bg-primary/5">
+                <Link to="/customize?mode=suggest">
+                  <Wand2 className="w-5 h-5 mr-2" />
+                  Suggest Colors from Room
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="lg" className="h-13 px-6 text-base rounded-lg">
                 <a href="#how-it-works">
                   Learn More
                 </a>
