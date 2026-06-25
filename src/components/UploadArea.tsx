@@ -1,7 +1,8 @@
-import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { Upload, ImagePlus, Sparkles, ArrowRight } from "lucide-react";
+import { useState, useRef, useEffect, DragEvent, ChangeEvent } from "react";
+import { Upload, ImagePlus, Sparkles, ArrowRight, Clipboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface UploadAreaProps {
   onImageUpload: (imageDataUrl: string) => void;
