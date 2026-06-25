@@ -11,6 +11,7 @@ export interface FurnitureEditorRef {
   hasSelection: () => boolean;
   clearSelection: () => void;
   assignPatternToPart: (partId: string, pattern: PatternOption) => void;
+  assignPatternsBulk: (entries: Array<{ partId: string; pattern: PatternOption }>) => number;
 }
 
 export interface FurniturePart {
@@ -157,6 +158,21 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
       hasSelection: () => patternAssignments.size > 0,
       clearSelection: clearAllAssignments,
       assignPatternToPart: assignPattern,
+      assignPatternsBulk: (entries) => {
+        let applied = 0;
+        setPatternAssignments((prev) => {
+          const next = new Map(prev);
+          entries.forEach(({ partId, pattern }) => {
+            if (parts.find((p) => p.id === partId)) {
+              next.set(partId, pattern);
+              applied++;
+            }
+          });
+          onSelectionChange?.(next.size > 0);
+          return next;
+        });
+        return applied;
+      },
     }));
 
     return (
