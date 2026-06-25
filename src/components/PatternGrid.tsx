@@ -189,7 +189,7 @@ export function PatternGrid({ selectedPattern, onPatternSelect, disabled }: Patt
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-primary truncate">
-                Selected: {selectedPattern.name}
+                Selected: {selectedPattern.code ? `${selectedPattern.code} — ${selectedPattern.name}` : selectedPattern.name}
               </p>
               <p className="text-xs text-muted-foreground">
                 Click on a furniture part to apply
