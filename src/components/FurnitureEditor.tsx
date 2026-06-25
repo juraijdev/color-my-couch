@@ -41,7 +41,7 @@ interface FurnitureEditorProps {
 }
 
 export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorProps>(
-  ({ imageUrl, selectedPattern, onSelectionChange, onBack }, ref) => {
+  ({ imageUrl, selectedPattern, onSelectionChange, onBack, onPartsDetected }, ref) => {
     const [parts, setParts] = useState<FurniturePart[]>([]);
     const [patternAssignments, setPatternAssignments] = useState<Map<string, PatternOption>>(new Map());
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -96,6 +96,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
         if (data.parts && data.parts.length > 0) {
           setParts(data.parts);
           setHasAnalyzed(true);
+          onPartsDetected?.(data.parts);
           toast.success(`Found ${data.parts.length} furniture parts!`);
         } else {
           toast.error("No distinct parts found. Try a clearer image.");
