@@ -259,6 +259,15 @@ export function GeneratePanel({
 
             <Button
               variant="outline"
+              className="w-full border-primary/30 text-primary hover:bg-primary/10"
+              onClick={handleCopyToClipboard}
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copy Furniture (Transparent PNG)
+            </Button>
+
+            <Button
+              variant="outline"
               className="w-full"
               onClick={() => setShowExport(!showExport)}
             >
