@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Download, Loader2, ImageIcon, Sparkles, RotateCcw, Check, Image as ImageIconLucide, Plus, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,9 +52,9 @@ export function GeneratePanel({
   const [showBackgroundPlacer, setShowBackgroundPlacer] = useState(false);
 
   // Auto-open the background placer when requested (e.g., Suggest Colors flow)
-  useState(() => {
+  useEffect(() => {
     if (autoOpenPlacer && generatedImage) setShowBackgroundPlacer(true);
-  });
+  }, [autoOpenPlacer, generatedImage]);
 
   const triggerDownload = (dataUrl: string, ext: string) => {
     const link = document.createElement("a");
