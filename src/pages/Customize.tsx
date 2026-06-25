@@ -168,6 +168,11 @@ export default function Customize() {
     [isSuggestMode, backgroundImage],
   );
 
+  const isNonColorablePart = useCallback((p: { name?: string; material?: string; description?: string }) => {
+    const hay = `${p.name ?? ""} ${p.material ?? ""} ${p.description ?? ""}`.toLowerCase();
+    return /(wheel|caster|castor|roller|tyre|tire)/.test(hay);
+  }, []);
+
   const acceptSuggestions = useCallback(() => {
     if (!suggestions || !furnitureEditorRef.current) return;
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -178,7 +183,7 @@ export default function Customize() {
     const patternsByCode = new Map(allPatterns.filter((p) => p.code).map((p) => [norm(p.code!), p]));
     const patternsByName = new Map(allPatterns.map((p) => [norm(p.name), p]));
 
-    let applied = 0;
+    const entries: Array<{ partId: string; pattern: PatternOption }> = [];
     suggestions.forEach((s) => {
       const part =
         partsById.get(s.partId) ||
@@ -189,13 +194,14 @@ export default function Customize() {
         patternsByNorm.get(norm(s.patternId)) ||
         patternsByCode.get(norm(s.patternId)) ||
         patternsByName.get(norm(s.patternId));
-      if (part && pattern) {
-        furnitureEditorRef.current!.assignPatternToPart(part.id, pattern);
-        applied++;
+      if (part && pattern && !isNonColorablePart(part)) {
+        entries.push({ partId: part.id, pattern });
       } else {
-        console.warn("Suggestion skipped — no match:", s, { part, pattern });
+        console.warn("Suggestion skipped:", s, { part: part?.name, pattern: pattern?.name });
       }
     });
+
+    const applied = furnitureEditorRef.current.assignPatternsBulk(entries);
     if (applied === 0) {
       toast.error("No suggested patterns matched the palette.");
       return;
@@ -203,11 +209,10 @@ export default function Customize() {
     setSuggestionsApplied(true);
     setAutoOpenPlacerAfterGen(true);
     toast.success(`Applied ${applied}/${suggestions.length} suggested colors. Generating design...`);
-    // Defer to next tick so state updates flush before generating
     setTimeout(() => {
       handleGenerate();
-    }, 100);
-  }, [suggestions, patternsById, detectedParts, allPatterns]);
+    }, 150);
+  }, [suggestions, patternsById, detectedParts, allPatterns, isNonColorablePart]);
 
   const denySuggestions = useCallback(() => {
     setSuggestions(null);
