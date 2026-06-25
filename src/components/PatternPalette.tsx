@@ -158,7 +158,6 @@ export interface PatternCategory {
 export const patternCategories: PatternCategory[] = [
   {
     id: "stainless-steel",
-    code: "STAINLESS-STEEL",
     name: "Hairline Stainless Steel",
     patterns: [
       { 
@@ -221,7 +220,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "powder-coat",
-    code: "POWDER-COAT",
     name: "Powder Coat Finishes",
     patterns: [
       { 
@@ -284,7 +282,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "wood-grain",
-    code: "WOOD-GRAIN",
     name: "Wood Grain Finishes",
     patterns: [
       { 
@@ -333,7 +330,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "wood-veneer",
-    code: "WOOD-VENEER",
     name: "Wood Veneer Finishes",
     patterns: [
       { 
@@ -480,7 +476,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "stone-marble",
-    code: "STONE-MARBLE",
     name: "Stone & Marble Finishes",
     patterns: [
       { 
@@ -571,7 +566,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "fabric-textile",
-    code: "FABRIC-TEXTILE",
     name: "Fabric & Textile Finishes",
     patterns: [
       { 
@@ -606,7 +600,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "quartz-terrazzo",
-    code: "QUARTZ-TERRAZZO",
     name: "Quartz & Terrazzo Finishes",
     patterns: [
       { 
@@ -641,7 +634,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "grain-series",
-    code: "GRAIN-SERIES",
     name: "Grain Series Finishes",
     patterns: [
       { 
@@ -676,7 +668,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "tweed-boucle",
-    code: "TWEED-BOUCLE",
     name: "Tweed & Bouclé Finishes",
     patterns: [
       { 
@@ -753,7 +744,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "linen-woven",
-    code: "LINEN-WOVEN",
     name: "Linen & Woven Finishes",
     patterns: [
       { 
@@ -858,7 +848,6 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "canvas-outdoor",
-    code: "CANVAS-OUTDOOR",
     name: "Canvas & Outdoor Fabrics",
     patterns: [
       { 
@@ -921,124 +910,106 @@ export const patternCategories: PatternCategory[] = [
   },
   {
     id: "3d-materials",
-    code: "MATERIALS",
     name: "3D Material Patterns",
     patterns: [
       {
         id: "3d-a136",
-        code: "A136",
         name: "Geo Stripe Silver",
         description: "3D geometric striped panel in silver and charcoal tones",
         imageUrl: A1363DGeoStripe,
       },
       {
         id: "3d-a169",
-        code: "A169",
         name: "Dark Hex Relief",
         description: "3D dark hexagonal relief pattern with graphite finish",
         imageUrl: A1693DDarkHex,
       },
       {
         id: "3d-a207",
-        code: "A207",
         name: "Olive Scale Relief",
         description: "3D olive scalloped pattern with layered scale texture",
         imageUrl: A2073DOliveScale,
       },
       {
         id: "3d-a112",
-        code: "A112",
         name: "Silver Star Facet",
         description: "3D metallic silver starburst panel with faceted geometry",
         imageUrl: A1123DSilverStar,
       },
       {
         id: "3d-a119-2",
-        code: "A119-2",
         name: "Navy Ribbed Panel",
         description: "3D deep navy vertical ribbed panel finish",
         imageUrl: A11923DNavyRibbed,
       },
       {
         id: "3d-a093",
-        code: "A093",
         name: "Aqua Wave Relief",
         description: "3D soft aqua wave panel with flowing vertical texture",
         imageUrl: A0933DAquaWave,
       },
       {
         id: "3d-a110",
-        code: "A110",
         name: "Orange Weave Block",
         description: "3D orange woven block pattern with structured depth",
         imageUrl: A1103DOrangeWeave,
       },
       {
         id: "3d-a034-2",
-        code: "A034-2",
         name: "White Arch Relief",
         description: "3D bright white arch panel with ribbed inset geometry",
         imageUrl: A03423DWhiteArch,
       },
       {
         id: "3d-a034",
-        code: "A034",
         name: "Soft White Arch Relief",
         description: "3D soft white arch panel with subtle ribbed inset texture",
         imageUrl: A0343DSoftWhiteArch,
       },
       {
         id: "3d-a090",
-        code: "A090",
         name: "Indigo Petal Relief",
         description: "3D indigo petal pattern with soft sculpted depth",
         imageUrl: A0903DIndigoPetal,
       },
       {
         id: "3d-a136-2",
-        code: "A136-2",
         name: "White Geo Stripe Relief",
         description: "3D white geometric striped panel with crisp layered depth",
         imageUrl: A13623DWhiteGeoStripe,
       },
       {
         id: "3d-a169-2",
-        code: "A169-2",
         name: "White Hex Relief",
         description: "3D white hexagonal relief pattern with clean faceted geometry",
         imageUrl: A16923DWhiteHex,
       },
       {
         id: "3d-a110-2",
-        code: "A110-2",
         name: "White Weave Block",
         description: "3D white woven block pattern with structured panel depth",
         imageUrl: A11023DWhiteWeave,
       },
       {
         id: "3d-a112-2",
-        code: "A112-2",
         name: "White Star Facet",
         description: "3D white starburst panel with faceted geometric texture",
         imageUrl: A11223DWhiteStarFacet,
       },
       {
         id: "3d-a119-white",
-        code: "A119-WHITE",
         name: "White Ribbed Panel",
         description: "3D white vertical ribbed panel with soft shadowed grooves",
         imageUrl: A11923DWhiteRibbed,
       },
       {
         id: "3d-a034-2-alt",
-        code: "A034-2-ALT",
         name: "Soft White Arch Relief Alt",
         description: "3D soft white arch panel with refined ribbed inset geometry",
         imageUrl: A03423DSoftWhiteArchAlt,
       },
       {
         id: "3d-a093-2",
-        code: "A093-2",
         name: "White Wave Relief",
         description: "3D white wave panel with flowing vertical sculpted texture",
         imageUrl: A09323DWhiteWave,
