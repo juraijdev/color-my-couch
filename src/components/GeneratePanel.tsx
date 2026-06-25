@@ -65,6 +65,25 @@ export function GeneratePanel({
     triggerDownload(generatedImage, format);
   };
 
+  const handleCopyToClipboard = async () => {
+    if (!generatedImage) return;
+    try {
+      const transparentPng = await resizeTransparentPng(generatedImage, 2400);
+      const blob = await (await fetch(transparentPng)).blob();
+      if (!navigator.clipboard || !(window as any).ClipboardItem) {
+        toast.error("Clipboard copy not supported in this browser. Use Download instead.");
+        return;
+      }
+      await navigator.clipboard.write([
+        new (window as any).ClipboardItem({ "image/png": blob }),
+      ]);
+      toast.success("Furniture copied (transparent PNG). Paste into Excel or Sheets.");
+    } catch (err) {
+      console.error("Copy failed:", err);
+      toast.error("Couldn't copy image. Try Download instead.");
+    }
+  };
+
   // Build the list of furniture images for background placement
   const furnitureForPlacement = allFurnitureImages.length > 0
     ? allFurnitureImages
