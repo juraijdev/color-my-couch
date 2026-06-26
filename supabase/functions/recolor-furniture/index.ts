@@ -71,6 +71,8 @@ function getDataImageDimensions(dataUrl: string) {
 
 function buildConsistencyLocks(assignments: PatternAssignment[]) {
   const locks = [
+    "SOURCE PHOTO IS THE ONLY GEOMETRY SOURCE: Pattern/reference images are color/texture swatches only. Never copy any object shape, edge, panel, seam, border, lighting, shadow, or perspective from a pattern/reference image into the furniture photo.",
+    "REPAINT EXISTING PIXELS ONLY: Treat the input furniture photo as a locked pixel layer. Change hue/material texture only inside the already-existing selected part pixels. Do not synthesize replacement furniture, do not redraw edges, and do not repair or beautify the product.",
     "Each listed part location is only a guidance envelope. Recolor ONLY the exact visible pixels of that named part, never the whole rectangle.",
     "Preserve crisp original boundaries between touching parts. No bleed, halo, soft blending, or shared tint across part borders.",
     "Never blend, average, or compromise two different assigned finishes into one shared look.",
@@ -117,8 +119,8 @@ async function generateRecoloredImage(
   messageContent: any[],
 ) {
   const models = [
-    "google/gemini-3.1-flash-image-preview",
     "google/gemini-3-pro-image-preview",
+    "google/gemini-3.1-flash-image-preview",
   ];
 
   let lastDetails = "No content returned";
@@ -307,6 +309,10 @@ Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring exi
         text: prompt
       },
       {
+        type: "text",
+        text: "LOCKED MASTER PHOTO — this image is the ONLY source for furniture shape, viewpoint, part count, edges, silhouette, shadows, crop, and composition. Edit this exact photo in place; do not generate a new furniture object."
+      },
+      {
         type: "image_url",
         image_url: {
           url: body.image
@@ -319,7 +325,7 @@ Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring exi
       if (assignment.patternImageUrl) {
         messageContent.push({
           type: "text",
-          text: `Reference for "${assignment.patternName}" finish to apply to "${assignment.partName}":`
+          text: `COLOR/TEXTURE SWATCH ONLY for "${assignment.patternName}" to apply to the existing pixels of "${assignment.partName}". Ignore any shape, object, edge, panel, lighting, perspective, or composition in this reference image.`
         });
         messageContent.push({
           type: "image_url",
@@ -329,6 +335,17 @@ Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring exi
         });
       }
     }
+
+    messageContent.push({
+      type: "text",
+      text: "FINAL GEOMETRY CHECK BEFORE RETURNING: compare against the locked master photo. The output must have the same furniture silhouette, same every part/edge/leg/panel/divider/top/buffet trim position, same camera view, and same crop. If any part shape changed or any extra part appeared, discard that attempt and return a version with only color/material changed."
+    });
+    messageContent.push({
+      type: "image_url",
+      image_url: {
+        url: body.image
+      }
+    });
 
     const generation = await generateRecoloredImage(LOVABLE_API_KEY, messageContent);
 
