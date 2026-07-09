@@ -140,16 +140,6 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-8 p-4 rounded-lg border border-border bg-muted/40">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Demo Credentials
-            </p>
-            <div className="text-sm font-mono text-foreground space-y-1">
-              <div>Username: <span className="text-primary font-semibold">admin</span></div>
-              <div>Password: <span className="text-primary font-semibold">lush2026</span></div>
-            </div>
-          </div>
-
           <p className="mt-8 text-xs text-center text-muted-foreground">
             By signing in you agree to the{" "}
             <Link to="/" className="underline hover:text-primary">Terms</Link> &{" "}
