@@ -118,7 +118,7 @@ export default function Customize() {
         image_hash: uploadedImageHash,
         image_url: uploadedImage,
         name,
-        parts: detectedParts as unknown as object,
+        parts: JSON.parse(JSON.stringify(detectedParts)),
         created_by: user?.id,
       }],
       { onConflict: "image_hash" },
