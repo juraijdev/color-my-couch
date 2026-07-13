@@ -66,18 +66,41 @@ export default function Customize() {
     return 3;
   };
 
-  const handleImageUpload = useCallback((imageDataUrl: string) => {
+  const handleImageUpload = useCallback(async (imageDataUrl: string) => {
     setUploadedImage(imageDataUrl);
     setGeneratedImage(null);
     setHasSelection(false);
     setDetectedParts([]);
     setSuggestions(null);
     setSuggestionsApplied(false);
+    setPreloadedParts(null);
+    setSavedName("");
+
+    try {
+      const hash = await hashImage(imageDataUrl);
+      setUploadedImageHash(hash);
+      const { data } = await supabase
+        .from("saved_furniture")
+        .select("name,parts")
+        .eq("image_hash", hash)
+        .maybeSingle();
+      if (data?.parts && Array.isArray(data.parts) && data.parts.length > 0) {
+        setPreloadedParts(data.parts as unknown as FurniturePart[]);
+        setSavedName(data.name);
+        toast.success(`Verified furniture recognized: "${data.name}"`);
+        return;
+      }
+    } catch (e) {
+      console.warn("hash lookup failed", e);
+    }
     toast.success("Image uploaded! AI is analyzing the furniture parts...");
   }, []);
 
   const handleImageClear = useCallback(() => {
     setUploadedImage(null);
+    setUploadedImageHash(null);
+    setPreloadedParts(null);
+    setSavedName("");
     setGeneratedImage(null);
     setSelectedPattern(null);
     setHasSelection(false);
@@ -85,6 +108,24 @@ export default function Customize() {
     setSuggestions(null);
     setSuggestionsApplied(false);
   }, []);
+
+  const handleSaveVerified = useCallback(async () => {
+    if (!isAdmin || !uploadedImage || !uploadedImageHash || detectedParts.length === 0) return;
+    const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from("saved_furniture").upsert(
+      {
+        image_hash: uploadedImageHash,
+        image_url: uploadedImage,
+        name,
+        parts: detectedParts as unknown as object,
+        created_by: user?.id,
+      },
+      { onConflict: "image_hash" },
+    );
+    if (error) toast.error(error.message);
+    else toast.success(`Saved "${name}" to the verified library`);
+  }, [isAdmin, uploadedImage, uploadedImageHash, detectedParts, savedName]);
 
   const handlePatternSelect = useCallback((pattern: PatternOption) => {
     setSelectedPattern(pattern);
