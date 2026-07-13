@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Wand2, Check, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { Wand2, Check, X, Loader2, Image as ImageIcon, BookmarkPlus, ShieldCheck } from "lucide-react";
 import { FurnitureEditor, FurnitureEditorRef, FurniturePart, PartPatternAssignment } from "@/components/FurnitureEditor";
 import { PatternGrid } from "@/components/PatternGrid";
 import { GeneratePanel } from "@/components/GeneratePanel";
@@ -10,7 +10,11 @@ import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { containImageInTransparentCanvas, flattenToWhiteBackground, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
+import { hashImage } from "@/lib/imageHash";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Suggestion {
   partId: string;
@@ -21,8 +25,12 @@ interface Suggestion {
 export default function Customize() {
   const [searchParams] = useSearchParams();
   const isSuggestMode = searchParams.get("mode") === "suggest";
+  const { isAdmin } = useAuth();
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImageHash, setUploadedImageHash] = useState<string | null>(null);
+  const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
+  const [savedName, setSavedName] = useState("");
   const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -58,18 +66,41 @@ export default function Customize() {
     return 3;
   };
 
-  const handleImageUpload = useCallback((imageDataUrl: string) => {
+  const handleImageUpload = useCallback(async (imageDataUrl: string) => {
     setUploadedImage(imageDataUrl);
     setGeneratedImage(null);
     setHasSelection(false);
     setDetectedParts([]);
     setSuggestions(null);
     setSuggestionsApplied(false);
+    setPreloadedParts(null);
+    setSavedName("");
+
+    try {
+      const hash = await hashImage(imageDataUrl);
+      setUploadedImageHash(hash);
+      const { data } = await supabase
+        .from("saved_furniture")
+        .select("name,parts")
+        .eq("image_hash", hash)
+        .maybeSingle();
+      if (data?.parts && Array.isArray(data.parts) && data.parts.length > 0) {
+        setPreloadedParts(data.parts as unknown as FurniturePart[]);
+        setSavedName(data.name);
+        toast.success(`Verified furniture recognized: "${data.name}"`);
+        return;
+      }
+    } catch (e) {
+      console.warn("hash lookup failed", e);
+    }
     toast.success("Image uploaded! AI is analyzing the furniture parts...");
   }, []);
 
   const handleImageClear = useCallback(() => {
     setUploadedImage(null);
+    setUploadedImageHash(null);
+    setPreloadedParts(null);
+    setSavedName("");
     setGeneratedImage(null);
     setSelectedPattern(null);
     setHasSelection(false);
@@ -77,6 +108,24 @@ export default function Customize() {
     setSuggestions(null);
     setSuggestionsApplied(false);
   }, []);
+
+  const handleSaveVerified = useCallback(async () => {
+    if (!isAdmin || !uploadedImage || !uploadedImageHash || detectedParts.length === 0) return;
+    const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from("saved_furniture").upsert(
+      [{
+        image_hash: uploadedImageHash,
+        image_url: uploadedImage,
+        name,
+        parts: JSON.parse(JSON.stringify(detectedParts)),
+        created_by: user?.id,
+      }],
+      { onConflict: "image_hash" },
+    );
+    if (error) toast.error(error.message);
+    else toast.success(`Saved "${name}" to the verified library`);
+  }, [isAdmin, uploadedImage, uploadedImageHash, detectedParts, savedName]);
 
   const handlePatternSelect = useCallback((pattern: PatternOption) => {
     setSelectedPattern(pattern);
@@ -305,6 +354,15 @@ export default function Customize() {
           return [...prev, finalImage];
         });
         toast.success("Design generated successfully!");
+        supabase.auth.getUser().then(({ data }) => {
+          supabase.from("ai_usage_log").insert({
+            user_id: data.user?.id,
+            feature: "recolor-furniture",
+            model: "gemini-3-pro-image",
+            status: "success",
+            metadata: { parts: patternAssignments.length },
+          });
+        });
       } else {
         throw new Error("No output image received");
       }
@@ -395,8 +453,29 @@ export default function Customize() {
                 onSelectionChange={handleSelectionChange}
                 onBack={handleImageClear}
                 onPartsDetected={handlePartsDetected}
+                preloadedParts={preloadedParts}
               />
+              {savedName && (
+                <div className="shrink-0 px-4 py-2 bg-primary/5 border-t border-border text-xs flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                  <span>Verified furniture: <strong>{savedName}</strong></span>
+                </div>
+              )}
+              {isAdmin && detectedParts.length > 0 && !preloadedParts && (
+                <div className="shrink-0 p-3 border-t border-border bg-card flex items-center gap-2">
+                  <Input
+                    value={savedName}
+                    onChange={(e) => setSavedName(e.target.value)}
+                    placeholder="Name this verified furniture (e.g. Buffet 120cm)"
+                    className="h-9 text-sm"
+                  />
+                  <Button size="sm" variant="outline" onClick={handleSaveVerified}>
+                    <BookmarkPlus className="w-4 h-4 mr-1" /> Save as verified
+                  </Button>
+                </div>
+              )}
             </div>
+
 
             <div className="w-full lg:w-[420px] xl:w-[480px] border-t lg:border-t-0 lg:border-l border-border flex flex-col overflow-hidden bg-card/50">
               {/* Suggestions panel */}
