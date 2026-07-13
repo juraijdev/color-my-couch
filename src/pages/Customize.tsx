@@ -444,8 +444,27 @@ export default function Customize() {
                 onSelectionChange={handleSelectionChange}
                 onBack={handleImageClear}
                 onPartsDetected={handlePartsDetected}
+                preloadedParts={preloadedParts}
               />
-            </div>
+              {savedName && (
+                <div className="shrink-0 px-4 py-2 bg-primary/5 border-t border-border text-xs flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                  <span>Verified furniture: <strong>{savedName}</strong></span>
+                </div>
+              )}
+              {isAdmin && detectedParts.length > 0 && !preloadedParts && (
+                <div className="shrink-0 p-3 border-t border-border bg-card flex items-center gap-2">
+                  <Input
+                    value={savedName}
+                    onChange={(e) => setSavedName(e.target.value)}
+                    placeholder="Name this verified furniture (e.g. Buffet 120cm)"
+                    className="h-9 text-sm"
+                  />
+                  <Button size="sm" variant="outline" onClick={handleSaveVerified}>
+                    <BookmarkPlus className="w-4 h-4 mr-1" /> Save as verified
+                  </Button>
+                </div>
+              )}
 
             <div className="w-full lg:w-[420px] xl:w-[480px] border-t lg:border-t-0 lg:border-l border-border flex flex-col overflow-hidden bg-card/50">
               {/* Suggestions panel */}
