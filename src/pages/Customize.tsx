@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Wand2, Check, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { Wand2, Check, X, Loader2, Image as ImageIcon, BookmarkPlus, ShieldCheck } from "lucide-react";
 import { FurnitureEditor, FurnitureEditorRef, FurniturePart, PartPatternAssignment } from "@/components/FurnitureEditor";
 import { PatternGrid } from "@/components/PatternGrid";
 import { GeneratePanel } from "@/components/GeneratePanel";
@@ -10,7 +10,11 @@ import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { containImageInTransparentCanvas, flattenToWhiteBackground, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
+import { hashImage } from "@/lib/imageHash";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Suggestion {
   partId: string;
