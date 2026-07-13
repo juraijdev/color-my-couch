@@ -114,13 +114,13 @@ export default function Customize() {
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from("saved_furniture").upsert(
-      {
+      [{
         image_hash: uploadedImageHash,
         image_url: uploadedImage,
         name,
         parts: detectedParts as unknown as object,
         created_by: user?.id,
-      },
+      }],
       { onConflict: "image_hash" },
     );
     if (error) toast.error(error.message);
