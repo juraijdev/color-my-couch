@@ -354,6 +354,15 @@ export default function Customize() {
           return [...prev, finalImage];
         });
         toast.success("Design generated successfully!");
+        supabase.auth.getUser().then(({ data }) => {
+          supabase.from("ai_usage_log").insert({
+            user_id: data.user?.id,
+            feature: "recolor-furniture",
+            model: "gemini-3-pro-image",
+            status: "success",
+            metadata: { parts: patternAssignments.length },
+          });
+        });
       } else {
         throw new Error("No output image received");
       }
