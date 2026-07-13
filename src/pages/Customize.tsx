@@ -465,6 +465,8 @@ export default function Customize() {
                   </Button>
                 </div>
               )}
+            </div>
+
 
             <div className="w-full lg:w-[420px] xl:w-[480px] border-t lg:border-t-0 lg:border-l border-border flex flex-col overflow-hidden bg-card/50">
               {/* Suggestions panel */}
