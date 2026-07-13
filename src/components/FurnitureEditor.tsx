@@ -39,10 +39,11 @@ interface FurnitureEditorProps {
   onSelectionChange?: (hasSelection: boolean) => void;
   onBack?: () => void;
   onPartsDetected?: (parts: FurniturePart[]) => void;
+  preloadedParts?: FurniturePart[] | null;
 }
 
 export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorProps>(
-  ({ imageUrl, selectedPattern, onSelectionChange, onBack, onPartsDetected }, ref) => {
+  ({ imageUrl, selectedPattern, onSelectionChange, onBack, onPartsDetected, preloadedParts }, ref) => {
     const [parts, setParts] = useState<FurniturePart[]>([]);
     const [patternAssignments, setPatternAssignments] = useState<Map<string, PatternOption>>(new Map());
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -50,10 +51,16 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
     
 
     useEffect(() => {
-      if (imageUrl && !hasAnalyzed) {
-        analyzeImage();
+      if (!imageUrl || hasAnalyzed) return;
+      if (preloadedParts && preloadedParts.length > 0) {
+        setParts(preloadedParts);
+        setHasAnalyzed(true);
+        onPartsDetected?.(preloadedParts);
+        toast.success(`Loaded ${preloadedParts.length} verified parts from library`);
+        return;
       }
-    }, [imageUrl]);
+      analyzeImage();
+    }, [imageUrl, preloadedParts]);
 
     useEffect(() => {
       setParts([]);
