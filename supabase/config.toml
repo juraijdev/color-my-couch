@@ -21,3 +21,6 @@ verify_jwt = false
 
 [functions.admin-chat]
 verify_jwt = false
+
+[functions.seed-users]
+verify_jwt = false
