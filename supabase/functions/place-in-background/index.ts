@@ -84,6 +84,11 @@ serve(async (req) => {
       ? `\n\nBACKGROUND IMAGE EXACT DIMENSIONS — MUST MATCH:\n- Width: ${bgWidth}px\n- Height: ${bgHeight}px\n- Aspect ratio: ${bgAspect} (${bgOrientation})\n- The OUTPUT image MUST have the EXACT SAME aspect ratio (${bgAspect}) and orientation (${bgOrientation}). Do NOT change to square. Do NOT change to a different aspect ratio. Do NOT add letterbox/pillarbox bars. Do NOT crop the background to fit a different ratio.\n`
       : "";
 
+    const positionRule = positionHints.length > 0
+      ? `\n\nUSER REPOSITION REQUEST (HIGHEST PRIORITY — MUST FOLLOW):\nThe user was not satisfied with the previous placement and asked to move the furniture. Reposition the furniture in the room to the following zone(s) of the scene: ${positionHints.join(", ").toUpperCase()}.\n- TOP = upper area of the frame / back of the room\n- BOTTOM = lower area of the frame / front of the room\n- LEFT = left side of the room\n- RIGHT = right side of the room\n- CENTER / MIDDLE = centered in the room\nArrange all furniture pieces so they clearly sit in the requested zone(s) while still looking natural, grounded, and proportionate. Preserve every other rule (background, shape, colors, dimensions).\n`
+      : "";
+
+
     const prompt = (isMultiple
       ? `You are a professional interior design compositor. Your task is to take ALL ${furnitureImages.length} furniture pieces from the provided furniture images and place ALL of them together into the room/scene in the background image.
 
