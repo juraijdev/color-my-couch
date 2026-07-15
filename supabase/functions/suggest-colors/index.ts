@@ -90,14 +90,11 @@ ${patternsList}
 
 Return one suggestion per part. Use the exact ids.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(aiCfg.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: aiCfg.headers,
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiCfg.mapModel("google/gemini-2.5-flash"),
         temperature: 0.4,
         messages: [
           { role: "system", content: systemPrompt },
