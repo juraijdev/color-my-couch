@@ -1,5 +1,5 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { Upload, Loader2, Sparkles, RotateCcw, X, Download, Plus, Trash2 } from "lucide-react";
+import { Upload, Loader2, Sparkles, RotateCcw, X, Download, Plus, Check, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,7 +39,13 @@ export function BackgroundPlacer({
   const [showExport, setShowExport] = useState(false);
   const [fileName, setFileName] = useState("furniture-in-room");
   const [format, setFormat] = useState("png");
+  const [satisfaction, setSatisfaction] = useState<"pending" | "yes" | "adjust">("pending");
+  const [positionHints, setPositionHints] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const togglePosition = (pos: string) => {
+    setPositionHints((prev) => (prev.includes(pos) ? prev.filter((p) => p !== pos) : [...prev, pos]));
+  };
 
   const processFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -76,7 +82,7 @@ export function BackgroundPlacer({
     if (file) processFile(file);
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (hints: string[] = []) => {
     if (!backgroundImage) {
       toast.error("Please upload a background image first");
       return;
@@ -88,8 +94,11 @@ export function BackgroundPlacer({
     }
 
     setIsProcessing(true);
+    setSatisfaction("pending");
     toast.info(
-      furnitureImages.length > 1
+      hints.length > 0
+        ? `Repositioning furniture to ${hints.join(", ")}...`
+        : furnitureImages.length > 1
         ? `AI is placing ${furnitureImages.length} furniture pieces in the scene...`
         : "AI is placing your furniture in the scene..."
     );
@@ -112,6 +121,7 @@ export function BackgroundPlacer({
           body: JSON.stringify({
             furnitureImages: compressedFurniture,
             backgroundImage: compressedBackground,
+            positionHints: hints,
           }),
         }
       );
@@ -318,7 +328,7 @@ export function BackgroundPlacer({
       <div className="p-4 border-t border-border space-y-3">
         {!compositedImage ? (
           <Button
-            onClick={handleGenerate}
+            onClick={() => handleGenerate([])}
             disabled={!backgroundImage || isProcessing}
             className={cn(
               "w-full h-11 font-semibold transition-all",
@@ -342,46 +352,148 @@ export function BackgroundPlacer({
           </Button>
         ) : (
           <>
-            <Button variant="outline" className="w-full" onClick={() => setShowExport(!showExport)}>
-              <Download className="w-4 h-4 mr-2" />
-              Download Image
-            </Button>
-
-            {showExport && (
-              <div className="space-y-3 p-3 rounded-lg bg-secondary/50 animate-fade-in">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">File Name</label>
-                  <Input value={fileName} onChange={(e) => setFileName(e.target.value)} className="h-9" />
+            {/* Satisfaction check */}
+            {satisfaction === "pending" && !isProcessing && (
+              <div className="space-y-2 p-3 rounded-lg bg-secondary/50 animate-fade-in">
+                <p className="text-sm font-medium text-center">Are you satisfied with the design?</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={() => setSatisfaction("yes")}
+                  >
+                    <Check className="w-4 h-4 mr-2" />
+                    Yes, looks good
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setSatisfaction("adjust");
+                      setPositionHints([]);
+                    }}
+                  >
+                    Adjust position
+                  </Button>
                 </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Format</label>
-                  <Select value={format} onValueChange={setFormat}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="png">PNG (Best Quality)</SelectItem>
-                      <SelectItem value="jpg">JPG (Smaller Size)</SelectItem>
-                      <SelectItem value="webp">WebP (Web Optimized)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button className="w-full" onClick={handleDownload}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Download {format.toUpperCase()}
-                </Button>
               </div>
             )}
 
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={handleGenerate}
-              disabled={isProcessing}
-            >
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Regenerate
-            </Button>
+            {satisfaction === "adjust" && !isProcessing && (
+              <div className="space-y-3 p-3 rounded-lg bg-secondary/50 animate-fade-in">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">
+                  Where should the furniture go?
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div />
+                  <Button
+                    variant={positionHints.includes("top") ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => togglePosition("top")}
+                  >
+                    <ArrowUp className="w-4 h-4 mr-1" />
+                    Top
+                  </Button>
+                  <div />
+                  <Button
+                    variant={positionHints.includes("left") ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => togglePosition("left")}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1" />
+                    Left
+                  </Button>
+                  <Button
+                    variant={positionHints.includes("middle") ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => togglePosition("middle")}
+                  >
+                    <Target className="w-4 h-4 mr-1" />
+                    Middle
+                  </Button>
+                  <Button
+                    variant={positionHints.includes("right") ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => togglePosition("right")}
+                  >
+                    Right
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                  <div />
+                  <Button
+                    variant={positionHints.includes("bottom") ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => togglePosition("bottom")}
+                  >
+                    <ArrowDown className="w-4 h-4 mr-1" />
+                    Bottom
+                  </Button>
+                  <div />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    className="flex-1"
+                    onClick={() => setSatisfaction("pending")}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    disabled={positionHints.length === 0}
+                    onClick={() => handleGenerate(positionHints)}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Regenerate
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {satisfaction === "yes" && (
+              <>
+                <Button variant="outline" className="w-full" onClick={() => setShowExport(!showExport)}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Image
+                </Button>
+
+                {showExport && (
+                  <div className="space-y-3 p-3 rounded-lg bg-secondary/50 animate-fade-in">
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">File Name</label>
+                      <Input value={fileName} onChange={(e) => setFileName(e.target.value)} className="h-9" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">Format</label>
+                      <Select value={format} onValueChange={setFormat}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="png">PNG (Best Quality)</SelectItem>
+                          <SelectItem value="jpg">JPG (Smaller Size)</SelectItem>
+                          <SelectItem value="webp">WebP (Web Optimized)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button className="w-full" onClick={handleDownload}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download {format.toUpperCase()}
+                    </Button>
+                  </div>
+                )}
+
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => handleGenerate([])}
+                  disabled={isProcessing}
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Regenerate from scratch
+                </Button>
+              </>
+            )}
           </>
         )}
 
