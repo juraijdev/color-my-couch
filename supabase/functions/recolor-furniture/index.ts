@@ -262,9 +262,9 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 4. IDENTICAL CAMERA & COMPOSITION: Same exact camera angle, perspective, focal length, distance, framing, crop, canvas aspect ratio, and composition. The furniture must occupy the EXACT same pixels in the frame. Do NOT zoom in or out. Do NOT recenter. Do NOT crop the left or right ends of long buffet tables.
 
-5. IDENTICAL BACKGROUND: The background, floor, shadows, reflections, and surrounding environment must be completely unchanged.
+5. SOLID WHITE BACKGROUND (MANDATORY): The output MUST place the recolored furniture on a plain solid white (#ffffff) background. Remove the original room, floor, walls, props, and environment completely and replace them with clean pure white. Do NOT keep the original background. Do NOT use gray, gradient, checkerboard, transparency, dots, or any texture — only flat solid white. Preserve only subtle contact shadow directly under the furniture if needed for grounding, otherwise pure white. Keep the same camera angle, framing, canvas aspect ratio, and furniture position/size within the frame; only the surrounding environment is replaced with white.
 
-5A. NO CUTOUT / NO BACKGROUND REMOVAL: Do NOT remove the background, do NOT create a product cutout, do NOT replace the background with white/transparent/checkerboard, and do NOT mask, extract, crop, resize, or recenter the furniture. The app will handle any final white export background separately. Your output must remain the same fixed photo with only the assigned part colors/materials changed.
+5A. CLEAN EDGES: Cut precisely along the true silhouette of the furniture with no background halo, fringe, or color spill. Preserve thin parts (legs, handles, trim) exactly.
 
 6. IDENTICAL LIGHTING: Same light direction, intensity, highlights, specular reflections, and ambient occlusion. Only the material's response to light changes.
 
