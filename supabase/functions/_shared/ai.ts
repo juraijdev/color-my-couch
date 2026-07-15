@@ -53,12 +53,12 @@ export function getAiConfig(): AiConfig {
     return {
       url: "https://ai.gateway.lovable.dev/v1/chat/completions",
       headers: {
-        Authorization: `Bearer ${lovableKey}`,
+        "Lovable-API-Key": lovableKey,
         "Content-Type": "application/json",
       },
       mapModel: (m: string) => m,
       provider: "lovable",
     };
   }
-  throw new Error("No AI key configured. Set GEMINI_API_KEY (self-hosted) or LOVABLE_API_KEY.");
+  throw new Error("No AI key is visible to the backend function runtime. Set GEMINI_API_KEY in the backend .env and pass it into the functions container, or set LOVABLE_API_KEY.");
 }
