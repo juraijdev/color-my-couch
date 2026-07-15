@@ -345,7 +345,7 @@ Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring exi
       }
     });
 
-    const generation = await generateRecoloredImage(LOVABLE_API_KEY, messageContent);
+    const generation = await generateRecoloredImage("", messageContent);
 
     if (generation.status === 429) {
       return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
