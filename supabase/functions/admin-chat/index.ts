@@ -1,5 +1,6 @@
-// Admin-only AI assistant chat. Uses Lovable AI Gateway.
+// Admin-only AI assistant chat.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getAiConfig } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,15 +36,16 @@ Deno.serve(async (req) => {
     const { messages } = await req.json() as { messages: ChatMsg[] };
     if (!Array.isArray(messages)) return json({ error: "messages[] required" }, 400);
 
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!apiKey) return json({ error: "LOVABLE_API_KEY not configured" }, 500);
+    let aiCfg;
+    try { aiCfg = getAiConfig(); }
+    catch (e) { return json({ error: (e as Error).message }, 500); }
 
     const started = Date.now();
-    const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const upstream = await fetch(aiCfg.url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      headers: aiCfg.headers,
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiCfg.mapModel("google/gemini-2.5-flash"),
         messages: [
           { role: "system", content: "You are the AI assistant for LUSHbyGESIGN admin. Help the admin diagnose furniture customization issues, explain how the AI recolor pipeline works (part segmentation, pattern assignment, shape preservation), and suggest fixes. Be concise." },
           ...messages,

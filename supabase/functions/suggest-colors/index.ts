@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getAiConfig } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,8 +35,7 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not set");
+    const aiCfg = getAiConfig();
 
     const body = (await req.json()) as RequestBody;
     if (!body.backgroundImage || !Array.isArray(body.parts) || !Array.isArray(body.availablePatterns)) {
@@ -90,14 +90,11 @@ ${patternsList}
 
 Return one suggestion per part. Use the exact ids.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(aiCfg.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: aiCfg.headers,
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiCfg.mapModel("google/gemini-2.5-flash"),
         temperature: 0.4,
         messages: [
           { role: "system", content: systemPrompt },
