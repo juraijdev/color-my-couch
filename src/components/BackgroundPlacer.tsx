@@ -39,7 +39,13 @@ export function BackgroundPlacer({
   const [showExport, setShowExport] = useState(false);
   const [fileName, setFileName] = useState("furniture-in-room");
   const [format, setFormat] = useState("png");
+  const [satisfaction, setSatisfaction] = useState<"pending" | "yes" | "adjust">("pending");
+  const [positionHints, setPositionHints] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const togglePosition = (pos: string) => {
+    setPositionHints((prev) => (prev.includes(pos) ? prev.filter((p) => p !== pos) : [...prev, pos]));
+  };
 
   const processFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
