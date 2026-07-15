@@ -23,6 +23,11 @@ interface PatternAssignment {
   patternImageUrl: string;
 }
 
+type AiMessageContent = Array<
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+>;
+
 function formatPartLocation(partName: string, location?: PartLocation) {
   if (!location) return `Approximate location for "${partName}": not provided.`;
 
@@ -117,7 +122,7 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
 
 async function generateRecoloredImage(
   _apiKey: string,
-  messageContent: any[],
+  messageContent: AiMessageContent,
 ) {
   const aiCfg = getAiConfig();
   const models = [
@@ -303,7 +308,7 @@ Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring exi
     console.log("Generating image with pattern application prompt:", prompt)
 
     // Build the message content with pattern reference images
-    const messageContent: any[] = [
+    const messageContent: AiMessageContent = [
       {
         type: "text",
         text: prompt
