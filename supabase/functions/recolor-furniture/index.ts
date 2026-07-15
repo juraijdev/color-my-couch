@@ -23,6 +23,11 @@ interface PatternAssignment {
   patternImageUrl: string;
 }
 
+type AiMessageContent = Array<
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+>;
+
 function formatPartLocation(partName: string, location?: PartLocation) {
   if (!location) return `Approximate location for "${partName}": not provided.`;
 
@@ -117,7 +122,7 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
 
 async function generateRecoloredImage(
   _apiKey: string,
-  messageContent: any[],
+  messageContent: AiMessageContent,
 ) {
   const aiCfg = getAiConfig();
   const models = [
@@ -229,7 +234,7 @@ serve(async (req) => {
       ? `\nSOURCE IMAGE FRAME LOCK — REQUIRED OUTPUT CANVAS:\n- Original input width: ${sourceDimensions.width}px\n- Original input height: ${sourceDimensions.height}px\n- Original aspect ratio: ${sourceDimensions.aspectRatio.toFixed(4)} (${isLandscapeFurniture ? "LANDSCAPE / WIDE BUFFET-SAFE" : "ALL-FURNITURE SAFE"})\n- Return the result with this SAME frame ratio and the FULL furniture visible. Do NOT output a square crop. Do NOT crop left, right, top, bottom, legs, backrests, arms, chair seats, table ends, or any edge. Do NOT rotate or recompose the furniture to fit a different canvas. If the input is portrait, keep portrait. If the input is square, keep square. If the input is landscape, keep landscape.\n`
       : "";
 
-    const prompt = `Edit the provided furniture photo in place. Return an edited IMAGE. Do not answer with text only.
+    const prompt = `Edit the provided furniture photo in place. Return an edited IMAGE. Do not answer with text only. The final image must show the recolored furniture isolated on a pure solid white (#ffffff) background.
 
 You are a precision image-editing / in-place retouching assistant, NOT a product renderer. Your ONLY job is to change the surface color/material/texture of specific existing furniture parts in the input photo. You must return the EXACT SAME photograph with ONLY the surface finish changed. The input image is the fixed master photo.
 ${sourceFrameRule}
@@ -262,7 +267,7 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 4. IDENTICAL CAMERA & COMPOSITION: Same exact camera angle, perspective, focal length, distance, framing, crop, canvas aspect ratio, and composition. The furniture must occupy the EXACT same pixels in the frame. Do NOT zoom in or out. Do NOT recenter. Do NOT crop the left or right ends of long buffet tables.
 
-5. SOLID WHITE BACKGROUND (MANDATORY): The output MUST place the recolored furniture on a plain solid white (#ffffff) background. Remove the original room, floor, walls, props, and environment completely and replace them with clean pure white. Do NOT keep the original background. Do NOT use gray, gradient, checkerboard, transparency, dots, or any texture — only flat solid white. Preserve only subtle contact shadow directly under the furniture if needed for grounding, otherwise pure white. Keep the same camera angle, framing, canvas aspect ratio, and furniture position/size within the frame; only the surrounding environment is replaced with white.
+5. SOLID WHITE BACKGROUND (MANDATORY): The output MUST place the recolored furniture on a plain solid white (#ffffff) background. Every pixel outside the furniture silhouette must be white. Remove the original room, floor, walls, props, contact shadows, reflections, and environment completely and replace them with clean pure white. Do NOT keep the original background. Do NOT use gray, cream, gradient, checkerboard, transparency, dots, columns, colored wall, colored floor, floor plane, shadow blob, or any texture — only flat solid white. Keep the same camera angle, framing, canvas aspect ratio, and furniture position/size within the frame; only the surrounding environment is replaced with white.
 
 5A. CLEAN EDGES: Cut precisely along the true silhouette of the furniture with no background halo, fringe, or color spill. Preserve thin parts (legs, handles, trim) exactly.
 
@@ -296,12 +301,14 @@ ABSOLUTE IRON-CLAD RULES — VIOLATION OF ANY RULE IS UNACCEPTABLE:
 
 20. SHARP PART BOUNDARY RULE: If two assigned parts touch each other, preserve the original edge between them with a crisp transition and zero color bleed.
 
-Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
+WHITE BACKGROUND FINAL CHECK: Before returning, inspect the entire image outside the furniture silhouette. If ANY non-furniture pixel is not pure white (#ffffff), replace that pixel with #ffffff. No floor, wall, gradient, shadow field, colored fill, gray/cream tint, checkerboard, dots, texture, or transparency is allowed outside the furniture.
+
+Return exactly one image. THINK OF IT THIS WAY: You are digitally recoloring existing surfaces on a real product photo, then placing that unchanged recolored furniture on a completely plain white product-photo background. The furniture is a fixed physical object that cannot change shape or gain new details. You can only change what color/material its already-existing surfaces appear to be.`;
 
     console.log("Generating image with pattern application prompt:", prompt)
 
     // Build the message content with pattern reference images
-    const messageContent: any[] = [
+    const messageContent: AiMessageContent = [
       {
         type: "text",
         text: prompt

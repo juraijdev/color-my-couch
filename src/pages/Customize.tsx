@@ -11,7 +11,7 @@ import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { containImageInTransparentCanvas, flattenToWhiteBackground, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
+import { containImageInTransparentCanvas, flattenToWhiteBackground, forceEdgeBackgroundToWhite, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
 import { hashImage } from "@/lib/imageHash";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -328,9 +328,34 @@ export default function Customize() {
       if (result.output) {
         let finalImage: string = result.output;
         try {
+          toast.info("Cleaning background to pure white...");
+          const cleanupResponse = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/remove-background`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({ image: finalImage }),
+            },
+          );
+
+          if (cleanupResponse.ok) {
+            const cleanupResult = await cleanupResponse.json();
+            if (cleanupResult.output) finalImage = cleanupResult.output;
+          } else {
+            console.warn("White background cleanup failed:", await cleanupResponse.text());
+          }
+        } catch (cleanupErr) {
+          console.warn("White background cleanup skipped:", cleanupErr);
+        }
+
+        try {
           toast.info("Preparing furniture on white background...");
+          finalImage = await forceEdgeBackgroundToWhite(finalImage);
           const whiteReadyImage = await containImageInTransparentCanvas(
-            result.output,
+            finalImage,
             sourceDimensions.width,
             sourceDimensions.height,
             3200,

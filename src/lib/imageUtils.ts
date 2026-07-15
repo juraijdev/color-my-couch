@@ -267,6 +267,100 @@ export function tightCropToWhiteCanvas(
   });
 }
 
+/**
+ * Force edge-connected non-furniture background pixels to pure white.
+ * This is a deterministic fallback for AI outputs that return a tinted wall,
+ * floor, gradient, or other generated background instead of #ffffff.
+ */
+export function forceEdgeBackgroundToWhite(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { reject(new Error('Failed to get canvas context')); return; }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+
+      let imageData: ImageData;
+      try {
+        imageData = ctx.getImageData(0, 0, w, h);
+      } catch {
+        resolve(dataUrl);
+        return;
+      }
+
+      const data = imageData.data;
+      const visited = new Uint8Array(w * h);
+      const queue: number[] = [];
+      const enqueue = (x: number, y: number) => {
+        if (x < 0 || y < 0 || x >= w || y >= h) return;
+        const idx = y * w + x;
+        if (visited[idx]) return;
+        visited[idx] = 1;
+        queue.push(idx);
+      };
+
+      for (let x = 0; x < w; x++) {
+        enqueue(x, 0);
+        enqueue(x, h - 1);
+      }
+      for (let y = 0; y < h; y++) {
+        enqueue(0, y);
+        enqueue(w - 1, y);
+      }
+
+      const isLikelyBackground = (idx: number) => {
+        const i = idx * 4;
+        const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+        if (a < 24) return true;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const saturation = max - min;
+        const brightness = (r + g + b) / 3;
+
+        // White / off-white / light gray generated backgrounds.
+        if (brightness >= 188 && saturation <= 58) return true;
+        // Muted studio-wall or floor tints, but avoid strong/dark furniture pixels.
+        if (brightness >= 132 && saturation <= 34) return true;
+        // Already white enough.
+        if (r >= 245 && g >= 245 && b >= 245) return true;
+        return false;
+      };
+
+      for (let read = 0; read < queue.length; read++) {
+        const idx = queue[read];
+        if (!isLikelyBackground(idx)) continue;
+
+        const i = idx * 4;
+        data[i] = 255;
+        data[i + 1] = 255;
+        data[i + 2] = 255;
+        data[i + 3] = 255;
+
+        const x = idx % w;
+        const y = Math.floor(idx / w);
+        enqueue(x + 1, y);
+        enqueue(x - 1, y);
+        enqueue(x, y + 1);
+        enqueue(x, y - 1);
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Failed to force white background'));
+    img.src = dataUrl;
+  });
+}
+
 export interface ImageDimensions {
   width: number;
   height: number;

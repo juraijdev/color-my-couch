@@ -24,7 +24,7 @@ serve(async (req) => {
       });
     }
 
-    const prompt = `You are a background cleanup tool. Your ONLY task is to remove the entire original background from this furniture product photo and place the furniture on a plain solid white background (#ffffff).
+    const prompt = `You are a background cleanup tool. Your ONLY task is to remove the entire original background from this furniture product photo and place the furniture on a plain solid white background (#ffffff). The final image background must be pure white in every non-furniture pixel.
 
 ABSOLUTE IRON-CLAD RULES:
 
@@ -32,7 +32,7 @@ ABSOLUTE IRON-CLAD RULES:
 
 2. ZERO STRUCTURAL CHANGES: Do NOT add, remove, reshape, resize, rotate, recolor, or alter any part of the furniture. Every leg, panel, handle, shelf, divider, trim strip, lip, edge cap, and caster must stay identical.
 
-3. FULL SOLID WHITE BACKGROUND: Replace EVERYTHING that is not the furniture (walls, floor, props, contact shadow on the floor, environment) with plain solid white (#ffffff). Do NOT use transparency, gray, black, checkerboard, dots, columns, pattern, texture, gradient, or any visible background design.
+3. FULL SOLID WHITE BACKGROUND: Replace EVERYTHING that is not the furniture (walls, floor, props, contact shadow on the floor, environment) with plain solid white (#ffffff). Every pixel outside the furniture silhouette must be white. Do NOT use transparency, gray, black, checkerboard, dots, columns, pattern, texture, gradient, floor shadows, reflections, or any visible background design.
 
 4. CLEAN EDGES: Cut precisely along the true silhouette of the furniture. Preserve fine details and thin parts (legs, handles, trim). Do NOT leave background halos, fringes, or color spill around the furniture.
 
@@ -40,9 +40,9 @@ ABSOLUTE IRON-CLAD RULES:
 
 6. NO NEW CONTENT: Do NOT add a new scene, gradient, checkerboard, drop shadow, reflection, floor, surface, or any decorative element. The area outside the furniture must be plain white only.
 
-7. NO ARTISTIC INTERPRETATION: This is a strict mechanical background-removal task. Output the same furniture, isolated, on transparent background.
+7. NO ARTISTIC INTERPRETATION: This is a strict mechanical background-removal task. Output the same furniture, isolated on pure solid white only.
 
-Output a single PNG image of the furniture on a clean solid white background. Never render checkerboard, black/gray columns, dots, or transparency preview patterns.`;
+WHITE BACKGROUND FINAL CHECK: Before returning, inspect the area outside the furniture. If ANY non-furniture pixel is not #ffffff, replace it with #ffffff. Return a single PNG image of the furniture on a clean solid white background. Never render checkerboard, black/gray columns, dots, colored floor, colored wall, gradient, shadows outside the furniture, or transparency preview patterns.`;
 
     const response = await fetch(aiCfg.url, {
       method: "POST",
