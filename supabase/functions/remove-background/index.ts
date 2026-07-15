@@ -44,14 +44,11 @@ ABSOLUTE IRON-CLAD RULES:
 
 Output a single PNG image of the furniture on a clean solid white background. Never render checkerboard, black/gray columns, dots, or transparency preview patterns.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(aiCfg.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: aiCfg.headers,
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
+        model: aiCfg.mapModel("google/gemini-3-pro-image-preview"),
         temperature: 0,
         messages: [
           {
