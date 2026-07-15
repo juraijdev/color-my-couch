@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { getAiConfig } from "../_shared/ai.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -115,9 +116,10 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
 }
 
 async function generateRecoloredImage(
-  apiKey: string,
+  _apiKey: string,
   messageContent: any[],
 ) {
+  const aiCfg = getAiConfig();
   const models = [
     "google/gemini-3-pro-image-preview",
     "google/gemini-3.1-flash-image-preview",
@@ -126,15 +128,13 @@ async function generateRecoloredImage(
   let lastDetails = "No content returned";
 
   for (const model of models) {
-    console.log(`Trying recolor image model: ${model}`);
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const mapped = aiCfg.mapModel(model);
+    console.log(`Trying recolor image model: ${model} -> ${mapped}`);
+    const response = await fetch(aiCfg.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: aiCfg.headers,
       body: JSON.stringify({
-        model,
+        model: mapped,
         temperature: 0.1,
         messages: [{ role: "user", content: messageContent }],
         modalities: ["image", "text"],
