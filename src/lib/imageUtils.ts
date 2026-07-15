@@ -320,18 +320,14 @@ export function forceEdgeBackgroundToWhite(dataUrl: string): Promise<string> {
       const isLikelyBackground = (idx: number) => {
         const i = idx * 4;
         const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
-        if (a < 24) return true;
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const saturation = max - min;
-        const brightness = (r + g + b) / 3;
-
-        // White / off-white / light gray generated backgrounds.
-        if (brightness >= 188 && saturation <= 58) return true;
-        // Muted studio-wall or floor tints, but avoid strong/dark furniture pixels.
-        if (brightness >= 132 && saturation <= 34) return true;
-        // Already white enough.
-        if (r >= 245 && g >= 245 && b >= 245) return true;
+        if (a < 16) return true;
+        // Strictly near-white only. This prevents the flood-fill from
+        // bleeding onto light-toned furniture (beige fabric, light wood,
+        // pale upholstery) that touches the top/side edges of the image.
+        // The remove-background edge function is responsible for removing
+        // the real background; this pass only cleans up remaining off-white
+        // residue right next to pure white areas.
+        if (r >= 244 && g >= 244 && b >= 244) return true;
         return false;
       };
 
