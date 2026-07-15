@@ -82,7 +82,7 @@ export function BackgroundPlacer({
     if (file) processFile(file);
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (hints: string[] = []) => {
     if (!backgroundImage) {
       toast.error("Please upload a background image first");
       return;
@@ -94,8 +94,11 @@ export function BackgroundPlacer({
     }
 
     setIsProcessing(true);
+    setSatisfaction("pending");
     toast.info(
-      furnitureImages.length > 1
+      hints.length > 0
+        ? `Repositioning furniture to ${hints.join(", ")}...`
+        : furnitureImages.length > 1
         ? `AI is placing ${furnitureImages.length} furniture pieces in the scene...`
         : "AI is placing your furniture in the scene..."
     );
