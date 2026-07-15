@@ -335,8 +335,8 @@ export function forceEdgeBackgroundToWhite(dataUrl: string): Promise<string> {
         return false;
       };
 
-      while (queue.length) {
-        const idx = queue.shift()!;
+      for (let read = 0; read < queue.length; read++) {
+        const idx = queue[read];
         if (!isLikelyBackground(idx)) continue;
 
         const i = idx * 4;
