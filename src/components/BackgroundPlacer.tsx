@@ -121,6 +121,7 @@ export function BackgroundPlacer({
           body: JSON.stringify({
             furnitureImages: compressedFurniture,
             backgroundImage: compressedBackground,
+            positionHints: hints,
           }),
         }
       );
