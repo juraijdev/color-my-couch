@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { getAiConfig } from "../_shared/ai.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,10 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not set')
-    }
+    const aiCfg = getAiConfig();
 
     const body = await req.json()
 
@@ -162,14 +160,11 @@ Output a single photorealistic image showing the COMPLETE original room (no crop
       { type: "image_url", image_url: { url: backgroundImage } }
     );
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(aiCfg.url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: aiCfg.headers,
       body: JSON.stringify({
-        model: "google/gemini-3-pro-image-preview",
+        model: aiCfg.mapModel("google/gemini-3-pro-image-preview"),
         messages: [{ role: "user", content: messageContent }],
         modalities: ["image", "text"],
       }),
