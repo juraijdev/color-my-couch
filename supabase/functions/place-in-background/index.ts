@@ -25,6 +25,7 @@ serve(async (req) => {
     }
 
     const backgroundImage = body.backgroundImage
+    const positionHints: string[] = Array.isArray(body.positionHints) ? body.positionHints : []
 
     console.log("Place in background request:", {
       furnitureCount: furnitureImages.length,
