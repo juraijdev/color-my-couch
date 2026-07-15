@@ -11,7 +11,7 @@ import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { containImageInTransparentCanvas, flattenToWhiteBackground, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
+import { containImageInTransparentCanvas, flattenToWhiteBackground, forceEdgeBackgroundToWhite, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
 import { hashImage } from "@/lib/imageHash";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -353,6 +353,7 @@ export default function Customize() {
 
         try {
           toast.info("Preparing furniture on white background...");
+          finalImage = await forceEdgeBackgroundToWhite(finalImage);
           const whiteReadyImage = await containImageInTransparentCanvas(
             finalImage,
             sourceDimensions.width,
