@@ -1,5 +1,5 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { Upload, Loader2, Sparkles, RotateCcw, X, Download, Plus, Trash2 } from "lucide-react";
+import { Upload, Loader2, Sparkles, RotateCcw, X, Download, Plus, Check, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
