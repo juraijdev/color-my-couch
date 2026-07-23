@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { getAiConfig } from "../_shared/ai.ts"
+import { generateImageFromMessages, getAiConfig } from "../_shared/ai.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -124,7 +124,6 @@ async function generateRecoloredImage(
   _apiKey: string,
   messageContent: AiMessageContent,
 ) {
-  const aiCfg = getAiConfig();
   const models = [
     "google/gemini-3-pro-image-preview",
     "google/gemini-3.1-flash-image-preview",
@@ -133,51 +132,25 @@ async function generateRecoloredImage(
   let lastDetails = "No content returned";
 
   for (const model of models) {
-    const mapped = aiCfg.mapModel(model);
-    console.log(`Trying recolor image model: ${model} -> ${mapped}`);
-    const response = await fetch(aiCfg.url, {
-      method: "POST",
-      headers: aiCfg.headers,
-      body: JSON.stringify({
-        model: mapped,
-        temperature: 0.1,
-        messages: [{ role: "user", content: messageContent }],
-        modalities: ["image", "text"],
-      }),
+    const result = await generateImageFromMessages({
+      model,
+      messageContent,
+      temperature: 0.1,
+      logLabel: "recolor image model",
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", model, response.status, errorText);
-      if (response.status === 429 || response.status === 402) {
-        return { status: response.status, error: errorText };
-      }
-      lastDetails = errorText;
-      continue;
+    if (result.output) {
+      console.log("Found recolored image in response", model);
+      return { output: result.output, model };
     }
 
-    const aiResult = await response.json();
-    const choice = aiResult.choices?.[0];
-    const message = choice?.message;
-    lastDetails = choice?.error?.message || message?.content || message?.reasoning || lastDetails;
+    if (result.status === 429 || result.status === 402) {
+      return { status: result.status, error: result.error };
+    }
 
-    console.log("AI response structure:", JSON.stringify({
-      model,
-      hasChoices: !!aiResult.choices,
-      choicesLength: aiResult.choices?.length,
-      hasChoiceError: !!choice?.error,
-      choiceError: choice?.error?.message,
-      hasImages: !!message?.images,
-      imagesLength: message?.images?.length,
-    }));
-
-    if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
-      const firstImage = message.images[0];
-      const imageUrl = firstImage.image_url?.url || firstImage.url;
-      if (imageUrl) {
-        console.log("Found recolored image in response", model);
-        return { output: imageUrl, model };
-      }
+    if (result.error) {
+      lastDetails = result.error;
+      continue;
     }
   }
 
