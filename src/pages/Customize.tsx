@@ -515,24 +515,31 @@ export default function Customize() {
                 preloadedParts={preloadedParts}
               />
               {savedName && (
-                <div className="shrink-0 px-4 py-2 bg-primary/5 border-t border-border text-xs flex items-center gap-2">
+                <div className="shrink-0 px-4 py-2 bg-primary/5 border-t border-border text-xs flex items-center gap-2 flex-wrap">
                   <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                   <span>Verified furniture: <strong>{savedName}</strong></span>
+                  {savedRenderingUrl && (
+                    <Button size="sm" variant="outline" className="ml-auto h-7" onClick={handleUseSavedRendering}>
+                      <Check className="w-3.5 h-3.5 mr-1" /> Use saved design
+                    </Button>
+                  )}
                 </div>
               )}
-              {isAdmin && detectedParts.length > 0 && !preloadedParts && (
+              {user && detectedParts.length > 0 && (
                 <div className="shrink-0 p-3 border-t border-border bg-card flex items-center gap-2">
                   <Input
                     value={savedName}
                     onChange={(e) => setSavedName(e.target.value)}
-                    placeholder="Name this verified furniture (e.g. Buffet 120cm)"
+                    placeholder="Name this furniture (e.g. Buffet 120cm)"
                     className="h-9 text-sm"
                   />
-                  <Button size="sm" variant="outline" onClick={handleSaveVerified}>
-                    <BookmarkPlus className="w-4 h-4 mr-1" /> Save as verified
+                  <Button size="sm" variant="outline" onClick={handleSaveVerified} title={generatedImage ? "Save furniture + this rendering so it can be reused next time" : "Save the analyzed parts so next time this furniture is recognized instantly"}>
+                    <BookmarkPlus className="w-4 h-4 mr-1" />
+                    {generatedImage ? "Save design" : "Save furniture"}
                   </Button>
                 </div>
               )}
+
             </div>
 
 
