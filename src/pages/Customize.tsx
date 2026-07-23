@@ -25,12 +25,14 @@ interface Suggestion {
 export default function Customize() {
   const [searchParams] = useSearchParams();
   const isSuggestMode = searchParams.get("mode") === "suggest";
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedImageHash, setUploadedImageHash] = useState<string | null>(null);
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
+  const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
+
   const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -75,19 +77,26 @@ export default function Customize() {
     setSuggestionsApplied(false);
     setPreloadedParts(null);
     setSavedName("");
+    setSavedRenderingUrl(null);
 
     try {
       const hash = await hashImage(imageDataUrl);
       setUploadedImageHash(hash);
       const { data } = await supabase
         .from("saved_furniture")
-        .select("name,parts")
+        .select("name,parts,rendering_url")
         .eq("image_hash", hash)
         .maybeSingle();
       if (data?.parts && Array.isArray(data.parts) && data.parts.length > 0) {
         setPreloadedParts(data.parts as unknown as FurniturePart[]);
         setSavedName(data.name);
-        toast.success(`Verified furniture recognized: "${data.name}"`);
+        const rendering = (data as { rendering_url?: string | null }).rendering_url ?? null;
+        setSavedRenderingUrl(rendering);
+        if (rendering) {
+          toast.success(`Verified furniture "${data.name}" — saved design available`);
+        } else {
+          toast.success(`Verified furniture recognized: "${data.name}"`);
+        }
         return;
       }
     } catch (e) {
@@ -101,6 +110,7 @@ export default function Customize() {
     setUploadedImageHash(null);
     setPreloadedParts(null);
     setSavedName("");
+    setSavedRenderingUrl(null);
     setGeneratedImage(null);
     setSelectedPattern(null);
     setHasSelection(false);
@@ -109,23 +119,47 @@ export default function Customize() {
     setSuggestionsApplied(false);
   }, []);
 
+  const handleUseSavedRendering = useCallback(() => {
+    if (!savedRenderingUrl) return;
+    setGeneratedImage(savedRenderingUrl);
+    setAllFurnitureImages((prev) => (prev.includes(savedRenderingUrl) ? prev : [...prev, savedRenderingUrl]));
+    toast.success("Loaded the saved verified design — no re-generation needed.");
+  }, [savedRenderingUrl]);
+
   const handleSaveVerified = useCallback(async () => {
-    if (!isAdmin || !uploadedImage || !uploadedImageHash || detectedParts.length === 0) return;
+    if (!user || !uploadedImage || !uploadedImageHash || detectedParts.length === 0) {
+      toast.error("Sign in and upload a furniture image first.");
+      return;
+    }
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
-    const { data: { user } } = await supabase.auth.getUser();
+    const assignments = furnitureEditorRef.current?.getPatternAssignments() ?? [];
+    const assignmentsPayload = assignments.map((pa) => ({
+      partId: pa.part.id,
+      partName: pa.part.name,
+      patternId: pa.targetPattern.id,
+      patternName: pa.targetPattern.name,
+    }));
     const { error } = await supabase.from("saved_furniture").upsert(
       [{
         image_hash: uploadedImageHash,
         image_url: uploadedImage,
         name,
         parts: JSON.parse(JSON.stringify(detectedParts)),
-        created_by: user?.id,
+        created_by: user.id,
+        rendering_url: generatedImage ?? null,
+        assignments: assignmentsPayload,
       }],
       { onConflict: "image_hash" },
     );
     if (error) toast.error(error.message);
-    else toast.success(`Saved "${name}" to the verified library`);
-  }, [isAdmin, uploadedImage, uploadedImageHash, detectedParts, savedName]);
+    else {
+      if (generatedImage) setSavedRenderingUrl(generatedImage);
+      toast.success(generatedImage
+        ? `Saved "${name}" with rendering — reusable next time`
+        : `Saved "${name}" to the verified library`);
+    }
+  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
+
 
   const handlePatternSelect = useCallback((pattern: PatternOption) => {
     setSelectedPattern(pattern);
@@ -481,24 +515,31 @@ export default function Customize() {
                 preloadedParts={preloadedParts}
               />
               {savedName && (
-                <div className="shrink-0 px-4 py-2 bg-primary/5 border-t border-border text-xs flex items-center gap-2">
+                <div className="shrink-0 px-4 py-2 bg-primary/5 border-t border-border text-xs flex items-center gap-2 flex-wrap">
                   <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                   <span>Verified furniture: <strong>{savedName}</strong></span>
+                  {savedRenderingUrl && (
+                    <Button size="sm" variant="outline" className="ml-auto h-7" onClick={handleUseSavedRendering}>
+                      <Check className="w-3.5 h-3.5 mr-1" /> Use saved design
+                    </Button>
+                  )}
                 </div>
               )}
-              {isAdmin && detectedParts.length > 0 && !preloadedParts && (
+              {user && detectedParts.length > 0 && (
                 <div className="shrink-0 p-3 border-t border-border bg-card flex items-center gap-2">
                   <Input
                     value={savedName}
                     onChange={(e) => setSavedName(e.target.value)}
-                    placeholder="Name this verified furniture (e.g. Buffet 120cm)"
+                    placeholder="Name this furniture (e.g. Buffet 120cm)"
                     className="h-9 text-sm"
                   />
-                  <Button size="sm" variant="outline" onClick={handleSaveVerified}>
-                    <BookmarkPlus className="w-4 h-4 mr-1" /> Save as verified
+                  <Button size="sm" variant="outline" onClick={handleSaveVerified} title={generatedImage ? "Save furniture + this rendering so it can be reused next time" : "Save the analyzed parts so next time this furniture is recognized instantly"}>
+                    <BookmarkPlus className="w-4 h-4 mr-1" />
+                    {generatedImage ? "Save design" : "Save furniture"}
                   </Button>
                 </div>
               )}
+
             </div>
 
 
