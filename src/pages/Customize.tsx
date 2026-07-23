@@ -25,7 +25,7 @@ interface Suggestion {
 export default function Customize() {
   const [searchParams] = useSearchParams();
   const isSuggestMode = searchParams.get("mode") === "suggest";
-  const { isAdmin, user } = useAuth();
+  const { user } = useAuth();
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedImageHash, setUploadedImageHash] = useState<string | null>(null);
