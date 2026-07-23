@@ -77,19 +77,26 @@ export default function Customize() {
     setSuggestionsApplied(false);
     setPreloadedParts(null);
     setSavedName("");
+    setSavedRenderingUrl(null);
 
     try {
       const hash = await hashImage(imageDataUrl);
       setUploadedImageHash(hash);
       const { data } = await supabase
         .from("saved_furniture")
-        .select("name,parts")
+        .select("name,parts,rendering_url")
         .eq("image_hash", hash)
         .maybeSingle();
       if (data?.parts && Array.isArray(data.parts) && data.parts.length > 0) {
         setPreloadedParts(data.parts as unknown as FurniturePart[]);
         setSavedName(data.name);
-        toast.success(`Verified furniture recognized: "${data.name}"`);
+        const rendering = (data as { rendering_url?: string | null }).rendering_url ?? null;
+        setSavedRenderingUrl(rendering);
+        if (rendering) {
+          toast.success(`Verified furniture "${data.name}" — saved design available`);
+        } else {
+          toast.success(`Verified furniture recognized: "${data.name}"`);
+        }
         return;
       }
     } catch (e) {
@@ -103,6 +110,7 @@ export default function Customize() {
     setUploadedImageHash(null);
     setPreloadedParts(null);
     setSavedName("");
+    setSavedRenderingUrl(null);
     setGeneratedImage(null);
     setSelectedPattern(null);
     setHasSelection(false);
@@ -111,23 +119,47 @@ export default function Customize() {
     setSuggestionsApplied(false);
   }, []);
 
+  const handleUseSavedRendering = useCallback(() => {
+    if (!savedRenderingUrl) return;
+    setGeneratedImage(savedRenderingUrl);
+    setAllFurnitureImages((prev) => (prev.includes(savedRenderingUrl) ? prev : [...prev, savedRenderingUrl]));
+    toast.success("Loaded the saved verified design — no re-generation needed.");
+  }, [savedRenderingUrl]);
+
   const handleSaveVerified = useCallback(async () => {
-    if (!isAdmin || !uploadedImage || !uploadedImageHash || detectedParts.length === 0) return;
+    if (!user || !uploadedImage || !uploadedImageHash || detectedParts.length === 0) {
+      toast.error("Sign in and upload a furniture image first.");
+      return;
+    }
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
-    const { data: { user } } = await supabase.auth.getUser();
+    const assignments = furnitureEditorRef.current?.getPatternAssignments() ?? [];
+    const assignmentsPayload = assignments.map((pa) => ({
+      partId: pa.part.id,
+      partName: pa.part.name,
+      patternId: pa.targetPattern.id,
+      patternName: pa.targetPattern.name,
+    }));
     const { error } = await supabase.from("saved_furniture").upsert(
       [{
         image_hash: uploadedImageHash,
         image_url: uploadedImage,
         name,
         parts: JSON.parse(JSON.stringify(detectedParts)),
-        created_by: user?.id,
+        created_by: user.id,
+        rendering_url: generatedImage ?? null,
+        assignments: assignmentsPayload,
       }],
       { onConflict: "image_hash" },
     );
     if (error) toast.error(error.message);
-    else toast.success(`Saved "${name}" to the verified library`);
-  }, [isAdmin, uploadedImage, uploadedImageHash, detectedParts, savedName]);
+    else {
+      if (generatedImage) setSavedRenderingUrl(generatedImage);
+      toast.success(generatedImage
+        ? `Saved "${name}" with rendering — reusable next time`
+        : `Saved "${name}" to the verified library`);
+    }
+  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
+
 
   const handlePatternSelect = useCallback((pattern: PatternOption) => {
     setSelectedPattern(pattern);
