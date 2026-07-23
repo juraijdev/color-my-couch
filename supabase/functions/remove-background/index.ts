@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { generateImageFromMessages, getAiConfig } from "../_shared/ai.ts";
+import { generateImageFromMessages } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,8 +13,6 @@ serve(async (req) => {
   }
 
   try {
-    const aiCfg = getAiConfig();
-
     const body = await req.json();
     const image = body.image;
     if (!image) {
