@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { getAiConfig } from "../_shared/ai.ts";
+import { generateImageFromMessages } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,8 +13,6 @@ serve(async (req) => {
   }
 
   try {
-    const aiCfg = getAiConfig();
-
     const body = await req.json();
     const image = body.image;
     if (!image) {
@@ -44,60 +42,37 @@ ABSOLUTE IRON-CLAD RULES:
 
 WHITE BACKGROUND FINAL CHECK: Before returning, inspect the area outside the furniture. If ANY non-furniture pixel is not #ffffff, replace it with #ffffff. Return a single PNG image of the furniture on a clean solid white background. Never render checkerboard, black/gray columns, dots, colored floor, colored wall, gradient, shadows outside the furniture, or transparency preview patterns.`;
 
-    const response = await fetch(aiCfg.url, {
-      method: "POST",
-      headers: aiCfg.headers,
-      body: JSON.stringify({
-        model: aiCfg.mapModel("google/gemini-3-pro-image-preview"),
-        temperature: 0,
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: image } },
-            ],
-          },
-        ],
-        modalities: ["image", "text"],
-      }),
+    const generation = await generateImageFromMessages({
+      model: "google/gemini-3-pro-image-preview",
+      temperature: 0,
+      logLabel: "white background cleanup image model",
+      messageContent: [
+        { type: "text", text: prompt },
+        { type: "image_url", image_url: { url: image } },
+      ],
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      if (response.status === 429) {
+    if (!generation.output) {
+      if (generation.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
+      if (generation.status === 402) {
         return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`AI generation failed: ${response.status}`);
-    }
-
-    const aiResult = await response.json();
-    const message = aiResult.choices?.[0]?.message;
-    let imageUrl: string | null = null;
-    if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
-      const first = message.images[0];
-      imageUrl = first.image_url?.url || first.url || null;
-    }
-
-    if (!imageUrl) {
-      console.log("No image in response:", JSON.stringify(aiResult).substring(0, 1500));
+      console.log("No image in white-background cleanup response:", generation.error);
       return new Response(
-        JSON.stringify({ error: "Background removal failed. Please try again." }),
+        JSON.stringify({ error: "Background removal failed. Please try again.", details: generation.error || "No content returned" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    return new Response(JSON.stringify({ output: imageUrl, status: "succeeded" }), {
+    return new Response(JSON.stringify({ output: generation.output, status: "succeeded" }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
