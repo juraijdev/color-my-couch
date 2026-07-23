@@ -22,17 +22,20 @@ export interface AiConfig {
 // Map Lovable-style model ids to Google's native model ids when we're going
 // direct to Gemini. Anything Lovable-exclusive (e.g. gemini-3 previews) falls
 // back to the closest public Gemini equivalent.
+// Use "-latest" aliases so we automatically follow Google's current stable
+// model for each family instead of pinning to a version they may deprecate
+// (e.g. gemini-2.5-flash was retired for new API keys).
 const GEMINI_MODEL_MAP: Record<string, string> = {
-  "google/gemini-3-pro-image-preview": "gemini-2.5-flash-image-preview",
-  "google/gemini-3.1-flash-image-preview": "gemini-2.5-flash-image-preview",
-  "google/gemini-2.5-flash-image": "gemini-2.5-flash-image-preview",
-  "google/gemini-2.5-flash": "gemini-2.5-flash",
-  "google/gemini-2.5-flash-lite": "gemini-2.5-flash-lite",
-  "google/gemini-2.5-pro": "gemini-2.5-pro",
-  "google/gemini-3-flash-preview": "gemini-2.5-flash",
-  "google/gemini-3.5-flash": "gemini-2.5-flash",
-  "google/gemini-3.1-flash-lite": "gemini-2.5-flash-lite",
-  "google/gemini-3.1-pro-preview": "gemini-2.5-pro",
+  "google/gemini-3-pro-image-preview": "gemini-2.5-flash-image",
+  "google/gemini-3.1-flash-image-preview": "gemini-2.5-flash-image",
+  "google/gemini-2.5-flash-image": "gemini-2.5-flash-image",
+  "google/gemini-2.5-flash": "gemini-flash-latest",
+  "google/gemini-2.5-flash-lite": "gemini-flash-lite-latest",
+  "google/gemini-2.5-pro": "gemini-pro-latest",
+  "google/gemini-3-flash-preview": "gemini-flash-latest",
+  "google/gemini-3.5-flash": "gemini-flash-latest",
+  "google/gemini-3.1-flash-lite": "gemini-flash-lite-latest",
+  "google/gemini-3.1-pro-preview": "gemini-pro-latest",
 };
 
 export function getAiConfig(): AiConfig {
