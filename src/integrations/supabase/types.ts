@@ -94,6 +94,7 @@ export type Database = {
       }
       saved_furniture: {
         Row: {
+          assignments: Json | null
           created_at: string
           created_by: string | null
           id: string
@@ -101,8 +102,10 @@ export type Database = {
           image_url: string
           name: string
           parts: Json
+          rendering_url: string | null
         }
         Insert: {
+          assignments?: Json | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -110,8 +113,10 @@ export type Database = {
           image_url: string
           name: string
           parts: Json
+          rendering_url?: string | null
         }
         Update: {
+          assignments?: Json | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -119,6 +124,7 @@ export type Database = {
           image_url?: string
           name?: string
           parts?: Json
+          rendering_url?: string | null
         }
         Relationships: []
       }
