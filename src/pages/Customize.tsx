@@ -25,12 +25,14 @@ interface Suggestion {
 export default function Customize() {
   const [searchParams] = useSearchParams();
   const isSuggestMode = searchParams.get("mode") === "suggest";
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedImageHash, setUploadedImageHash] = useState<string | null>(null);
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
+  const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
+
   const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
