@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { getAiConfig } from "../_shared/ai.ts"
+import { generateImageFromMessages, getAiConfig } from "../_shared/ai.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -166,61 +166,33 @@ Output a single photorealistic image showing the COMPLETE original room (no crop
       { type: "image_url", image_url: { url: backgroundImage } }
     );
 
-    const response = await fetch(aiCfg.url, {
-      method: "POST",
-      headers: aiCfg.headers,
-      body: JSON.stringify({
-        model: aiCfg.mapModel("google/gemini-3-pro-image-preview"),
-        messages: [{ role: "user", content: messageContent }],
-        modalities: ["image", "text"],
-      }),
+    const generation = await generateImageFromMessages({
+      model: "google/gemini-3-pro-image-preview",
+      messageContent,
+      logLabel: "background placement image model",
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-
-      if (response.status === 429) {
+    if (!generation.output) {
+      if (generation.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (response.status === 402) {
+      if (generation.status === 402) {
         return new Response(JSON.stringify({ error: "AI credits exhausted. Please add more credits." }), {
           status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      throw new Error(`AI generation failed: ${response.status}`);
-    }
-
-    const aiResult = await response.json();
-    console.log("AI response structure:", JSON.stringify({
-      hasChoices: !!aiResult.choices,
-      choicesLength: aiResult.choices?.length,
-      hasImages: !!aiResult.choices?.[0]?.message?.images,
-      imagesLength: aiResult.choices?.[0]?.message?.images?.length,
-    }));
-
-    const message = aiResult.choices?.[0]?.message;
-    let imageUrl = null;
-
-    if (message?.images && Array.isArray(message.images) && message.images.length > 0) {
-      const firstImage = message.images[0];
-      imageUrl = firstImage.image_url?.url || firstImage.url;
-      console.log("Found composited image in response");
-    }
-
-    if (!imageUrl) {
-      console.log("No image found in response:", JSON.stringify(aiResult, null, 2).substring(0, 2000));
+      console.log("No image found in background placement response:", generation.error);
       return new Response(JSON.stringify({
         error: "Failed to place furniture in background. Please try again.",
-        details: message?.content || "No content returned",
+        details: generation.error || "No content returned",
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200,
       });
     }
 
-    return new Response(JSON.stringify({ output: imageUrl, status: "succeeded" }), {
+    return new Response(JSON.stringify({ output: generation.output, status: "succeeded" }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200,
     });
   } catch (error) {
