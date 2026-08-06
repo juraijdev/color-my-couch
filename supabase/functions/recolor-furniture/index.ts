@@ -136,6 +136,20 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
     );
   });
 
+  // PC-056 is intentionally pale, so a generic "Champagne" instruction is
+  // often mistaken for the existing highlight on a light metal frame. Give
+  // this exact catalogue finish an explicit, measurable visual target.
+  assignments.filter((a) =>
+    /pc[\s-]?0*56/i.test(`${a.patternName} ${a.patternDescription}`) ||
+    (/champagne/i.test(a.patternName) && /powder\s*coat/i.test(a.patternDescription))
+  ).forEach((a) => {
+    locks.unshift(
+      `PC-056 CHAMPAGNE — EXPLICIT COLOR TARGET: Repaint EVERY visible existing pixel of "${a.partName}" with the supplied PC-056 swatch. This is a LIGHT, OPAQUE, WARM CHAMPAGNE POWDER COAT: pale warm beige-gold, approximately RGB 195/184/152 before the original object's lighting and shadows are preserved. It is NOT white, silver, cool grey, chrome, dark gold, brown, or transparent.`,
+      `PC-056 MUST PRODUCE A VISIBLE CHANGE: do not leave "${a.partName}" in its original finish even when the original frame is already light. Replace its original hue across the complete connected frame/leg/rail system with the warm beige-gold PC-056 hue. Preserve natural highlights and shadows, but the local midtone must visibly read as warm champagne rather than the original color.`,
+      `PC-056 COVERAGE CHECK: inspect every existing tube, leg, rail, crossbar, support, connector, edge and return belonging to "${a.partName}". All must share the same light PC-056 powder coat; zero segments may remain black, chrome, silver, grey, white, or the source color. Do not enlarge, redraw, or add any segment.`,
+    );
+  });
+
   return locks.map((lock, index) => `${index + 1}. ${lock}`).join("\n");
 }
 

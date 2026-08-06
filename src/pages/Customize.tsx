@@ -330,7 +330,9 @@ export default function Customize() {
           partMaterial: pa.part.material,
           partDescription: pa.part.description,
           partLocation: pa.part.location,
-          patternName: pa.targetPattern.name,
+          patternName: pa.targetPattern.code
+            ? `${pa.targetPattern.code} - ${pa.targetPattern.name}`
+            : pa.targetPattern.name,
           patternDescription: pa.targetPattern.description,
           patternImageUrl: await imageUrlToBase64(pa.targetPattern.imageUrl),
         })),
