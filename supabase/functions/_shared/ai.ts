@@ -174,28 +174,30 @@ async function generateImageWithLovable(
   return { error: choice?.error?.message || message?.content || message?.reasoning || "No image returned", model };
 }
 
-async function generateImageWithGeminiNative(
-  cfg: AiConfig,
-  { model, messageContent, temperature, logLabel }: GenerateImageOptions,
+// Google retires image model ids without notice (a working id can start
+// returning 400/404 overnight). Always try a chain of known-good image model
+// ids instead of a single pinned name.
+const GEMINI_NATIVE_IMAGE_FALLBACKS = [
+  "gemini-3-pro-image-preview",
+  "gemini-3-flash-image-preview",
+  "gemini-2.5-flash-image",
+  "gemini-2.5-flash-image-preview",
+  "gemini-2.0-flash-preview-image-generation",
+];
+
+async function callGeminiNativeImage(
+  geminiKey: string,
+  mapped: string,
+  parts: unknown[],
+  temperature?: number,
 ): Promise<GenerateImageResult> {
-  const geminiKey = Deno.env.get("GEMINI_API_KEY");
-  if (!geminiKey) return { error: "GEMINI_API_KEY is not configured" };
-
-  const mapped = cfg.mapModel(model);
-  console.log(`Trying ${logLabel || "native Gemini image model"}: ${model} -> ${mapped}`);
-
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${mapped}:generateContent?key=${encodeURIComponent(geminiKey)}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: await buildGeminiParts(messageContent),
-          },
-        ],
+        contents: [{ role: "user", parts }],
         generationConfig: {
           ...(typeof temperature === "number" ? { temperature } : {}),
           responseModalities: ["TEXT", "IMAGE"],
@@ -207,19 +209,18 @@ async function generateImageWithGeminiNative(
   if (!response.ok) {
     const errorText = await response.text();
     console.error("Native Gemini image error:", mapped, response.status, errorText);
-    return { status: response.status, error: errorText, model };
+    return { status: response.status, error: errorText, model: mapped };
   }
 
   const aiResult = await response.json();
-  const parts = aiResult.candidates?.[0]?.content?.parts || [];
-  const imagePart = parts.find((part: any) => part.inlineData?.data || part.inline_data?.data);
+  const responseParts = aiResult.candidates?.[0]?.content?.parts || [];
+  const imagePart = responseParts.find((part: any) => part.inlineData?.data || part.inline_data?.data);
   const inlineData = imagePart?.inlineData || imagePart?.inline_data;
 
   console.log("Native Gemini image response structure:", JSON.stringify({
-    model,
     mapped,
     candidatesLength: aiResult.candidates?.length,
-    partsLength: parts.length,
+    partsLength: responseParts.length,
     hasImage: !!inlineData?.data,
     finishReason: aiResult.candidates?.[0]?.finishReason,
     promptFeedback: aiResult.promptFeedback,
@@ -227,11 +228,39 @@ async function generateImageWithGeminiNative(
 
   if (inlineData?.data) {
     const mimeType = inlineData.mimeType || inlineData.mime_type || "image/png";
-    return { output: `data:${mimeType};base64,${inlineData.data}`, model };
+    return { output: `data:${mimeType};base64,${inlineData.data}`, model: mapped };
   }
 
-  const textDetails = parts.map((part: any) => part.text).filter(Boolean).join("\n");
-  return { error: textDetails || JSON.stringify(aiResult).slice(0, 1500), model };
+  const textDetails = responseParts.map((part: any) => part.text).filter(Boolean).join("\n");
+  return { error: textDetails || JSON.stringify(aiResult).slice(0, 1500), model: mapped };
+}
+
+async function generateImageWithGeminiNative(
+  cfg: AiConfig,
+  { model, messageContent, temperature, logLabel }: GenerateImageOptions,
+): Promise<GenerateImageResult> {
+  const geminiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!geminiKey) return { error: "GEMINI_API_KEY is not configured" };
+
+  const mapped = cfg.mapModel(model);
+  const candidates = [mapped, ...GEMINI_NATIVE_IMAGE_FALLBACKS].filter(
+    (id, index, all) => all.indexOf(id) === index,
+  );
+
+  const parts = await buildGeminiParts(messageContent);
+  let last: GenerateImageResult = { error: "No image returned", model };
+
+  for (const candidate of candidates) {
+    console.log(`Trying ${logLabel || "native Gemini image model"}: ${model} -> ${candidate}`);
+    const result = await callGeminiNativeImage(geminiKey, candidate, parts, temperature);
+    if (result.output) return result;
+
+    last = result;
+    // Quota / auth problems will not be fixed by another model id.
+    if (result.status === 429 || result.status === 401 || result.status === 403) return result;
+  }
+
+  return last;
 }
 
 export async function generateImageFromMessages(options: GenerateImageOptions): Promise<GenerateImageResult> {
