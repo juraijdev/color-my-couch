@@ -117,6 +117,25 @@ function buildConsistencyLocks(assignments: PatternAssignment[]) {
     }
   }
 
+  // Low-contrast / powder-coat finishes (e.g. PC-056 Champagne) are frequently
+  // skipped on metal frames because the AI decides the metal "already looks like that".
+  const isMetalPart = (a: PatternAssignment) =>
+    /metal|steel|stainless|chrome|aluminium|aluminum|frame|leg|trim|edge|base|handle|rail|bar/i.test(
+      `${a.partName} ${a.partMaterial} ${a.partDescription ?? ""}`,
+    );
+  const isSubtleFinish = (a: PatternAssignment) =>
+    /champagne|powder coat|gold|silver|beige|bronze|brushed|satin|nickel|pearl|ivory|cream/i.test(
+      `${a.patternName} ${a.patternDescription}`,
+    );
+
+  assignments.filter((a) => isMetalPart(a) && isSubtleFinish(a)).forEach((a) => {
+    locks.unshift(
+      `SUBTLE FINISH ON METAL — MANDATORY REPAINT: "${a.partName}" is a metal element and its assigned finish "${a.patternName}" (${a.patternDescription}) is a light, low-contrast finish. The original raw steel/chrome/black metal appearance MUST be completely replaced by "${a.patternName}" on EVERY visible pixel of "${a.partName}" — including metal frames, frame tubes, legs, rails, supports, cross bars, base frames, edge profiles and connectors that belong to this part. Leaving ANY of these metal pieces in their original metal color, or applying the finish to only part of the frame, is a WRONG result.`,
+      `Because "${a.patternName}" can look similar to bare metal, you must push the recolor far enough that the difference is clearly visible to a customer: match the exact hue, warmth and brightness of the reference swatch, and remove the original cool grey/chrome/black cast entirely. Never conclude that the metal "already matches" the swatch — always repaint it.`,
+      `Apply "${a.patternName}" consistently across ALL segments of the same metal frame system, so no segment stays a different color from the others.`,
+    );
+  });
+
   return locks.map((lock, index) => `${index + 1}. ${lock}`).join("\n");
 }
 
