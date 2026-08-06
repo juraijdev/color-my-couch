@@ -250,18 +250,32 @@ async function generateImageWithGeminiNative(
   const parts = await buildGeminiParts(messageContent);
   let last: GenerateImageResult = { error: "No image returned", model };
 
-  for (const candidate of candidates) {
-    console.log(`Trying ${logLabel || "native Gemini image model"}: ${model} -> ${candidate}`);
-    const result = await callGeminiNativeImage(geminiKey, candidate, parts, temperature);
-    if (result.output) return result;
+  // Two passes: Google's image models regularly return transient 500/503 when
+  // overloaded, which is why a retry usually succeeds. Only truly missing ids
+  // (404/400) are skipped permanently.
+  const deadIds = new Set<string>();
 
-    last = result;
-    // Quota / auth problems will not be fixed by another model id.
-    if (result.status === 429 || result.status === 401 || result.status === 403) return result;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    for (const candidate of candidates) {
+      if (deadIds.has(candidate)) continue;
+      console.log(`Trying ${logLabel || "native Gemini image model"}: ${model} -> ${candidate} (attempt ${attempt + 1})`);
+      const result = await callGeminiNativeImage(geminiKey, candidate, parts, temperature);
+      if (result.output) return result;
+
+      last = result;
+      // Quota / auth problems will not be fixed by another model id or a retry.
+      if (result.status === 429 || result.status === 401 || result.status === 403) return result;
+      // Model id does not exist for this key/region - never try it again.
+      if (result.status === 404 || result.status === 400) deadIds.add(candidate);
+    }
+    if (deadIds.size === candidates.length) break;
+    // Back off before retrying the transiently-failing ids (1s, 3s).
+    await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 1000 : 3000));
   }
 
   return last;
 }
+
 
 export async function generateImageFromMessages(options: GenerateImageOptions): Promise<GenerateImageResult> {
   const cfg = getAiConfig();
