@@ -489,6 +489,64 @@ function normalizeParts(parts: any[]) {
   }, []);
 }
 
+const ANALYSIS_RETRY_DELAYS_MS = [0, 1200, 3000, 6000];
+const TRANSIENT_AI_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+
+async function analyzeFurnitureWithRetry(aiCfg: ReturnType<typeof getAiConfig>, image: string) {
+  let lastStatus = 500;
+  let lastError = "AI analysis failed";
+
+  for (let attempt = 0; attempt < ANALYSIS_RETRY_DELAYS_MS.length; attempt++) {
+    const delay = ANALYSIS_RETRY_DELAYS_MS[attempt];
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+
+    try {
+      const response = await fetch(aiCfg.url, {
+        method: "POST",
+        headers: aiCfg.headers,
+        body: JSON.stringify({
+          model: aiCfg.mapModel("google/gemini-3.6-flash"),
+          temperature: 0,
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: userPrompt },
+                { type: "image_url", image_url: { url: image } },
+              ],
+            },
+          ],
+          max_tokens: 4000,
+        }),
+      });
+
+      lastStatus = response.status;
+      if (!response.ok) {
+        lastError = await response.text();
+        console.error(`AI analysis attempt ${attempt + 1} failed:`, response.status, lastError);
+        if (!TRANSIENT_AI_STATUSES.has(response.status)) break;
+        continue;
+      }
+
+      const aiResult = await response.json();
+      const content = aiResult.choices?.[0]?.message?.content || "";
+      const parts = normalizeParts(extractPartsFromContent(content));
+      if (parts.length > 0) return { parts, content };
+
+      lastStatus = 502;
+      lastError = "The AI returned an incomplete furniture analysis";
+      console.error(`AI analysis attempt ${attempt + 1} returned no usable parts`);
+    } catch (error) {
+      lastStatus = 503;
+      lastError = error instanceof Error ? error.message : "AI connection failed";
+      console.error(`AI analysis attempt ${attempt + 1} network error:`, error);
+    }
+  }
+
+  return { parts: [], status: lastStatus, error: lastError };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -517,63 +575,30 @@ serve(async (req) => {
       )
     }
 
-    const response = await fetch(aiCfg.url, {
-      method: "POST",
-      headers: aiCfg.headers,
-      body: JSON.stringify({
-        model: aiCfg.mapModel("google/gemini-2.5-flash"),
-        temperature: 0,
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: userPrompt,
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: body.image,
-                },
-              },
-            ],
-          },
-        ],
-        max_tokens: 4000,
-      }),
-    });
+    const analysis = await analyzeFurnitureWithRetry(aiCfg, body.image);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-
-      if (response.status === 429) {
+    if (analysis.parts.length === 0) {
+      if (analysis.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (response.status === 402) {
+      if (analysis.status === 402) {
         return new Response(JSON.stringify({ error: "AI credits exhausted. Please add more credits." }), {
           status: 402,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      throw new Error("AI analysis failed");
+      return new Response(JSON.stringify({ error: "AI analysis failed after automatic retries", details: analysis.error }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const aiResult = await response.json();
-    const content = aiResult.choices?.[0]?.message?.content || "";
-
-    console.log("AI response:", content);
-
-    const parts = normalizeParts(extractPartsFromContent(content));
+    console.log("AI response:", analysis.content);
+    const parts = analysis.parts;
 
     console.log("Normalized parts:", JSON.stringify(parts));
 
