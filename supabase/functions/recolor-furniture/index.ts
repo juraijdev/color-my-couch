@@ -158,8 +158,8 @@ async function generateRecoloredImage(
   messageContent: AiMessageContent,
 ) {
   const models = [
-    "google/gemini-3-pro-image-preview",
-    "google/gemini-3.1-flash-image-preview",
+    "google/gemini-3-pro-image",
+    "google/gemini-3.1-flash-image",
   ];
 
   let lastDetails = "No content returned";
