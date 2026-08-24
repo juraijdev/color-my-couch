@@ -3,6 +3,7 @@ import { Loader2, RefreshCw, Layers, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { PatternOption } from "@/components/PatternPalette";
+import { compressImage } from "@/lib/imageUtils";
 
 export interface PartSelectorRef {
   getPatternAssignments: () => PartPatternAssignment[];
@@ -71,24 +72,23 @@ export const PartSelector = forwardRef<PartSelectorRef, PartSelectorProps>(
     const analyzeImage = async () => {
       setIsAnalyzing(true);
       try {
-        let response: Response | null = null;
-        for (let attempt = 0; attempt < 2; attempt++) {
-          if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 2_000));
-          response = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/segment-furniture`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-              },
-              body: JSON.stringify({ image: imageUrl }),
-            }
-          );
-          if (![502, 503, 504].includes(response.status)) break;
+        let payloadImage = imageUrl;
+        try {
+          payloadImage = await compressImage(imageUrl, 1400, 0.82);
+        } catch (error) {
+          console.warn("Image compression failed, sending original", error);
         }
-
-        if (!response) throw new Error("Unable to contact furniture analysis");
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/segment-furniture`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ image: payloadImage }),
+          }
+        );
 
         const responseText = await response.text();
         let data: { parts?: FurniturePart[]; error?: string } | null = null;

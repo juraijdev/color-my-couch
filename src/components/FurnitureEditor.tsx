@@ -82,26 +82,17 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
           console.warn("Image compression failed, sending original", e);
         }
 
-        let response: Response | null = null;
-        for (let attempt = 0; attempt < 2; attempt++) {
-          if (attempt > 0) {
-            await new Promise((resolve) => setTimeout(resolve, 2_000));
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/segment-furniture`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ image: payloadImage }),
           }
-          response = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/segment-furniture`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-              },
-              body: JSON.stringify({ image: payloadImage }),
-            }
-          );
-          if (![502, 503, 504].includes(response.status)) break;
-        }
-
-        if (!response) throw new Error("Unable to contact furniture analysis");
+        );
 
         const responseText = await response.text();
         let data: { parts?: FurniturePart[]; error?: string } | null = null;
