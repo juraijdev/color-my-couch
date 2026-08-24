@@ -77,35 +77,50 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
         // for the edge function (large raw PNGs cause "Failed to fetch").
         let payloadImage = imageUrl;
         try {
-          payloadImage = await compressImage(imageUrl, 1600, 0.85);
+          payloadImage = await compressImage(imageUrl, 1400, 0.82);
         } catch (e) {
           console.warn("Image compression failed, sending original", e);
         }
 
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/segment-furniture`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({ image: payloadImage }),
+        let response: Response | null = null;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          if (attempt > 0) {
+            await new Promise((resolve) => setTimeout(resolve, 2_000));
           }
-        );
+          response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/segment-furniture`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({ image: payloadImage }),
+            }
+          );
+          if (![502, 503, 504].includes(response.status)) break;
+        }
+
+        if (!response) throw new Error("Unable to contact furniture analysis");
+
+        const responseText = await response.text();
+        let data: { parts?: FurniturePart[]; error?: string } | null = null;
+        if (responseText.trim()) {
+          try {
+            data = JSON.parse(responseText);
+          } catch {
+            data = null;
+          }
+        }
 
         if (!response.ok) {
-          const contentType = response.headers.get("content-type") || "";
-          const errorData = contentType.includes("application/json")
-            ? await response.json().catch(() => null)
-            : null;
-          const message = errorData?.error || (response.status === 504
-            ? "Analysis timed out. Please try again—the server is busy."
+          const message = data?.error || ([502, 503, 504].includes(response.status)
+            ? "Furniture analysis is temporarily unavailable. Please try Re-analyze."
             : `Failed to analyze image (${response.status})`);
           throw new Error(message);
         }
 
-        const data = await response.json();
+        if (!data) throw new Error("The analysis server returned an empty response. Please try Re-analyze.");
         
         if (data.parts && data.parts.length > 0) {
           setParts(data.parts);
