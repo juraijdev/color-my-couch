@@ -95,8 +95,14 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
         );
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to analyze image");
+          const contentType = response.headers.get("content-type") || "";
+          const errorData = contentType.includes("application/json")
+            ? await response.json().catch(() => null)
+            : null;
+          const message = errorData?.error || (response.status === 504
+            ? "Analysis timed out. Please try again—the server is busy."
+            : `Failed to analyze image (${response.status})`);
+          throw new Error(message);
         }
 
         const data = await response.json();
