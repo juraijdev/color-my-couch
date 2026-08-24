@@ -82,11 +82,16 @@ export default function Customize() {
     try {
       const hash = await hashImage(imageDataUrl);
       setUploadedImageHash(hash);
-      const { data } = await supabase
+      // Select all available columns so older self-hosted databases that have
+      // not added rendering_url yet can still perform the library lookup.
+      const { data, error } = await supabase
         .from("saved_furniture")
-        .select("name,parts,rendering_url")
+        .select("*")
         .eq("image_hash", hash)
         .maybeSingle();
+      if (error) {
+        console.warn("Saved furniture lookup unavailable:", error.message);
+      }
       if (data?.parts && Array.isArray(data.parts) && data.parts.length > 0) {
         setPreloadedParts(data.parts as unknown as FurniturePart[]);
         setSavedName(data.name);
