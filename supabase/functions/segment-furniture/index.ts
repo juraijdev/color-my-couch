@@ -489,59 +489,100 @@ function normalizeParts(parts: any[]) {
   }, []);
 }
 
-// Keep the complete analysis below the common 60-second Nginx/edge timeout.
-// Previously four retry rounds across four models could run for several
-// minutes, so Nginx returned an HTML 504 page before this function responded.
-const ANALYSIS_REQUEST_TIMEOUT_MS = 20_000;
 const MAX_ANALYSIS_ATTEMPTS = 2;
+const ANALYSIS_RETRY_DELAY_MS = 1_500;
 
 // Google retires model ids without notice: a single pinned id starts 400/404-ing
 // overnight and analysis dies. Always walk a chain of known-good text/vision ids.
 const ANALYSIS_MODEL_CANDIDATES = [
   "google/gemini-3.6-flash",
   "google/gemini-2.5-flash",
-  "google/gemini-2.5-pro",
-  "google/gemini-2.5-flash-lite",
 ];
+
+function getInlineImage(image: string) {
+  const match = image.match(/^data:([^;]+);base64,(.+)$/);
+  if (!match) return null;
+  return { mimeType: match[1], data: match[2] };
+}
+
+async function callNativeGeminiAnalysis(model: string, image: string) {
+  const geminiKey = Deno.env.get("GEMINI_API_KEY");
+  const inlineImage = getInlineImage(image);
+  if (!geminiKey || !inlineImage) {
+    return { status: 400, error: "The analysis image or Gemini API configuration is invalid" };
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(geminiKey)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents: [{
+          role: "user",
+          parts: [
+            { text: userPrompt },
+            { inlineData: inlineImage },
+          ],
+        }],
+        generationConfig: {
+          temperature: 0,
+          maxOutputTokens: 4000,
+          responseMimeType: "application/json",
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    return { status: response.status, error: await response.text() };
+  }
+
+  const aiResult = await response.json();
+  const content = (aiResult.candidates?.[0]?.content?.parts || [])
+    .map((part: { text?: string }) => part.text || "")
+    .join("\n");
+  const parts = normalizeParts(extractPartsFromContent(content));
+  if (parts.length > 0) return { parts, content };
+
+  const blockReason = aiResult.promptFeedback?.blockReason;
+  return {
+    status: blockReason ? 400 : 502,
+    error: blockReason
+      ? `Furniture analysis was blocked: ${blockReason}`
+      : "The AI returned an incomplete furniture analysis",
+  };
+}
 
 async function callAnalysisModel(
   aiCfg: ReturnType<typeof getAiConfig>,
   model: string,
   image: string,
 ) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), ANALYSIS_REQUEST_TIMEOUT_MS);
-  let response: Response;
-
-  try {
-    response = await fetch(aiCfg.url, {
-      method: "POST",
-      headers: aiCfg.headers,
-      signal: controller.signal,
-      body: JSON.stringify({
-        model,
-        temperature: 0,
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: userPrompt },
-              { type: "image_url", image_url: { url: image } },
-            ],
-          },
-        ],
-        max_tokens: 2500,
-      }),
-    });
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return { status: 504, error: `AI model did not respond within ${ANALYSIS_REQUEST_TIMEOUT_MS / 1000} seconds` };
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
+  if (aiCfg.provider === "gemini") {
+    return callNativeGeminiAnalysis(model, image);
   }
+
+  const response = await fetch(aiCfg.url, {
+    method: "POST",
+    headers: aiCfg.headers,
+    body: JSON.stringify({
+      model,
+      temperature: 0,
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: userPrompt },
+            { type: "image_url", image_url: { url: image } },
+          ],
+        },
+      ],
+      max_tokens: 4000,
+    }),
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -562,10 +603,11 @@ async function analyzeFurnitureWithRetry(aiCfg: ReturnType<typeof getAiConfig>, 
   const candidates = ANALYSIS_MODEL_CANDIDATES
     .map((m) => aiCfg.mapModel(m))
     .filter((id, i, all) => all.indexOf(id) === i);
-  // Try at most two distinct models. Each call has a 20-second ceiling, keeping
-  // the function response comfortably inside a 60-second reverse-proxy limit.
   for (let attempt = 0; attempt < Math.min(MAX_ANALYSIS_ATTEMPTS, candidates.length); attempt++) {
     const model = candidates[attempt];
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, ANALYSIS_RETRY_DELAY_MS));
+    }
     try {
       const result = await callAnalysisModel(aiCfg, model, image);
       if (result.parts) return { parts: result.parts, content: result.content };
