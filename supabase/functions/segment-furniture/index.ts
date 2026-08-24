@@ -492,60 +492,94 @@ function normalizeParts(parts: any[]) {
 const ANALYSIS_RETRY_DELAYS_MS = [0, 1200, 3000, 6000];
 const TRANSIENT_AI_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 
+// Google retires model ids without notice: a single pinned id starts 400/404-ing
+// overnight and analysis dies. Always walk a chain of known-good text/vision ids.
+const ANALYSIS_MODEL_CANDIDATES = [
+  "google/gemini-3.6-flash",
+  "google/gemini-2.5-flash",
+  "google/gemini-2.5-pro",
+  "google/gemini-2.5-flash-lite",
+];
+
+async function callAnalysisModel(
+  aiCfg: ReturnType<typeof getAiConfig>,
+  model: string,
+  image: string,
+) {
+  const response = await fetch(aiCfg.url, {
+    method: "POST",
+    headers: aiCfg.headers,
+    body: JSON.stringify({
+      model,
+      temperature: 0,
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: userPrompt },
+            { type: "image_url", image_url: { url: image } },
+          ],
+        },
+      ],
+      max_tokens: 4000,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    return { status: response.status, error: errorText };
+  }
+
+  const aiResult = await response.json();
+  const content = aiResult.choices?.[0]?.message?.content || "";
+  const parts = normalizeParts(extractPartsFromContent(content));
+  if (parts.length > 0) return { parts, content };
+  return { status: 502, error: "The AI returned an incomplete furniture analysis" };
+}
+
 async function analyzeFurnitureWithRetry(aiCfg: ReturnType<typeof getAiConfig>, image: string) {
   let lastStatus = 500;
   let lastError = "AI analysis failed";
+
+  const candidates = ANALYSIS_MODEL_CANDIDATES
+    .map((m) => aiCfg.mapModel(m))
+    .filter((id, i, all) => all.indexOf(id) === i);
+  const deadIds = new Set<string>();
 
   for (let attempt = 0; attempt < ANALYSIS_RETRY_DELAYS_MS.length; attempt++) {
     const delay = ANALYSIS_RETRY_DELAYS_MS[attempt];
     if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
 
-    try {
-      const response = await fetch(aiCfg.url, {
-        method: "POST",
-        headers: aiCfg.headers,
-        body: JSON.stringify({
-          model: aiCfg.mapModel("google/gemini-3.6-flash"),
-          temperature: 0,
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: [
-                { type: "text", text: userPrompt },
-                { type: "image_url", image_url: { url: image } },
-              ],
-            },
-          ],
-          max_tokens: 4000,
-        }),
-      });
+    for (const model of candidates) {
+      if (deadIds.has(model)) continue;
+      try {
+        const result = await callAnalysisModel(aiCfg, model, image);
+        if (result.parts) return { parts: result.parts, content: result.content };
 
-      lastStatus = response.status;
-      if (!response.ok) {
-        lastError = await response.text();
-        console.error(`AI analysis attempt ${attempt + 1} failed:`, response.status, lastError);
-        if (!TRANSIENT_AI_STATUSES.has(response.status)) break;
-        continue;
+        lastStatus = result.status ?? 500;
+        lastError = result.error ?? "AI analysis failed";
+        console.error(`AI analysis attempt ${attempt + 1} failed:`, model, lastStatus, lastError);
+
+        // Quota/auth issues are not fixed by another model id.
+        if (lastStatus === 429 || lastStatus === 401 || lastStatus === 403 || lastStatus === 402) {
+          return { parts: [], status: lastStatus, error: lastError };
+        }
+        // Model id does not exist for this key/region - never try it again.
+        if (lastStatus === 404 || lastStatus === 400) deadIds.add(model);
+      } catch (error) {
+        lastStatus = 503;
+        lastError = error instanceof Error ? error.message : "AI connection failed";
+        console.error(`AI analysis attempt ${attempt + 1} network error:`, model, error);
       }
-
-      const aiResult = await response.json();
-      const content = aiResult.choices?.[0]?.message?.content || "";
-      const parts = normalizeParts(extractPartsFromContent(content));
-      if (parts.length > 0) return { parts, content };
-
-      lastStatus = 502;
-      lastError = "The AI returned an incomplete furniture analysis";
-      console.error(`AI analysis attempt ${attempt + 1} returned no usable parts`);
-    } catch (error) {
-      lastStatus = 503;
-      lastError = error instanceof Error ? error.message : "AI connection failed";
-      console.error(`AI analysis attempt ${attempt + 1} network error:`, error);
     }
+
+    if (deadIds.size === candidates.length) break;
   }
 
   return { parts: [], status: lastStatus, error: lastError };
 }
+
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {

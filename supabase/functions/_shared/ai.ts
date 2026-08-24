@@ -50,7 +50,7 @@ const GEMINI_MODEL_MAP: Record<string, string> = {
   "google/gemini-3-pro-image-preview": "gemini-2.5-flash-image",
   "google/gemini-3.1-flash-image-preview": "gemini-2.5-flash-image",
   "google/gemini-2.5-flash-image": "gemini-2.5-flash-image",
-  "google/gemini-2.5-flash": "gemini-flash-latest",
+  "google/gemini-2.5-flash": "gemini-2.5-flash",
   "google/gemini-2.5-flash-lite": "gemini-flash-lite-latest",
   "google/gemini-2.5-pro": "gemini-pro-latest",
   "google/gemini-3-flash-preview": "gemini-flash-latest",
