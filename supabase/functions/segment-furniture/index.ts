@@ -489,8 +489,9 @@ function normalizeParts(parts: any[]) {
   }, []);
 }
 
-const MAX_ANALYSIS_ATTEMPTS = 2;
-const ANALYSIS_RETRY_DELAY_MS = 1_500;
+// Keep the complete analysis below the reverse-proxy timeout. Candidates run
+// together so a slow/unavailable model cannot block the known-good fallback.
+const ANALYSIS_DEADLINE_MS = 45_000;
 
 // Google retires model ids without notice: a single pinned id starts 400/404-ing
 // overnight and analysis dies. Always walk a chain of known-good text/vision ids.
@@ -505,7 +506,7 @@ function getInlineImage(image: string) {
   return { mimeType: match[1], data: match[2] };
 }
 
-async function callNativeGeminiAnalysis(model: string, image: string) {
+async function callNativeGeminiAnalysis(model: string, image: string, signal?: AbortSignal) {
   const geminiKey = Deno.env.get("GEMINI_API_KEY");
   const inlineImage = getInlineImage(image);
   if (!geminiKey || !inlineImage) {
@@ -516,6 +517,7 @@ async function callNativeGeminiAnalysis(model: string, image: string) {
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(geminiKey)}`,
     {
       method: "POST",
+      signal,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -559,13 +561,15 @@ async function callAnalysisModel(
   aiCfg: ReturnType<typeof getAiConfig>,
   model: string,
   image: string,
+  signal?: AbortSignal,
 ) {
   if (aiCfg.provider === "gemini") {
-    return callNativeGeminiAnalysis(model, image);
+    return callNativeGeminiAnalysis(model, image, signal);
   }
 
   const response = await fetch(aiCfg.url, {
     method: "POST",
+    signal,
     headers: aiCfg.headers,
     body: JSON.stringify({
       model,
@@ -597,37 +601,58 @@ async function callAnalysisModel(
 }
 
 async function analyzeFurnitureWithRetry(aiCfg: ReturnType<typeof getAiConfig>, image: string) {
-  let lastStatus = 500;
-  let lastError = "AI analysis failed";
-
   const candidates = ANALYSIS_MODEL_CANDIDATES
     .map((m) => aiCfg.mapModel(m))
     .filter((id, i, all) => all.indexOf(id) === i);
-  for (let attempt = 0; attempt < Math.min(MAX_ANALYSIS_ATTEMPTS, candidates.length); attempt++) {
-    const model = candidates[attempt];
-    if (attempt > 0) {
-      await new Promise((resolve) => setTimeout(resolve, ANALYSIS_RETRY_DELAY_MS));
+  const controller = new AbortController();
+  const failures: Array<{ status: number; error: string }> = [];
+
+  return await new Promise<{ parts: any[]; content?: string; status?: number; error?: string }>((resolve) => {
+    let finished = false;
+    let completed = 0;
+    const finish = (result: { parts: any[]; content?: string; status?: number; error?: string }) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(deadline);
+      controller.abort();
+      resolve(result);
+    };
+    const deadline = setTimeout(() => {
+      finish({ parts: [], status: 503, error: "Furniture analysis exceeded its safe processing time" });
+    }, ANALYSIS_DEADLINE_MS);
+
+    for (const model of candidates) {
+      callAnalysisModel(aiCfg, model, image, controller.signal)
+        .then((result) => {
+          if (finished) return;
+          if (result.parts) {
+            console.log(`AI analysis succeeded with ${model}`);
+            finish({ parts: result.parts, content: result.content });
+            return;
+          }
+          const failure = {
+            status: result.status ?? 500,
+            error: result.error ?? "AI analysis failed",
+          };
+          failures.push(failure);
+          console.error("AI analysis candidate failed:", model, failure.status, failure.error);
+        })
+        .catch((error) => {
+          if (finished) return;
+          const message = error instanceof Error ? error.message : "AI connection failed";
+          failures.push({ status: 503, error: message });
+          console.error("AI analysis candidate network error:", model, message);
+        })
+        .finally(() => {
+          completed++;
+          if (!finished && completed === candidates.length) {
+            const terminal = failures.find((failure) => [401, 402, 403, 429].includes(failure.status));
+            const last = terminal ?? failures[failures.length - 1] ?? { status: 503, error: "AI analysis failed" };
+            finish({ parts: [], status: last.status, error: last.error });
+          }
+        });
     }
-    try {
-      const result = await callAnalysisModel(aiCfg, model, image);
-      if (result.parts) return { parts: result.parts, content: result.content };
-
-      lastStatus = result.status ?? 500;
-      lastError = result.error ?? "AI analysis failed";
-      console.error(`AI analysis attempt ${attempt + 1} failed:`, model, lastStatus, lastError);
-
-      // Billing/auth/policy failures are terminal and must be surfaced as-is.
-      if ([401, 402, 403, 429].includes(lastStatus)) {
-        return { parts: [], status: lastStatus, error: lastError };
-      }
-    } catch (error) {
-      lastStatus = 503;
-      lastError = error instanceof Error ? error.message : "AI connection failed";
-      console.error(`AI analysis attempt ${attempt + 1} network error:`, model, error);
-    }
-  }
-
-  return { parts: [], status: lastStatus, error: lastError };
+  });
 }
 
 
