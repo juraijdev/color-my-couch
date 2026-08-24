@@ -489,8 +489,11 @@ function normalizeParts(parts: any[]) {
   }, []);
 }
 
-const ANALYSIS_RETRY_DELAYS_MS = [0, 1200, 3000, 6000];
-const TRANSIENT_AI_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+// Keep the complete analysis below the common 60-second Nginx/edge timeout.
+// Previously four retry rounds across four models could run for several
+// minutes, so Nginx returned an HTML 504 page before this function responded.
+const ANALYSIS_REQUEST_TIMEOUT_MS = 20_000;
+const MAX_ANALYSIS_ATTEMPTS = 2;
 
 // Google retires model ids without notice: a single pinned id starts 400/404-ing
 // overnight and analysis dies. Always walk a chain of known-good text/vision ids.
@@ -506,25 +509,39 @@ async function callAnalysisModel(
   model: string,
   image: string,
 ) {
-  const response = await fetch(aiCfg.url, {
-    method: "POST",
-    headers: aiCfg.headers,
-    body: JSON.stringify({
-      model,
-      temperature: 0,
-      messages: [
-        { role: "system", content: systemPrompt },
-        {
-          role: "user",
-          content: [
-            { type: "text", text: userPrompt },
-            { type: "image_url", image_url: { url: image } },
-          ],
-        },
-      ],
-      max_tokens: 4000,
-    }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ANALYSIS_REQUEST_TIMEOUT_MS);
+  let response: Response;
+
+  try {
+    response = await fetch(aiCfg.url, {
+      method: "POST",
+      headers: aiCfg.headers,
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        temperature: 0,
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: userPrompt },
+              { type: "image_url", image_url: { url: image } },
+            ],
+          },
+        ],
+        max_tokens: 2500,
+      }),
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return { status: 504, error: `AI model did not respond within ${ANALYSIS_REQUEST_TIMEOUT_MS / 1000} seconds` };
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -545,36 +562,27 @@ async function analyzeFurnitureWithRetry(aiCfg: ReturnType<typeof getAiConfig>, 
   const candidates = ANALYSIS_MODEL_CANDIDATES
     .map((m) => aiCfg.mapModel(m))
     .filter((id, i, all) => all.indexOf(id) === i);
-  const deadIds = new Set<string>();
+  // Try at most two distinct models. Each call has a 20-second ceiling, keeping
+  // the function response comfortably inside a 60-second reverse-proxy limit.
+  for (let attempt = 0; attempt < Math.min(MAX_ANALYSIS_ATTEMPTS, candidates.length); attempt++) {
+    const model = candidates[attempt];
+    try {
+      const result = await callAnalysisModel(aiCfg, model, image);
+      if (result.parts) return { parts: result.parts, content: result.content };
 
-  for (let attempt = 0; attempt < ANALYSIS_RETRY_DELAYS_MS.length; attempt++) {
-    const delay = ANALYSIS_RETRY_DELAYS_MS[attempt];
-    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+      lastStatus = result.status ?? 500;
+      lastError = result.error ?? "AI analysis failed";
+      console.error(`AI analysis attempt ${attempt + 1} failed:`, model, lastStatus, lastError);
 
-    for (const model of candidates) {
-      if (deadIds.has(model)) continue;
-      try {
-        const result = await callAnalysisModel(aiCfg, model, image);
-        if (result.parts) return { parts: result.parts, content: result.content };
-
-        lastStatus = result.status ?? 500;
-        lastError = result.error ?? "AI analysis failed";
-        console.error(`AI analysis attempt ${attempt + 1} failed:`, model, lastStatus, lastError);
-
-        // Quota/auth issues are not fixed by another model id.
-        if (lastStatus === 429 || lastStatus === 401 || lastStatus === 403 || lastStatus === 402) {
-          return { parts: [], status: lastStatus, error: lastError };
-        }
-        // Model id does not exist for this key/region - never try it again.
-        if (lastStatus === 404 || lastStatus === 400) deadIds.add(model);
-      } catch (error) {
-        lastStatus = 503;
-        lastError = error instanceof Error ? error.message : "AI connection failed";
-        console.error(`AI analysis attempt ${attempt + 1} network error:`, model, error);
+      // Billing/auth/policy failures are terminal and must be surfaced as-is.
+      if ([401, 402, 403, 429].includes(lastStatus)) {
+        return { parts: [], status: lastStatus, error: lastError };
       }
+    } catch (error) {
+      lastStatus = 503;
+      lastError = error instanceof Error ? error.message : "AI connection failed";
+      console.error(`AI analysis attempt ${attempt + 1} network error:`, model, error);
     }
-
-    if (deadIds.size === candidates.length) break;
   }
 
   return { parts: [], status: lastStatus, error: lastError };
