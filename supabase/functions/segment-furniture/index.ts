@@ -489,15 +489,17 @@ function normalizeParts(parts: any[]) {
   }, []);
 }
 
-// Keep the complete analysis below the reverse-proxy timeout. Candidates run
-// together so a slow/unavailable model cannot block the known-good fallback.
-const ANALYSIS_DEADLINE_MS = 45_000;
+// Keep each upstream call bounded, but do not launch duplicate vision requests
+// in parallel. Parallel calls consume quota together and can make a temporary
+// provider overload worse. The VPS proxy allows the bounded fallback sequence.
+const ANALYSIS_ATTEMPT_TIMEOUT_MS = 28_000;
 
 // Google retires model ids without notice: a single pinned id starts 400/404-ing
 // overnight and analysis dies. Always walk a chain of known-good text/vision ids.
 const ANALYSIS_MODEL_CANDIDATES = [
-  "google/gemini-3.6-flash",
   "google/gemini-2.5-flash",
+  "google/gemini-3.6-flash",
+  "google/gemini-2.5-flash-lite",
 ];
 
 function getInlineImage(image: string) {
@@ -604,55 +606,53 @@ async function analyzeFurnitureWithRetry(aiCfg: ReturnType<typeof getAiConfig>, 
   const candidates = ANALYSIS_MODEL_CANDIDATES
     .map((m) => aiCfg.mapModel(m))
     .filter((id, i, all) => all.indexOf(id) === i);
-  const controller = new AbortController();
   const failures: Array<{ status: number; error: string }> = [];
 
-  return await new Promise<{ parts: any[]; content?: string; status?: number; error?: string }>((resolve) => {
-    let finished = false;
-    let completed = 0;
-    const finish = (result: { parts: any[]; content?: string; status?: number; error?: string }) => {
-      if (finished) return;
-      finished = true;
-      clearTimeout(deadline);
-      controller.abort();
-      resolve(result);
-    };
-    const deadline = setTimeout(() => {
-      finish({ parts: [], status: 503, error: "Furniture analysis exceeded its safe processing time" });
-    }, ANALYSIS_DEADLINE_MS);
+  // Retry the primary model once after the fallbacks. This handles brief 503s
+  // without multiplying every user action into simultaneous paid API calls.
+  const attemptModels = [...candidates, ...(candidates[0] ? [candidates[0]] : [])];
+  for (let attempt = 0; attempt < attemptModels.length; attempt++) {
+    const model = attemptModels[attempt];
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), ANALYSIS_ATTEMPT_TIMEOUT_MS);
+    try {
+      const result = await callAnalysisModel(aiCfg, model, image, controller.signal);
+      if (result.parts) {
+        console.log(`AI analysis succeeded with ${model} on attempt ${attempt + 1}`);
+        return { parts: result.parts, content: result.content };
+      }
 
-    for (const model of candidates) {
-      callAnalysisModel(aiCfg, model, image, controller.signal)
-        .then((result) => {
-          if (finished) return;
-          if (result.parts) {
-            console.log(`AI analysis succeeded with ${model}`);
-            finish({ parts: result.parts, content: result.content });
-            return;
-          }
-          const failure = {
-            status: result.status ?? 500,
-            error: result.error ?? "AI analysis failed",
-          };
-          failures.push(failure);
-          console.error("AI analysis candidate failed:", model, failure.status, failure.error);
-        })
-        .catch((error) => {
-          if (finished) return;
-          const message = error instanceof Error ? error.message : "AI connection failed";
-          failures.push({ status: 503, error: message });
-          console.error("AI analysis candidate network error:", model, message);
-        })
-        .finally(() => {
-          completed++;
-          if (!finished && completed === candidates.length) {
-            const terminal = failures.find((failure) => [401, 402, 403, 429].includes(failure.status));
-            const last = terminal ?? failures[failures.length - 1] ?? { status: 503, error: "AI analysis failed" };
-            finish({ parts: [], status: last.status, error: last.error });
-          }
-        });
+      const failure = {
+        status: result.status ?? 500,
+        error: result.error ?? "AI analysis failed",
+      };
+      failures.push(failure);
+      console.error("AI analysis attempt failed:", attempt + 1, model, failure.status, failure.error);
+
+      // Invalid input, authentication, billing, and rate-limit responses will
+      // not improve by trying another model in the same request.
+      if ([400, 401, 402, 403, 429].includes(failure.status) && ![400, 404].includes(failure.status)) {
+        break;
+      }
+    } catch (error) {
+      const timedOut = error instanceof DOMException && error.name === "AbortError";
+      const message = timedOut
+        ? `Upstream analysis timed out after ${ANALYSIS_ATTEMPT_TIMEOUT_MS / 1000}s`
+        : error instanceof Error ? error.message : "AI connection failed";
+      failures.push({ status: 503, error: message });
+      console.error("AI analysis attempt network error:", attempt + 1, model, message);
+    } finally {
+      clearTimeout(timeout);
     }
-  });
+
+    if (attempt < attemptModels.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+  }
+
+  const terminal = failures.find((failure) => [401, 402, 403, 429].includes(failure.status));
+  const last = terminal ?? failures[failures.length - 1] ?? { status: 503, error: "AI analysis failed" };
+  return { parts: [], status: last.status, error: last.error };
 }
 
 
