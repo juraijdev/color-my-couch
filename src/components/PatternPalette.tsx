@@ -152,6 +152,16 @@ import ESRA034P90303 from "@/assets/patterns/ESR-A034-P90303-Graphite-Arch.jpg";
 import ESRA034R8001 from "@/assets/patterns/ESR-A034-R8001-Pure-White-Arch.jpg";
 import ESRA09030166 from "@/assets/patterns/ESR-A090-30166-Tan-Petal.jpg";
 import ESRA090BR9004 from "@/assets/patterns/ESR-A090-BR9004-Navy-Petal.jpg";
+import ESRA090M1306 from "@/assets/patterns/ESR-A090-M1306-Walnut-Petal.jpg";
+import ESRA090P41116 from "@/assets/patterns/ESR-A090-P41116-Warm-White-Petal.jpg";
+import ESRA090P90303 from "@/assets/patterns/ESR-A090-P90303-Graphite-Petal.jpg";
+import ESRA09330166 from "@/assets/patterns/ESR-A093-30166-Terracotta-Wave.jpg";
+import ESRA093BR9004 from "@/assets/patterns/ESR-A093-BR9004-Navy-Wave.jpg";
+import ESRA093M1306 from "@/assets/patterns/ESR-A093-M1306-Walnut-Wave.jpg";
+import ESRA093P41116 from "@/assets/patterns/ESR-A093-P41116-Warm-White-Wave.jpg";
+import ESRA093R8001 from "@/assets/patterns/ESR-A093-R8001-Pure-White-Wave.jpg";
+import ESRA118BR9004 from "@/assets/patterns/ESR-A118-BR9004-Navy-Slat.jpg";
+import ESRA118M1306 from "@/assets/patterns/ESR-A118-M1306-Walnut-Slat.jpg";
 
 export interface PatternOption {
   id: string;
