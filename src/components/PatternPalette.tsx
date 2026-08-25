@@ -162,6 +162,11 @@ import ESRA093P41116 from "@/assets/patterns/ESR-A093-P41116-Warm-White-Wave.jpg
 import ESRA093R8001 from "@/assets/patterns/ESR-A093-R8001-Pure-White-Wave.jpg";
 import ESRA118BR9004 from "@/assets/patterns/ESR-A118-BR9004-Navy-Slat.jpg";
 import ESRA118M1306 from "@/assets/patterns/ESR-A118-M1306-Walnut-Slat.jpg";
+import ESRA118P41116 from "@/assets/patterns/ESR-A118-P41116-Warm-White-Slat.jpg";
+import ESRA118P90303 from "@/assets/patterns/ESR-A118-P90303-Graphite-Slat.jpg";
+import ESRA118R8001 from "@/assets/patterns/ESR-A118-R8001-Pure-White-Slat.jpg";
+import ESRA119M1306 from "@/assets/patterns/ESR-A119-M1306-Walnut-Fluted.jpg";
+import ESRA119BR9004 from "@/assets/patterns/ESR-A119-BR9004-Navy-Fluted.jpg";
 
 export interface PatternOption {
   id: string;
