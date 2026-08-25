@@ -141,6 +141,18 @@ import A11923DWhiteRibbed from "@/assets/patterns/A119-2-3D-White-Ribbed.png";
 import A03423DSoftWhiteArchAlt from "@/assets/patterns/A034-2-3D-Soft-White-Arch-Alt.png";
 import A09323DWhiteWave from "@/assets/patterns/A093-2-3D-White-Wave.png";
 
+// Import pattern images - ESR 3D Panels (coded finishes)
+import ESRA119P41116 from "@/assets/patterns/ESR-A119-P41116-Warm-White-Ribbed.jpg";
+import ESRA119P90303 from "@/assets/patterns/ESR-A119-P90303-Graphite-Ribbed.jpg";
+import ESRA119R8001 from "@/assets/patterns/ESR-A119-R8001-Pure-White-Ribbed.jpg";
+import ESRA034BR9004 from "@/assets/patterns/ESR-A034-BR9004-Navy-Arch.jpg";
+import ESRA034M1306 from "@/assets/patterns/ESR-A034-M1306-Walnut-Arch.jpg";
+import ESRA034P41116 from "@/assets/patterns/ESR-A034-P41116-Warm-White-Arch.jpg";
+import ESRA034P90303 from "@/assets/patterns/ESR-A034-P90303-Graphite-Arch.jpg";
+import ESRA034R8001 from "@/assets/patterns/ESR-A034-R8001-Pure-White-Arch.jpg";
+import ESRA09030166 from "@/assets/patterns/ESR-A090-30166-Tan-Petal.jpg";
+import ESRA090BR9004 from "@/assets/patterns/ESR-A090-BR9004-Navy-Petal.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
