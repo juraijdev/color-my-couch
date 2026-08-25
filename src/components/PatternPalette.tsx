@@ -141,6 +141,18 @@ import A11923DWhiteRibbed from "@/assets/patterns/A119-2-3D-White-Ribbed.png";
 import A03423DSoftWhiteArchAlt from "@/assets/patterns/A034-2-3D-Soft-White-Arch-Alt.png";
 import A09323DWhiteWave from "@/assets/patterns/A093-2-3D-White-Wave.png";
 
+// Import pattern images - ESR 3D Panels (coded finishes)
+import ESRA119P41116 from "@/assets/patterns/ESR-A119-P41116-Warm-White-Ribbed.jpg";
+import ESRA119P90303 from "@/assets/patterns/ESR-A119-P90303-Graphite-Ribbed.jpg";
+import ESRA119R8001 from "@/assets/patterns/ESR-A119-R8001-Pure-White-Ribbed.jpg";
+import ESRA034BR9004 from "@/assets/patterns/ESR-A034-BR9004-Navy-Arch.jpg";
+import ESRA034M1306 from "@/assets/patterns/ESR-A034-M1306-Walnut-Arch.jpg";
+import ESRA034P41116 from "@/assets/patterns/ESR-A034-P41116-Warm-White-Arch.jpg";
+import ESRA034P90303 from "@/assets/patterns/ESR-A034-P90303-Graphite-Arch.jpg";
+import ESRA034R8001 from "@/assets/patterns/ESR-A034-R8001-Pure-White-Arch.jpg";
+import ESRA09030166 from "@/assets/patterns/ESR-A090-30166-Tan-Petal.jpg";
+import ESRA090BR9004 from "@/assets/patterns/ESR-A090-BR9004-Navy-Petal.jpg";
+
 export interface PatternOption {
   id: string;
   name: string;
@@ -1013,6 +1025,82 @@ export const patternCategories: PatternCategory[] = [
         name: "White Wave Relief",
         description: "3D white wave panel with flowing vertical sculpted texture",
         imageUrl: A09323DWhiteWave,
+      },
+    ],
+  },
+  {
+    id: "esr-3d-panels",
+    name: "ESR 3D Panels",
+    patterns: [
+      {
+        id: "esr-a119-p41116",
+        code: "ESR-A-119 / P-41116-OANY",
+        name: "Warm White Ribbed",
+        description: "3D vertical ribbed panel in soft warm white matte finish",
+        imageUrl: ESRA119P41116,
+      },
+      {
+        id: "esr-a119-p90303",
+        code: "ESR-A-119 / P-90303-OANY",
+        name: "Graphite Ribbed",
+        description: "3D vertical ribbed panel in dark graphite grey matte finish",
+        imageUrl: ESRA119P90303,
+      },
+      {
+        id: "esr-a119-r8001",
+        code: "ESR-A-119 / R8001-F09-T06",
+        name: "Pure White Ribbed",
+        description: "3D vertical ribbed panel in bright pure white finish",
+        imageUrl: ESRA119R8001,
+      },
+      {
+        id: "esr-a034-br9004",
+        code: "ESR-A-034 / BR9004-F06-T72",
+        name: "Navy Arch Relief",
+        description: "3D arch relief panel in deep navy with fine ribbed insets",
+        imageUrl: ESRA034BR9004,
+      },
+      {
+        id: "esr-a034-m1306",
+        code: "ESR-A-034 / M1306",
+        name: "Walnut Arch Relief",
+        description: "3D arch relief panel in warm walnut wood grain",
+        imageUrl: ESRA034M1306,
+      },
+      {
+        id: "esr-a034-p41116",
+        code: "ESR-A-034 / P-41116-OANY",
+        name: "Warm White Arch Relief",
+        description: "3D arch relief panel in soft warm white matte finish",
+        imageUrl: ESRA034P41116,
+      },
+      {
+        id: "esr-a034-p90303",
+        code: "ESR-A-034 / P-90303-OANY",
+        name: "Graphite Arch Relief",
+        description: "3D arch relief panel in dark graphite grey matte finish",
+        imageUrl: ESRA034P90303,
+      },
+      {
+        id: "esr-a034-r8001",
+        code: "ESR-A-034 / R8001-F09-T06",
+        name: "Pure White Arch Relief",
+        description: "3D arch relief panel in bright pure white finish",
+        imageUrl: ESRA034R8001,
+      },
+      {
+        id: "esr-a090-30166",
+        code: "ESR-A-090 / 30166-2S",
+        name: "Tan Petal Relief",
+        description: "3D sculpted petal relief panel in warm tan leather tone",
+        imageUrl: ESRA09030166,
+      },
+      {
+        id: "esr-a090-br9004",
+        code: "ESR-A-090 / BR9004-F06-T72",
+        name: "Navy Petal Relief",
+        description: "3D sculpted petal relief panel in deep navy matte finish",
+        imageUrl: ESRA090BR9004,
       },
     ],
   },
