@@ -1028,6 +1028,82 @@ export const patternCategories: PatternCategory[] = [
       },
     ],
   },
+  {
+    id: "esr-3d-panels",
+    name: "ESR 3D Panels",
+    patterns: [
+      {
+        id: "esr-a119-p41116",
+        code: "ESR-A-119 / P-41116-OANY",
+        name: "Warm White Ribbed",
+        description: "3D vertical ribbed panel in soft warm white matte finish",
+        imageUrl: ESRA119P41116,
+      },
+      {
+        id: "esr-a119-p90303",
+        code: "ESR-A-119 / P-90303-OANY",
+        name: "Graphite Ribbed",
+        description: "3D vertical ribbed panel in dark graphite grey matte finish",
+        imageUrl: ESRA119P90303,
+      },
+      {
+        id: "esr-a119-r8001",
+        code: "ESR-A-119 / R8001-F09-T06",
+        name: "Pure White Ribbed",
+        description: "3D vertical ribbed panel in bright pure white finish",
+        imageUrl: ESRA119R8001,
+      },
+      {
+        id: "esr-a034-br9004",
+        code: "ESR-A-034 / BR9004-F06-T72",
+        name: "Navy Arch Relief",
+        description: "3D arch relief panel in deep navy with fine ribbed insets",
+        imageUrl: ESRA034BR9004,
+      },
+      {
+        id: "esr-a034-m1306",
+        code: "ESR-A-034 / M1306",
+        name: "Walnut Arch Relief",
+        description: "3D arch relief panel in warm walnut wood grain",
+        imageUrl: ESRA034M1306,
+      },
+      {
+        id: "esr-a034-p41116",
+        code: "ESR-A-034 / P-41116-OANY",
+        name: "Warm White Arch Relief",
+        description: "3D arch relief panel in soft warm white matte finish",
+        imageUrl: ESRA034P41116,
+      },
+      {
+        id: "esr-a034-p90303",
+        code: "ESR-A-034 / P-90303-OANY",
+        name: "Graphite Arch Relief",
+        description: "3D arch relief panel in dark graphite grey matte finish",
+        imageUrl: ESRA034P90303,
+      },
+      {
+        id: "esr-a034-r8001",
+        code: "ESR-A-034 / R8001-F09-T06",
+        name: "Pure White Arch Relief",
+        description: "3D arch relief panel in bright pure white finish",
+        imageUrl: ESRA034R8001,
+      },
+      {
+        id: "esr-a090-30166",
+        code: "ESR-A-090 / 30166-2S",
+        name: "Tan Petal Relief",
+        description: "3D sculpted petal relief panel in warm tan leather tone",
+        imageUrl: ESRA09030166,
+      },
+      {
+        id: "esr-a090-br9004",
+        code: "ESR-A-090 / BR9004-F06-T72",
+        name: "Navy Petal Relief",
+        description: "3D sculpted petal relief panel in deep navy matte finish",
+        imageUrl: ESRA090BR9004,
+      },
+    ],
+  },
 ];
 
 interface PatternPaletteProps {
