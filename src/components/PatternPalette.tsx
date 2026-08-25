@@ -162,6 +162,11 @@ import ESRA093P41116 from "@/assets/patterns/ESR-A093-P41116-Warm-White-Wave.jpg
 import ESRA093R8001 from "@/assets/patterns/ESR-A093-R8001-Pure-White-Wave.jpg";
 import ESRA118BR9004 from "@/assets/patterns/ESR-A118-BR9004-Navy-Slat.jpg";
 import ESRA118M1306 from "@/assets/patterns/ESR-A118-M1306-Walnut-Slat.jpg";
+import ESRA118P41116 from "@/assets/patterns/ESR-A118-P41116-Warm-White-Slat.jpg";
+import ESRA118P90303 from "@/assets/patterns/ESR-A118-P90303-Graphite-Slat.jpg";
+import ESRA118R8001 from "@/assets/patterns/ESR-A118-R8001-Pure-White-Slat.jpg";
+import ESRA119M1306 from "@/assets/patterns/ESR-A119-M1306-Walnut-Fluted.jpg";
+import ESRA119BR9004 from "@/assets/patterns/ESR-A119-BR9004-Navy-Fluted.jpg";
 
 export interface PatternOption {
   id: string;
@@ -1181,6 +1186,41 @@ export const patternCategories: PatternCategory[] = [
         name: "Walnut Fine Slat",
         description: "3D fine vertical slat panel in warm walnut wood grain",
         imageUrl: ESRA118M1306,
+      },
+      {
+        id: "esr-a118-p41116",
+        code: "ESR-A-118 / P-41116-OANY",
+        name: "Warm White Fine Slat",
+        description: "3D fine vertical slat panel in soft warm white matte finish",
+        imageUrl: ESRA118P41116,
+      },
+      {
+        id: "esr-a118-p90303",
+        code: "ESR-A-118 / P-90303-OANY",
+        name: "Graphite Fine Slat",
+        description: "3D fine vertical slat panel in dark graphite grey matte finish",
+        imageUrl: ESRA118P90303,
+      },
+      {
+        id: "esr-a118-r8001",
+        code: "ESR-A-118 / R8001-F09-T06",
+        name: "Pure White Fine Slat",
+        description: "3D fine vertical slat panel in bright pure white finish",
+        imageUrl: ESRA118R8001,
+      },
+      {
+        id: "esr-a119-m1306",
+        code: "ESR-A-119-001 / M1306",
+        name: "Walnut Wide Fluted",
+        description: "3D wide fluted slat panel in warm walnut wood grain",
+        imageUrl: ESRA119M1306,
+      },
+      {
+        id: "esr-a119-br9004",
+        code: "ESR-A-119 / BR9004-F06-T72",
+        name: "Navy Wide Fluted",
+        description: "3D wide fluted slat panel in deep navy matte finish",
+        imageUrl: ESRA119BR9004,
       },
     ],
   },
