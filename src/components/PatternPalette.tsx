@@ -152,6 +152,16 @@ import ESRA034P90303 from "@/assets/patterns/ESR-A034-P90303-Graphite-Arch.jpg";
 import ESRA034R8001 from "@/assets/patterns/ESR-A034-R8001-Pure-White-Arch.jpg";
 import ESRA09030166 from "@/assets/patterns/ESR-A090-30166-Tan-Petal.jpg";
 import ESRA090BR9004 from "@/assets/patterns/ESR-A090-BR9004-Navy-Petal.jpg";
+import ESRA090M1306 from "@/assets/patterns/ESR-A090-M1306-Walnut-Petal.jpg";
+import ESRA090P41116 from "@/assets/patterns/ESR-A090-P41116-Warm-White-Petal.jpg";
+import ESRA090P90303 from "@/assets/patterns/ESR-A090-P90303-Graphite-Petal.jpg";
+import ESRA09330166 from "@/assets/patterns/ESR-A093-30166-Terracotta-Wave.jpg";
+import ESRA093BR9004 from "@/assets/patterns/ESR-A093-BR9004-Navy-Wave.jpg";
+import ESRA093M1306 from "@/assets/patterns/ESR-A093-M1306-Walnut-Wave.jpg";
+import ESRA093P41116 from "@/assets/patterns/ESR-A093-P41116-Warm-White-Wave.jpg";
+import ESRA093R8001 from "@/assets/patterns/ESR-A093-R8001-Pure-White-Wave.jpg";
+import ESRA118BR9004 from "@/assets/patterns/ESR-A118-BR9004-Navy-Slat.jpg";
+import ESRA118M1306 from "@/assets/patterns/ESR-A118-M1306-Walnut-Slat.jpg";
 
 export interface PatternOption {
   id: string;
@@ -1101,6 +1111,76 @@ export const patternCategories: PatternCategory[] = [
         name: "Navy Petal Relief",
         description: "3D sculpted petal relief panel in deep navy matte finish",
         imageUrl: ESRA090BR9004,
+      },
+      {
+        id: "esr-a090-m1306",
+        code: "ESR-A-090 / M1306",
+        name: "Walnut Petal Relief",
+        description: "3D sculpted petal relief panel in warm walnut wood grain",
+        imageUrl: ESRA090M1306,
+      },
+      {
+        id: "esr-a090-p41116",
+        code: "ESR-A-090 / P-41116-OANY",
+        name: "Warm White Petal Relief",
+        description: "3D sculpted petal relief panel in soft warm white matte finish",
+        imageUrl: ESRA090P41116,
+      },
+      {
+        id: "esr-a090-p90303",
+        code: "ESR-A-090 / P-90303-OANY",
+        name: "Graphite Petal Relief",
+        description: "3D sculpted petal relief panel in dark graphite grey matte finish",
+        imageUrl: ESRA090P90303,
+      },
+      {
+        id: "esr-a093-30166",
+        code: "ESR-A-093 / 30166-2S",
+        name: "Terracotta Wave",
+        description: "3D vertical flowing wave panel in warm terracotta orange",
+        imageUrl: ESRA09330166,
+      },
+      {
+        id: "esr-a093-br9004",
+        code: "ESR-A-093 / BR9004-F06-T72",
+        name: "Navy Wave",
+        description: "3D vertical flowing wave panel in deep navy matte finish",
+        imageUrl: ESRA093BR9004,
+      },
+      {
+        id: "esr-a093-m1306",
+        code: "ESR-A-093 / M1306",
+        name: "Walnut Wave",
+        description: "3D vertical flowing wave panel in warm walnut wood grain",
+        imageUrl: ESRA093M1306,
+      },
+      {
+        id: "esr-a093-p41116",
+        code: "ESR-A-093 / P-41116-OANY",
+        name: "Warm White Wave",
+        description: "3D vertical flowing wave panel in soft warm white matte finish",
+        imageUrl: ESRA093P41116,
+      },
+      {
+        id: "esr-a093-r8001",
+        code: "ESR-A-093 / R8001-F09-T06",
+        name: "Pure White Wave",
+        description: "3D vertical flowing wave panel in bright pure white finish",
+        imageUrl: ESRA093R8001,
+      },
+      {
+        id: "esr-a118-br9004",
+        code: "ESR-A-118 / BR9004-F06-T72",
+        name: "Navy Fine Slat",
+        description: "3D fine vertical slat panel in deep navy with soft highlights",
+        imageUrl: ESRA118BR9004,
+      },
+      {
+        id: "esr-a118-m1306",
+        code: "ESR-A-118 / M1306",
+        name: "Walnut Fine Slat",
+        description: "3D fine vertical slat panel in warm walnut wood grain",
+        imageUrl: ESRA118M1306,
       },
     ],
   },
