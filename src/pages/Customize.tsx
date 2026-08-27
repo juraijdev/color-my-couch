@@ -9,6 +9,7 @@ import { PatternOption, patternCategories } from "@/components/PatternPalette";
 import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SavedFurniturePicker, SavedFurnitureRow } from "@/components/SavedFurniturePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { containImageInTransparentCanvas, flattenToWhiteBackground, forceEdgeBackgroundToWhite, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
@@ -140,6 +141,25 @@ export default function Customize() {
     toast.success("Loaded the saved verified design — no re-generation needed.");
   }, [savedRenderingUrl]);
 
+  // Load a furniture straight from the saved library (dropdown on step 1)
+  const handleSelectSavedFurniture = useCallback((row: SavedFurnitureRow) => {
+    setUploadedImage(row.image_url);
+    setUploadedImageHash(row.image_hash);
+    setPreloadedParts(Array.isArray(row.parts) ? (row.parts as FurniturePart[]) : null);
+    setSavedName(row.name);
+    setSavedRenderingUrl(row.rendering_url ?? null);
+    setSavedAssignments(Array.isArray(row.assignments) ? row.assignments : null);
+    setSavedAssignmentsApplied(false);
+    setGeneratedImage(null);
+    setSelectedPattern(null);
+    setHasSelection(false);
+    setDetectedParts([]);
+    setSuggestions(null);
+    setSuggestionsApplied(false);
+    toast.success(`Loaded saved furniture "${row.name}" — change the colours you want`);
+  }, []);
+
+
   // Re-apply the colour assignments stored with a saved (verified) furniture,
   // so the user starts from the exact previous design and only tweaks colours.
   useEffect(() => {
@@ -234,6 +254,35 @@ export default function Customize() {
     }
   }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
 
+  // Auto-store the generated rendering for furniture that is already in the
+  // saved library, so the design is always available next time.
+  const autoSavedRenderingRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user || !generatedImage || !uploadedImageHash) return;
+    if (!savedName) return; // only for furniture already recognised/named as saved
+    if (autoSavedRenderingRef.current === generatedImage) return;
+    autoSavedRenderingRef.current = generatedImage;
+
+    const assignmentsPayload = (furnitureEditorRef.current?.getPatternAssignments() ?? []).map((pa) => ({
+      partId: pa.part.id,
+      partName: pa.part.name,
+      patternId: pa.targetPattern.id,
+      patternName: pa.targetPattern.name,
+    }));
+
+    (async () => {
+      const { error } = await supabase
+        .from("saved_furniture")
+        .update({ rendering_url: generatedImage, assignments: assignmentsPayload } as never)
+        .eq("image_hash", uploadedImageHash);
+      if (error) {
+        console.warn("Auto-save of rendering failed:", error.message);
+        return;
+      }
+      setSavedRenderingUrl(generatedImage);
+      setSavedAssignments(assignmentsPayload);
+    })();
+  }, [user, generatedImage, uploadedImageHash, savedName]);
 
 
   const handlePatternSelect = useCallback((pattern: PatternOption) => {
@@ -577,7 +626,17 @@ export default function Customize() {
                 </p>
               </div>
             )}
+            <div className="max-w-3xl mx-auto px-4 pt-6 flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="text-sm font-medium">Reuse a saved design</p>
+                <p className="text-xs text-muted-foreground">
+                  Pick a previously verified furniture and just change its colours.
+                </p>
+              </div>
+              <SavedFurniturePicker onSelect={handleSelectSavedFurniture} />
+            </div>
             <UploadArea onImageUpload={handleImageUpload} />
+
           </div>
         ) : (
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
