@@ -692,18 +692,31 @@ export default function Customize() {
                 </div>
               )}
               {user && detectedParts.length > 0 && (
-                <div className="shrink-0 p-3 border-t border-border bg-card flex items-center gap-2">
+                <div className="shrink-0 p-3 border-t border-border bg-card flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <Input
+                    value={savedCategory}
+                    onChange={(e) => setSavedCategory(e.target.value)}
+                    placeholder="Category (e.g. Buffet Tables)"
+                    list="saved-furniture-categories"
+                    className="h-9 text-sm sm:w-52"
+                  />
+                  <datalist id="saved-furniture-categories">
+                    {knownCategories.map((c) => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
                   <Input
                     value={savedName}
                     onChange={(e) => setSavedName(e.target.value)}
                     placeholder="Name this furniture (e.g. Buffet 120cm)"
                     className="h-9 text-sm"
                   />
-                  <Button size="sm" variant="outline" onClick={handleSaveVerified} title={generatedImage ? "Save furniture + this rendering so it can be reused next time" : "Save the analyzed parts so next time this furniture is recognized instantly"}>
+                  <Button size="sm" variant="outline" className="shrink-0" onClick={handleSaveVerified} title={generatedImage ? "Save furniture + this rendering so it can be reused next time" : "Save the analyzed parts so next time this furniture is recognized instantly"}>
                     <BookmarkPlus className="w-4 h-4 mr-1" />
                     {generatedImage ? "Save design" : "Save furniture"}
                   </Button>
                 </div>
+
               )}
 
             </div>
