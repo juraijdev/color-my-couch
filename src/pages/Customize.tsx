@@ -211,6 +211,7 @@ export default function Customize() {
       return;
     }
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
+    const category = savedCategory.trim() || "Uncategorized";
 
     const assignments = furnitureEditorRef.current?.getPatternAssignments() ?? [];
     const assignmentsPayload = assignments.map((pa) => ({
@@ -231,10 +232,12 @@ export default function Customize() {
     // Older self-hosted databases may not have the optional columns yet.
     // Save progressively: full row first, then drop unknown columns.
     const variants: Array<Record<string, unknown>> = [
+      { ...baseRow, category, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, rendering_url: generatedImage ?? null },
       { ...baseRow },
     ];
+
 
     let lastError: string | null = null;
     let missingColumns = false;
