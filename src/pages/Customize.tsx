@@ -80,6 +80,8 @@ export default function Customize() {
     setPreloadedParts(null);
     setSavedName("");
     setSavedRenderingUrl(null);
+    setSavedAssignments(null);
+    setSavedAssignmentsApplied(false);
 
     try {
       const hash = await hashImage(imageDataUrl);
