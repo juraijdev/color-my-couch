@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookMarked, ChevronDown, Download, Loader2, RefreshCw } from "lucide-react";
+import { BookMarked, ChevronDown, ChevronLeft, ChevronRight, Download, Folder, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ import type { FurniturePart } from "@/components/FurnitureEditor";
 export interface SavedFurnitureRow {
   id: string;
   name: string;
+  category?: string | null;
   image_hash: string;
   image_url: string;
   rendering_url?: string | null;
@@ -26,6 +27,7 @@ export function SavedFurniturePicker({ onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<SavedFurnitureRow[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const patternById = useMemo(() => {
     const map = new Map<string, { name: string; code?: string; imageUrl: string }>();
@@ -34,6 +36,23 @@ export function SavedFurniturePicker({ onSelect }: Props) {
     );
     return map;
   }, []);
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, SavedFurnitureRow[]>();
+    rows.forEach((r) => {
+      const cat = (r.category ?? "").trim() || "Uncategorized";
+      const list = map.get(cat) ?? [];
+      list.push(r);
+      map.set(cat, list);
+    });
+    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [rows]);
+
+  const visibleRows = useMemo(
+    () => (activeCategory ? grouped.find(([c]) => c === activeCategory)?.[1] ?? [] : []),
+    [grouped, activeCategory],
+  );
+
 
   const downloadRow = useCallback(async (row: SavedFurnitureRow) => {
     const url = row.rendering_url || row.image_url;
