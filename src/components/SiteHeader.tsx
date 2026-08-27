@@ -54,6 +54,10 @@ export function SiteHeader() {
             </Button>
           )}
 
+          <LanguageSwitcher />
+
+
+
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
