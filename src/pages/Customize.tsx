@@ -254,6 +254,35 @@ export default function Customize() {
     }
   }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
 
+  // Auto-store the generated rendering for furniture that is already in the
+  // saved library, so the design is always available next time.
+  const autoSavedRenderingRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user || !generatedImage || !uploadedImageHash) return;
+    if (!savedName) return; // only for furniture already recognised/named as saved
+    if (autoSavedRenderingRef.current === generatedImage) return;
+    autoSavedRenderingRef.current = generatedImage;
+
+    const assignmentsPayload = (furnitureEditorRef.current?.getPatternAssignments() ?? []).map((pa) => ({
+      partId: pa.part.id,
+      partName: pa.part.name,
+      patternId: pa.targetPattern.id,
+      patternName: pa.targetPattern.name,
+    }));
+
+    (async () => {
+      const { error } = await supabase
+        .from("saved_furniture")
+        .update({ rendering_url: generatedImage, assignments: assignmentsPayload } as never)
+        .eq("image_hash", uploadedImageHash);
+      if (error) {
+        console.warn("Auto-save of rendering failed:", error.message);
+        return;
+      }
+      setSavedRenderingUrl(generatedImage);
+      setSavedAssignments(assignmentsPayload);
+    })();
+  }, [user, generatedImage, uploadedImageHash, savedName]);
 
 
   const handlePatternSelect = useCallback((pattern: PatternOption) => {
