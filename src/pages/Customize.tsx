@@ -32,7 +32,9 @@ export default function Customize() {
   const [uploadedImageHash, setUploadedImageHash] = useState<string | null>(null);
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
-  const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
+  const [savedCategory, setSavedCategory] = useState("");
+  const [knownCategories, setKnownCategories] = useState<string[]>([]);
+
   const [savedAssignments, setSavedAssignments] = useState<Array<{ partId: string; patternId: string }> | null>(null);
   const [savedAssignmentsApplied, setSavedAssignmentsApplied] = useState(false);
 
