@@ -166,7 +166,20 @@ export default function Customize() {
       toast.error("Sign in and upload a furniture image first.");
       return;
     }
+    // Make sure we still have a live session — an expired token makes the
+    // database reject the insert with a row-level-security error.
+    const { data: sessionData } = await supabase.auth.getSession();
+    let activeUserId = sessionData.session?.user?.id ?? null;
+    if (!activeUserId) {
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      activeUserId = refreshed.session?.user?.id ?? null;
+    }
+    if (!activeUserId) {
+      toast.error("Your session expired. Please sign in again and retry saving.");
+      return;
+    }
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
+
     const assignments = furnitureEditorRef.current?.getPatternAssignments() ?? [];
     const assignmentsPayload = assignments.map((pa) => ({
       partId: pa.part.id,
@@ -180,7 +193,7 @@ export default function Customize() {
       image_url: uploadedImage,
       name,
       parts: JSON.parse(JSON.stringify(detectedParts)),
-      created_by: user.id,
+      created_by: activeUserId,
     };
 
     // Older self-hosted databases may not have the optional columns yet.
@@ -214,7 +227,11 @@ export default function Customize() {
       if (!isMissingColumn) break;
       missingColumns = true;
     }
-    toast.error(lastError ?? "Could not save this furniture.");
+    if (lastError && /row-level security/i.test(lastError)) {
+      toast.error("The database rejected the save (permission rule). Sign out and back in, or ask the admin to run the latest database update on the server.");
+    } else {
+      toast.error(lastError ?? "Could not save this furniture.");
+    }
   }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
 
 
