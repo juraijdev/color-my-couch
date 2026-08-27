@@ -193,7 +193,7 @@ export default function Customize() {
       image_url: uploadedImage,
       name,
       parts: JSON.parse(JSON.stringify(detectedParts)),
-      created_by: user.id,
+      created_by: activeUserId,
     };
 
     // Older self-hosted databases may not have the optional columns yet.
@@ -227,7 +227,11 @@ export default function Customize() {
       if (!isMissingColumn) break;
       missingColumns = true;
     }
-    toast.error(lastError ?? "Could not save this furniture.");
+    if (lastError && /row-level security/i.test(lastError)) {
+      toast.error("The database rejected the save (permission rule). Sign out and back in, or ask the admin to run the latest database update on the server.");
+    } else {
+      toast.error(lastError ?? "Could not save this furniture.");
+    }
   }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
 
 
