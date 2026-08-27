@@ -85,6 +85,7 @@ export const DICTIONARY: Record<string, Entry> = {
     { zh: "仅限受邀访问，请使用提供给您的账号登录。", ar: "الدخول بدعوة فقط. استخدم بيانات الاعتماد المقدمة لك.", id: "Akses hanya dengan undangan. Gunakan kredensial yang diberikan kepada Anda." },
   "Email": { zh: "邮箱", ar: "البريد الإلكتروني", id: "Email" },
   "Password": { zh: "密码", ar: "كلمة المرور", id: "Kata Sandi" },
+  "By continuing you agree to the": { zh: "继续即表示您同意", ar: "بالمتابعة فإنك توافق على", id: "Dengan melanjutkan Anda menyetujui" },
   "Terms": { zh: "条款", ar: "الشروط", id: "Ketentuan" },
   "Privacy": { zh: "隐私", ar: "الخصوصية", id: "Privasi" },
   "Sign in to upload furniture, apply premium materials, and place your pieces into any interior — in seconds.":
