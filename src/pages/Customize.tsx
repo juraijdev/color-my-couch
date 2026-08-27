@@ -9,6 +9,7 @@ import { PatternOption, patternCategories } from "@/components/PatternPalette";
 import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SavedFurniturePicker, SavedFurnitureRow } from "@/components/SavedFurniturePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { containImageInTransparentCanvas, flattenToWhiteBackground, forceEdgeBackgroundToWhite, getImageDimensions, imageUrlToBase64, tightCropToWhiteCanvas } from "@/lib/imageUtils";
