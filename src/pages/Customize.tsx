@@ -166,7 +166,20 @@ export default function Customize() {
       toast.error("Sign in and upload a furniture image first.");
       return;
     }
+    // Make sure we still have a live session — an expired token makes the
+    // database reject the insert with a row-level-security error.
+    const { data: sessionData } = await supabase.auth.getSession();
+    let activeUserId = sessionData.session?.user?.id ?? null;
+    if (!activeUserId) {
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      activeUserId = refreshed.session?.user?.id ?? null;
+    }
+    if (!activeUserId) {
+      toast.error("Your session expired. Please sign in again and retry saving.");
+      return;
+    }
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
+
     const assignments = furnitureEditorRef.current?.getPatternAssignments() ?? [];
     const assignmentsPayload = assignments.map((pa) => ({
       partId: pa.part.id,
