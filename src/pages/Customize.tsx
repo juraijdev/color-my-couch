@@ -32,6 +32,8 @@ export default function Customize() {
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
   const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
+  const [savedAssignments, setSavedAssignments] = useState<Array<{ partId: string; patternId: string }> | null>(null);
+  const [savedAssignmentsApplied, setSavedAssignmentsApplied] = useState(false);
 
   const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -78,6 +80,8 @@ export default function Customize() {
     setPreloadedParts(null);
     setSavedName("");
     setSavedRenderingUrl(null);
+    setSavedAssignments(null);
+    setSavedAssignmentsApplied(false);
 
     try {
       const hash = await hashImage(imageDataUrl);
@@ -97,6 +101,9 @@ export default function Customize() {
         setSavedName(data.name);
         const rendering = (data as { rendering_url?: string | null }).rendering_url ?? null;
         setSavedRenderingUrl(rendering);
+        const saved = (data as { assignments?: unknown }).assignments;
+        setSavedAssignments(Array.isArray(saved) ? (saved as Array<{ partId: string; patternId: string }>) : null);
+        setSavedAssignmentsApplied(false);
         if (rendering) {
           toast.success(`Verified furniture "${data.name}" — saved design available`);
         } else {
@@ -116,6 +123,8 @@ export default function Customize() {
     setPreloadedParts(null);
     setSavedName("");
     setSavedRenderingUrl(null);
+    setSavedAssignments(null);
+    setSavedAssignmentsApplied(false);
     setGeneratedImage(null);
     setSelectedPattern(null);
     setHasSelection(false);
@@ -131,6 +140,27 @@ export default function Customize() {
     toast.success("Loaded the saved verified design — no re-generation needed.");
   }, [savedRenderingUrl]);
 
+  // Re-apply the colour assignments stored with a saved (verified) furniture,
+  // so the user starts from the exact previous design and only tweaks colours.
+  useEffect(() => {
+    if (savedAssignmentsApplied) return;
+    if (!savedAssignments || savedAssignments.length === 0) return;
+    if (detectedParts.length === 0 || !furnitureEditorRef.current) return;
+    const entries = savedAssignments
+      .map((a) => {
+        const pattern = patternsById.get(a.patternId);
+        const part = detectedParts.find((p) => p.id === a.partId);
+        return pattern && part ? { partId: part.id, pattern } : null;
+      })
+      .filter(Boolean) as Array<{ partId: string; pattern: PatternOption }>;
+    if (entries.length === 0) return;
+    const applied = furnitureEditorRef.current.assignPatternsBulk(entries);
+    setSavedAssignmentsApplied(true);
+    if (applied > 0) {
+      toast.success(`Restored ${applied} saved colour assignment${applied > 1 ? "s" : ""} — change any of them`);
+    }
+  }, [savedAssignments, savedAssignmentsApplied, detectedParts, patternsById]);
+
   const handleSaveVerified = useCallback(async () => {
     if (!user || !uploadedImage || !uploadedImageHash || detectedParts.length === 0) {
       toast.error("Sign in and upload a furniture image first.");
@@ -144,26 +174,49 @@ export default function Customize() {
       patternId: pa.targetPattern.id,
       patternName: pa.targetPattern.name,
     }));
-    const { error } = await supabase.from("saved_furniture").upsert(
-      [{
-        image_hash: uploadedImageHash,
-        image_url: uploadedImage,
-        name,
-        parts: JSON.parse(JSON.stringify(detectedParts)),
-        created_by: user.id,
-        rendering_url: generatedImage ?? null,
-        assignments: assignmentsPayload,
-      }],
-      { onConflict: "image_hash" },
-    );
-    if (error) toast.error(error.message);
-    else {
-      if (generatedImage) setSavedRenderingUrl(generatedImage);
-      toast.success(generatedImage
-        ? `Saved "${name}" with rendering — reusable next time`
-        : `Saved "${name}" to the verified library`);
+
+    const baseRow: Record<string, unknown> = {
+      image_hash: uploadedImageHash,
+      image_url: uploadedImage,
+      name,
+      parts: JSON.parse(JSON.stringify(detectedParts)),
+      created_by: user.id,
+    };
+
+    // Older self-hosted databases may not have the optional columns yet.
+    // Save progressively: full row first, then drop unknown columns.
+    const variants: Array<Record<string, unknown>> = [
+      { ...baseRow, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
+      { ...baseRow, rendering_url: generatedImage ?? null },
+      { ...baseRow },
+    ];
+
+    let lastError: string | null = null;
+    let missingColumns = false;
+    for (const row of variants) {
+      const { error } = await supabase
+        .from("saved_furniture")
+        .upsert([row] as never, { onConflict: "image_hash" });
+      if (!error) {
+        if (generatedImage) setSavedRenderingUrl(generatedImage);
+        setSavedAssignments(assignmentsPayload);
+        setSavedAssignmentsApplied(true);
+        toast.success(generatedImage
+          ? `Saved "${name}" with rendering — reusable next time`
+          : `Saved "${name}" to the verified library`);
+        if (missingColumns) {
+          toast.warning("Saved, but this server's database is missing the newer columns — run the latest migration to store colours and renderings.");
+        }
+        return;
+      }
+      lastError = error.message;
+      const isMissingColumn = /column|schema cache/i.test(error.message);
+      if (!isMissingColumn) break;
+      missingColumns = true;
     }
+    toast.error(lastError ?? "Could not save this furniture.");
   }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
+
 
 
   const handlePatternSelect = useCallback((pattern: PatternOption) => {
