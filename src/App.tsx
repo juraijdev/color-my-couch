@@ -18,21 +18,24 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/customize" element={<ProtectedRoute><Customize /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
-            <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+      <LanguageProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/customize" element={<ProtectedRoute><Customize /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
+              <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
+
 
 export default App;
