@@ -84,6 +84,8 @@ export default function Customize() {
     setSuggestionsApplied(false);
     setPreloadedParts(null);
     setSavedName("");
+    setSavedCategory("");
+
     setSavedRenderingUrl(null);
     setSavedAssignments(null);
     setSavedAssignmentsApplied(false);
