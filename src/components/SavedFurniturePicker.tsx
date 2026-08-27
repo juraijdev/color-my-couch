@@ -107,11 +107,21 @@ export function SavedFurniturePicker({ onSelect }: Props) {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[340px] p-2">
-        <div className="flex items-center justify-between px-1 pb-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Saved furniture
-          </span>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={load} title="Refresh">
+        <div className="flex items-center justify-between px-1 pb-2 gap-1">
+          {activeCategory ? (
+            <button
+              onClick={() => setActiveCategory(null)}
+              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground min-w-0"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{activeCategory}</span>
+            </button>
+          ) : (
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Categories
+            </span>
+          )}
+          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={load} title="Refresh">
             <RefreshCw className="w-3.5 h-3.5" />
           </Button>
         </div>
@@ -124,10 +134,40 @@ export function SavedFurniturePicker({ onSelect }: Props) {
           <p className="p-4 text-sm text-muted-foreground">
             No saved furniture yet. Customize a piece and press “Save design”.
           </p>
+        ) : !activeCategory ? (
+          <div className="max-h-96 overflow-y-auto space-y-1">
+            {grouped.map(([category, items]) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className="w-full flex items-center gap-3 rounded-lg p-2 hover:bg-muted transition-colors text-left"
+              >
+                <div className="w-10 h-10 rounded-md border border-border overflow-hidden shrink-0 bg-white">
+                  <img
+                    src={items[0].rendering_url || items[0].image_url}
+                    alt=""
+                    className="w-full h-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium truncate flex items-center gap-1">
+                    <Folder className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    {category}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {items.length} design{items.length > 1 ? "s" : ""}
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </button>
+            ))}
+          </div>
         ) : (
           <div className="max-h-96 overflow-y-auto space-y-1">
-            {rows.map((row) => {
+            {visibleRows.map((row) => {
               const assignments = Array.isArray(row.assignments) ? row.assignments : [];
+
               const parts = Array.isArray(row.parts) ? row.parts : [];
               return (
                 <div key={row.id} className="rounded-lg hover:bg-muted transition-colors p-2">
