@@ -10,6 +10,8 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthProvider } from "./hooks/useAuth";
+import { LanguageProvider } from "./i18n/LanguageProvider";
+
 
 const queryClient = new QueryClient();
 
