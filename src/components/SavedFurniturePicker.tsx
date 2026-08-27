@@ -27,6 +27,34 @@ export function SavedFurniturePicker({ onSelect }: Props) {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<SavedFurnitureRow[]>([]);
 
+  const patternById = useMemo(() => {
+    const map = new Map<string, { name: string; code?: string; imageUrl: string }>();
+    patternCategories.forEach((c) =>
+      c.patterns.forEach((p) => map.set(p.id, { name: p.name, code: p.code, imageUrl: p.imageUrl })),
+    );
+    return map;
+  }, []);
+
+  const downloadRow = useCallback(async (row: SavedFurnitureRow) => {
+    const url = row.rendering_url || row.image_url;
+    if (!url) return;
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${row.name.replace(/[^\w\-]+/g, "_") || "design"}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    } catch {
+      window.open(url, "_blank");
+    }
+  }, []);
+
+
+
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
