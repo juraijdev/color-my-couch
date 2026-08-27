@@ -597,7 +597,17 @@ export default function Customize() {
                 </p>
               </div>
             )}
+            <div className="max-w-3xl mx-auto px-4 pt-6 flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="text-sm font-medium">Reuse a saved design</p>
+                <p className="text-xs text-muted-foreground">
+                  Pick a previously verified furniture and just change its colours.
+                </p>
+              </div>
+              <SavedFurniturePicker onSelect={handleSelectSavedFurniture} />
+            </div>
             <UploadArea onImageUpload={handleImageUpload} />
+
           </div>
         ) : (
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
