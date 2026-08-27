@@ -34,6 +34,8 @@ export default function Customize() {
   const [savedName, setSavedName] = useState("");
   const [savedCategory, setSavedCategory] = useState("");
   const [knownCategories, setKnownCategories] = useState<string[]>([]);
+  const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
+
 
   const [savedAssignments, setSavedAssignments] = useState<Array<{ partId: string; patternId: string }> | null>(null);
   const [savedAssignmentsApplied, setSavedAssignmentsApplied] = useState(false);
