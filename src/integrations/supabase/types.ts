@@ -95,6 +95,7 @@ export type Database = {
       saved_furniture: {
         Row: {
           assignments: Json | null
+          category: string
           created_at: string
           created_by: string | null
           id: string
@@ -106,6 +107,7 @@ export type Database = {
         }
         Insert: {
           assignments?: Json | null
+          category?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -117,6 +119,7 @@ export type Database = {
         }
         Update: {
           assignments?: Json | null
+          category?: string
           created_at?: string
           created_by?: string | null
           id?: string

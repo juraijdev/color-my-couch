@@ -32,7 +32,11 @@ export default function Customize() {
   const [uploadedImageHash, setUploadedImageHash] = useState<string | null>(null);
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
+  const [savedCategory, setSavedCategory] = useState("");
+  const [knownCategories, setKnownCategories] = useState<string[]>([]);
   const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
+
+
   const [savedAssignments, setSavedAssignments] = useState<Array<{ partId: string; patternId: string }> | null>(null);
   const [savedAssignmentsApplied, setSavedAssignmentsApplied] = useState(false);
 
@@ -80,6 +84,8 @@ export default function Customize() {
     setSuggestionsApplied(false);
     setPreloadedParts(null);
     setSavedName("");
+    setSavedCategory("");
+
     setSavedRenderingUrl(null);
     setSavedAssignments(null);
     setSavedAssignmentsApplied(false);
@@ -100,6 +106,8 @@ export default function Customize() {
       if (data?.parts && Array.isArray(data.parts) && data.parts.length > 0) {
         setPreloadedParts(data.parts as unknown as FurniturePart[]);
         setSavedName(data.name);
+        setSavedCategory(((data as { category?: string | null }).category ?? "") || "");
+
         const rendering = (data as { rendering_url?: string | null }).rendering_url ?? null;
         setSavedRenderingUrl(rendering);
         const saved = (data as { assignments?: unknown }).assignments;
@@ -123,6 +131,8 @@ export default function Customize() {
     setUploadedImageHash(null);
     setPreloadedParts(null);
     setSavedName("");
+    setSavedCategory("");
+
     setSavedRenderingUrl(null);
     setSavedAssignments(null);
     setSavedAssignmentsApplied(false);
@@ -147,6 +157,8 @@ export default function Customize() {
     setUploadedImageHash(row.image_hash);
     setPreloadedParts(Array.isArray(row.parts) ? (row.parts as FurniturePart[]) : null);
     setSavedName(row.name);
+    setSavedCategory(row.category ?? "");
+
     setSavedRenderingUrl(row.rendering_url ?? null);
     setSavedAssignments(Array.isArray(row.assignments) ? row.assignments : null);
     setSavedAssignmentsApplied(false);
@@ -199,6 +211,7 @@ export default function Customize() {
       return;
     }
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
+    const category = savedCategory.trim() || "Uncategorized";
 
     const assignments = furnitureEditorRef.current?.getPatternAssignments() ?? [];
     const assignmentsPayload = assignments.map((pa) => ({
@@ -219,10 +232,12 @@ export default function Customize() {
     // Older self-hosted databases may not have the optional columns yet.
     // Save progressively: full row first, then drop unknown columns.
     const variants: Array<Record<string, unknown>> = [
+      { ...baseRow, category, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, rendering_url: generatedImage ?? null },
       { ...baseRow },
     ];
+
 
     let lastError: string | null = null;
     let missingColumns = false;
@@ -234,11 +249,12 @@ export default function Customize() {
         if (generatedImage) setSavedRenderingUrl(generatedImage);
         setSavedAssignments(assignmentsPayload);
         setSavedAssignmentsApplied(true);
+        setKnownCategories((prev) => (prev.includes(category) ? prev : [...prev, category].sort()));
         toast.success(generatedImage
-          ? `Saved "${name}" with rendering — reusable next time`
-          : `Saved "${name}" to the verified library`);
+          ? `Saved "${name}" in "${category}" with rendering — reusable next time`
+          : `Saved "${name}" in "${category}"`);
         if (missingColumns) {
-          toast.warning("Saved, but this server's database is missing the newer columns — run the latest migration to store colours and renderings.");
+          toast.warning("Saved, but this server's database is missing the newer columns — run the latest migration to store categories, colours and renderings.");
         }
         return;
       }
@@ -252,7 +268,21 @@ export default function Customize() {
     } else {
       toast.error(lastError ?? "Could not save this furniture.");
     }
-  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
+  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, savedCategory, generatedImage]);
+
+  // Load existing categories for the save-category suggestions
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data, error } = await supabase.from("saved_furniture").select("category").limit(500);
+      if (error || !data) return;
+      const cats = Array.from(
+        new Set((data as Array<{ category?: string | null }>).map((r) => (r.category ?? "").trim()).filter(Boolean)),
+      ).sort();
+      setKnownCategories(cats);
+    })();
+  }, [user]);
+
 
   // Auto-store the generated rendering for furniture that is already in the
   // saved library, so the design is always available next time.
@@ -662,18 +692,31 @@ export default function Customize() {
                 </div>
               )}
               {user && detectedParts.length > 0 && (
-                <div className="shrink-0 p-3 border-t border-border bg-card flex items-center gap-2">
+                <div className="shrink-0 p-3 border-t border-border bg-card flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <Input
+                    value={savedCategory}
+                    onChange={(e) => setSavedCategory(e.target.value)}
+                    placeholder="Category (e.g. Buffet Tables)"
+                    list="saved-furniture-categories"
+                    className="h-9 text-sm sm:w-52"
+                  />
+                  <datalist id="saved-furniture-categories">
+                    {knownCategories.map((c) => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
                   <Input
                     value={savedName}
                     onChange={(e) => setSavedName(e.target.value)}
                     placeholder="Name this furniture (e.g. Buffet 120cm)"
                     className="h-9 text-sm"
                   />
-                  <Button size="sm" variant="outline" onClick={handleSaveVerified} title={generatedImage ? "Save furniture + this rendering so it can be reused next time" : "Save the analyzed parts so next time this furniture is recognized instantly"}>
+                  <Button size="sm" variant="outline" className="shrink-0" onClick={handleSaveVerified} title={generatedImage ? "Save furniture + this rendering so it can be reused next time" : "Save the analyzed parts so next time this furniture is recognized instantly"}>
                     <BookmarkPlus className="w-4 h-4 mr-1" />
                     {generatedImage ? "Save design" : "Save furniture"}
                   </Button>
                 </div>
+
               )}
 
             </div>

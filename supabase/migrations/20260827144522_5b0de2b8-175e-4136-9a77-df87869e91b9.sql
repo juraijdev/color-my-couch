@@ -1,0 +1,2 @@
+ALTER TABLE public.saved_furniture ADD COLUMN IF NOT EXISTS category text NOT NULL DEFAULT 'Uncategorized';
+CREATE INDEX IF NOT EXISTS saved_furniture_category_idx ON public.saved_furniture (category);
