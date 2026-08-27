@@ -32,6 +32,8 @@ export default function Customize() {
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
   const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
+  const [savedAssignments, setSavedAssignments] = useState<Array<{ partId: string; patternId: string }> | null>(null);
+  const [savedAssignmentsApplied, setSavedAssignmentsApplied] = useState(false);
 
   const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
