@@ -140,6 +140,25 @@ export default function Customize() {
     toast.success("Loaded the saved verified design — no re-generation needed.");
   }, [savedRenderingUrl]);
 
+  // Load a furniture straight from the saved library (dropdown on step 1)
+  const handleSelectSavedFurniture = useCallback((row: SavedFurnitureRow) => {
+    setUploadedImage(row.image_url);
+    setUploadedImageHash(row.image_hash);
+    setPreloadedParts(Array.isArray(row.parts) ? (row.parts as FurniturePart[]) : null);
+    setSavedName(row.name);
+    setSavedRenderingUrl(row.rendering_url ?? null);
+    setSavedAssignments(Array.isArray(row.assignments) ? row.assignments : null);
+    setSavedAssignmentsApplied(false);
+    setGeneratedImage(null);
+    setSelectedPattern(null);
+    setHasSelection(false);
+    setDetectedParts([]);
+    setSuggestions(null);
+    setSuggestionsApplied(false);
+    toast.success(`Loaded saved furniture "${row.name}" — change the colours you want`);
+  }, []);
+
+
   // Re-apply the colour assignments stored with a saved (verified) furniture,
   // so the user starts from the exact previous design and only tweaks colours.
   useEffect(() => {
