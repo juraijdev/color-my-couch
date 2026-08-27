@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
-import { BookMarked, ChevronDown, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { BookMarked, ChevronDown, Download, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
+import { patternCategories } from "@/components/PatternPalette";
 import type { FurniturePart } from "@/components/FurnitureEditor";
+
 
 export interface SavedFurnitureRow {
   id: string;
@@ -24,6 +26,34 @@ export function SavedFurniturePicker({ onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<SavedFurnitureRow[]>([]);
+
+  const patternById = useMemo(() => {
+    const map = new Map<string, { name: string; code?: string; imageUrl: string }>();
+    patternCategories.forEach((c) =>
+      c.patterns.forEach((p) => map.set(p.id, { name: p.name, code: p.code, imageUrl: p.imageUrl })),
+    );
+    return map;
+  }, []);
+
+  const downloadRow = useCallback(async (row: SavedFurnitureRow) => {
+    const url = row.rendering_url || row.image_url;
+    if (!url) return;
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${row.name.replace(/[^\w\-]+/g, "_") || "design"}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    } catch {
+      window.open(url, "_blank");
+    }
+  }, []);
+
+
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -76,34 +106,78 @@ export function SavedFurniturePicker({ onSelect }: Props) {
             No saved furniture yet. Customize a piece and press “Save design”.
           </p>
         ) : (
-          <div className="max-h-80 overflow-y-auto space-y-1">
-            {rows.map((row) => (
-              <button
-                key={row.id}
-                onClick={() => {
-                  onSelect(row);
-                  setOpen(false);
-                }}
-                className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted text-left transition-colors"
-              >
-                <div className="w-14 h-14 rounded-md border border-border overflow-hidden shrink-0 bg-white">
-                  <img
-                    src={row.rendering_url || row.image_url}
-                    alt={row.name}
-                    className="w-full h-full object-contain"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium truncate">{row.name}</div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    {Array.isArray(row.parts) ? row.parts.length : 0} parts
-                    {row.rendering_url ? " · rendering saved" : ""}
+          <div className="max-h-96 overflow-y-auto space-y-1">
+            {rows.map((row) => {
+              const assignments = Array.isArray(row.assignments) ? row.assignments : [];
+              const parts = Array.isArray(row.parts) ? row.parts : [];
+              return (
+                <div key={row.id} className="rounded-lg hover:bg-muted transition-colors p-2">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        onSelect(row);
+                        setOpen(false);
+                      }}
+                      className="flex items-center gap-3 text-left min-w-0 flex-1"
+                    >
+                      <div className="w-14 h-14 rounded-md border border-border overflow-hidden shrink-0 bg-white">
+                        <img
+                          src={row.rendering_url || row.image_url}
+                          alt={row.name}
+                          className="w-full h-full object-contain"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium truncate">{row.name}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {parts.length} parts
+                          {row.rendering_url ? " · rendering saved" : ""}
+                        </div>
+                      </div>
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      title="Download saved design"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadRow(row);
+                      }}
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
                   </div>
+
+                  {assignments.length > 0 && (
+                    <ul className="mt-2 pl-1 space-y-1">
+                      {assignments.map((a, i) => {
+                        const pat = patternById.get(a.patternId);
+                        const part = parts.find((p) => p.id === a.partId);
+                        return (
+                          <li key={`${a.partId}-${i}`} className="flex items-center gap-2 text-[11px]">
+                            <span className="w-4 h-4 rounded border border-border overflow-hidden shrink-0 bg-muted">
+                              {pat?.imageUrl && (
+                                <img src={pat.imageUrl} alt="" className="w-full h-full object-cover" />
+                              )}
+                            </span>
+                            <span className="truncate max-w-[110px] text-muted-foreground">
+                              {part?.name ?? a.partId}
+                            </span>
+                            <span className="truncate font-medium">
+                              {pat ? `${pat.code ? pat.code + " – " : ""}${pat.name}` : a.patternId}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
+
         )}
       </PopoverContent>
     </Popover>
