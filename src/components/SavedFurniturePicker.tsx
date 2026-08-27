@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
-import { BookMarked, ChevronDown, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { BookMarked, ChevronDown, Download, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
+import { patternCategories } from "@/components/PatternPalette";
 import type { FurniturePart } from "@/components/FurnitureEditor";
+
 
 export interface SavedFurnitureRow {
   id: string;
