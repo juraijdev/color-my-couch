@@ -106,6 +106,8 @@ export default function Customize() {
       if (data?.parts && Array.isArray(data.parts) && data.parts.length > 0) {
         setPreloadedParts(data.parts as unknown as FurniturePart[]);
         setSavedName(data.name);
+        setSavedCategory(((data as { category?: string | null }).category ?? "") || "");
+
         const rendering = (data as { rendering_url?: string | null }).rendering_url ?? null;
         setSavedRenderingUrl(rendering);
         const saved = (data as { assignments?: unknown }).assignments;
