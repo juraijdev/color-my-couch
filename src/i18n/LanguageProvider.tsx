@@ -91,6 +91,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     translateTree(document.body, lang);
 
     let frame = 0;
+    let observer: MutationObserver;
     const pending: Node[] = [];
     const flush = () => {
       frame = 0;
@@ -98,9 +99,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       for (const n of nodes) {
         if (n.isConnected) translateTree(n, langRef.current);
       }
+      // discard the mutation records caused by our own writes
+      observer.takeRecords();
     };
 
-    const observer = new MutationObserver((mutations) => {
+    observer = new MutationObserver((mutations) => {
       for (const m of mutations) {
         if (m.type === "childList") {
           m.addedNodes.forEach((n) => pending.push(n));
