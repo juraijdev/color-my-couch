@@ -131,6 +131,8 @@ export default function Customize() {
     setUploadedImageHash(null);
     setPreloadedParts(null);
     setSavedName("");
+    setSavedCategory("");
+
     setSavedRenderingUrl(null);
     setSavedAssignments(null);
     setSavedAssignmentsApplied(false);
