@@ -3,6 +3,8 @@ import { LogOut, Shield, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
@@ -53,6 +55,10 @@ export function SiteHeader() {
               <MessageSquare className="w-4 h-4" />
             </Button>
           )}
+
+          <LanguageSwitcher />
+
+
 
           {user && (
             <DropdownMenu>

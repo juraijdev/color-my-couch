@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+
 
 export default function Login() {
   const navigate = useNavigate();
@@ -55,9 +57,13 @@ export default function Login() {
         <div className="absolute top-1/3 -right-16 w-64 h-64 rounded-full bg-primary-foreground/5" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative">
+        <div className="absolute top-6 right-6">
+          <LanguageSwitcher />
+        </div>
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2 mb-10">
+
             <div className="w-9 h-9 rounded-md bg-primary flex items-center justify-center">
               <Sofa className="w-5 h-5 text-primary-foreground" />
             </div>
