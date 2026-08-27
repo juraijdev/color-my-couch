@@ -157,6 +157,8 @@ export default function Customize() {
     setUploadedImageHash(row.image_hash);
     setPreloadedParts(Array.isArray(row.parts) ? (row.parts as FurniturePart[]) : null);
     setSavedName(row.name);
+    setSavedCategory(row.category ?? "");
+
     setSavedRenderingUrl(row.rendering_url ?? null);
     setSavedAssignments(Array.isArray(row.assignments) ? row.assignments : null);
     setSavedAssignmentsApplied(false);
