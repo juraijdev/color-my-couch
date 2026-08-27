@@ -249,11 +249,12 @@ export default function Customize() {
         if (generatedImage) setSavedRenderingUrl(generatedImage);
         setSavedAssignments(assignmentsPayload);
         setSavedAssignmentsApplied(true);
+        setKnownCategories((prev) => (prev.includes(category) ? prev : [...prev, category].sort()));
         toast.success(generatedImage
-          ? `Saved "${name}" with rendering — reusable next time`
-          : `Saved "${name}" to the verified library`);
+          ? `Saved "${name}" in "${category}" with rendering — reusable next time`
+          : `Saved "${name}" in "${category}"`);
         if (missingColumns) {
-          toast.warning("Saved, but this server's database is missing the newer columns — run the latest migration to store colours and renderings.");
+          toast.warning("Saved, but this server's database is missing the newer columns — run the latest migration to store categories, colours and renderings.");
         }
         return;
       }
@@ -267,7 +268,21 @@ export default function Customize() {
     } else {
       toast.error(lastError ?? "Could not save this furniture.");
     }
-  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, generatedImage]);
+  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, savedCategory, generatedImage]);
+
+  // Load existing categories for the save-category suggestions
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data, error } = await supabase.from("saved_furniture").select("category").limit(500);
+      if (error || !data) return;
+      const cats = Array.from(
+        new Set((data as Array<{ category?: string | null }>).map((r) => (r.category ?? "").trim()).filter(Boolean)),
+      ).sort();
+      setKnownCategories(cats);
+    })();
+  }, [user]);
+
 
   // Auto-store the generated rendering for furniture that is already in the
   // saved library, so the design is always available next time.
