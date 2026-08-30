@@ -46,13 +46,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loadRole = async (userId: string) => {
-    const { data } = await supabase
+    // 1) canonical source: user_roles table
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);
-    if (data && data.some((r) => r.role === "admin")) setRole("admin");
-    else setRole("user");
+    if (!error && data && data.some((r) => r.role === "admin")) {
+      setRole("admin");
+      return;
+    }
+    if (error) console.warn("user_roles lookup failed:", error.message);
+
+    // 2) fallback for self-hosted servers where user_roles is unreadable
+    try {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+      if (prof && (prof as { role?: string }).role === "admin") {
+        setRole("admin");
+        return;
+      }
+    } catch {
+      /* profiles table may not exist */
+    }
+
+    // 3) fallback: role stored on the auth user metadata
+    const { data: userRes } = await supabase.auth.getUser();
+    const meta = userRes?.user;
+    const metaRole =
+      (meta?.app_metadata as Record<string, unknown> | undefined)?.role ??
+      (meta?.user_metadata as Record<string, unknown> | undefined)?.role;
+    if (metaRole === "admin") {
+      setRole("admin");
+      return;
+    }
+
+    setRole("user");
   };
+
 
   return (
     <AuthContext.Provider value={{
