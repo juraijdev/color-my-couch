@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookMarked, ChevronDown, ChevronLeft, ChevronRight, Download, Folder, Loader2, RefreshCw } from "lucide-react";
+import { BookMarked, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Folder, Loader2, Pencil, RefreshCw, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import { patternCategories } from "@/components/PatternPalette";
 import type { FurniturePart } from "@/components/FurnitureEditor";
 
@@ -24,10 +27,15 @@ interface Props {
 }
 
 export function SavedFurniturePicker({ onSelect }: Props) {
+  const { isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<SavedFurnitureRow[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const patternById = useMemo(() => {
     const map = new Map<string, { name: string; code?: string; imageUrl: string }>();
@@ -94,6 +102,57 @@ export function SavedFurniturePicker({ onSelect }: Props) {
     load();
   }, [load]);
 
+  // ---------- admin actions ----------
+  const renameDesign = async (row: SavedFurnitureRow) => {
+    const name = editValue.trim();
+    if (!name || name === row.name) {
+      setEditingId(null);
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.from("saved_furniture").update({ name }).eq("id", row.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, name } : r)));
+    setEditingId(null);
+    toast.success("Design renamed");
+  };
+
+  const deleteDesign = async (row: SavedFurnitureRow) => {
+    if (!window.confirm(`Delete "${row.name}"? This cannot be undone.`)) return;
+    setBusy(true);
+    const { error } = await supabase.from("saved_furniture").delete().eq("id", row.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setRows((prev) => prev.filter((r) => r.id !== row.id));
+    toast.success("Design deleted");
+  };
+
+  const renameCategory = async (oldName: string) => {
+    const name = editValue.trim();
+    if (!name || name === oldName) {
+      setEditingCategory(null);
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.from("saved_furniture").update({ category: name }).eq("category", oldName);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setRows((prev) => prev.map((r) => ((r.category ?? "Uncategorized") === oldName ? { ...r, category: name } : r)));
+    setEditingCategory(null);
+    toast.success("Category renamed");
+  };
+
+  const startEditDesign = (row: SavedFurnitureRow) => {
+    setEditingId(row.id);
+    setEditValue(row.name);
+  };
+
+  const startEditCategory = (cat: string) => {
+    setEditingCategory(cat);
+    setEditValue(cat);
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -109,21 +168,52 @@ export function SavedFurniturePicker({ onSelect }: Props) {
       <PopoverContent align="start" className="w-[340px] p-2">
         <div className="flex items-center justify-between px-1 pb-2 gap-1">
           {activeCategory ? (
-            <button
-              onClick={() => setActiveCategory(null)}
-              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground min-w-0"
-            >
-              <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{activeCategory}</span>
-            </button>
+            editingCategory === activeCategory ? (
+              <div className="flex items-center gap-1 min-w-0 flex-1">
+                <Input
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="h-7 text-xs"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") renameCategory(activeCategory);
+                    if (e.key === "Escape") setEditingCategory(null);
+                  }}
+                />
+                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={busy}
+                  onClick={() => renameCategory(activeCategory)} title="Save category name">
+                  <Check className="w-3.5 h-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0"
+                  onClick={() => setEditingCategory(null)} title="Cancel">
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setActiveCategory(null)}
+                className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground min-w-0"
+              >
+                <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{activeCategory}</span>
+              </button>
+            )
           ) : (
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Categories
             </span>
           )}
-          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={load} title="Refresh">
-            <RefreshCw className="w-3.5 h-3.5" />
-          </Button>
+          <div className="flex items-center shrink-0">
+            {isAdmin && activeCategory && editingCategory !== activeCategory && (
+              <Button variant="ghost" size="icon" className="h-7 w-7" title="Rename category"
+                onClick={() => startEditCategory(activeCategory)}>
+                <Pencil className="w-3.5 h-3.5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={load} title="Refresh">
+              <RefreshCw className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         </div>
 
         {loading ? (
@@ -188,13 +278,65 @@ export function SavedFurniturePicker({ onSelect }: Props) {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium truncate">{row.name}</div>
+                        {editingId === row.id ? (
+                          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                            <Input
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="h-7 text-xs"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") renameDesign(row);
+                                if (e.key === "Escape") setEditingId(null);
+                              }}
+                            />
+                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={busy}
+                              onClick={() => renameDesign(row)} title="Save name">
+                              <Check className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0"
+                              onClick={() => setEditingId(null)} title="Cancel">
+                              <X className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="text-sm font-medium truncate">{row.name}</div>
+                        )}
                         <div className="text-xs text-muted-foreground truncate">
                           {parts.length} parts
                           {row.rendering_url ? " · rendering saved" : ""}
                         </div>
                       </div>
                     </button>
+                    {isAdmin && editingId !== row.id && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          title="Rename design"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditDesign(row);
+                          }}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 shrink-0 text-destructive hover:text-destructive"
+                          title="Delete design"
+                          disabled={busy}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteDesign(row);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
