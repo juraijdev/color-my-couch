@@ -101,6 +101,7 @@ export type Database = {
           id: string
           image_hash: string
           image_url: string
+          main_category: string
           name: string
           parts: Json
           rendering_url: string | null
@@ -113,6 +114,7 @@ export type Database = {
           id?: string
           image_hash: string
           image_url: string
+          main_category?: string
           name: string
           parts: Json
           rendering_url?: string | null
@@ -125,6 +127,7 @@ export type Database = {
           id?: string
           image_hash?: string
           image_url?: string
+          main_category?: string
           name?: string
           parts?: Json
           rendering_url?: string | null
