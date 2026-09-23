@@ -53,20 +53,26 @@ export default function Admin() {
 function UsersPanel() {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usage, setUsage] = useState<UsageRow[]>([]);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
-    const [{ data: profiles }, { data: roles }] = await Promise.all([
+    const [{ data: profiles }, { data: roles }, { data: logs }] = await Promise.all([
       supabase.from("profiles").select("id,email,display_name"),
       supabase.from("user_roles").select("user_id,role"),
+      supabase.from("ai_usage_log").select("*").order("created_at", { ascending: false }).limit(2000),
     ]);
     const byId = new Map<string, UserRow>();
     profiles?.forEach((p) => byId.set(p.id, { ...p, roles: [] }));
     roles?.forEach((r) => byId.get(r.user_id)?.roles.push(r.role as Role));
     setRows(Array.from(byId.values()));
+    setUsage((logs ?? []) as UsageRow[]);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+
+  const usageFor = (userId: string) => usage.filter((u) => u.user_id === userId);
 
   const toggleAdmin = async (userId: string, isAdmin: boolean) => {
     if (isAdmin) {
