@@ -16,6 +16,7 @@ import { containImageInTransparentCanvas, flattenToWhiteBackground, forceEdgeBac
 import { hashImage } from "@/lib/imageHash";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { MAIN_CATEGORIES, normalizeMainCategory } from "@/lib/furnitureCategories";
 
 interface Suggestion {
   partId: string;
@@ -26,6 +27,7 @@ interface Suggestion {
 export default function Customize() {
   const [searchParams] = useSearchParams();
   const isSuggestMode = searchParams.get("mode") === "suggest";
+  const libraryMain = searchParams.get("library");
   const { user } = useAuth();
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -33,6 +35,7 @@ export default function Customize() {
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
   const [savedCategory, setSavedCategory] = useState("");
+  const [savedMainCategory, setSavedMainCategory] = useState<string>(MAIN_CATEGORIES[0]);
   const [knownCategories, setKnownCategories] = useState<string[]>([]);
   const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
 
@@ -107,6 +110,7 @@ export default function Customize() {
         setPreloadedParts(data.parts as unknown as FurniturePart[]);
         setSavedName(data.name);
         setSavedCategory(((data as { category?: string | null }).category ?? "") || "");
+        setSavedMainCategory(normalizeMainCategory((data as { main_category?: string | null }).main_category));
 
         const rendering = (data as { rendering_url?: string | null }).rendering_url ?? null;
         setSavedRenderingUrl(rendering);
@@ -158,6 +162,7 @@ export default function Customize() {
     setPreloadedParts(Array.isArray(row.parts) ? (row.parts as FurniturePart[]) : null);
     setSavedName(row.name);
     setSavedCategory(row.category ?? "");
+    setSavedMainCategory(normalizeMainCategory(row.main_category));
 
     setSavedRenderingUrl(row.rendering_url ?? null);
     setSavedAssignments(Array.isArray(row.assignments) ? row.assignments : null);
@@ -212,6 +217,7 @@ export default function Customize() {
     }
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
     const category = savedCategory.trim() || "Uncategorized";
+    const mainCategory = normalizeMainCategory(savedMainCategory);
 
     const assignments = furnitureEditorRef.current?.getPatternAssignments() ?? [];
     const assignmentsPayload = assignments.map((pa) => ({
@@ -232,6 +238,7 @@ export default function Customize() {
     // Older self-hosted databases may not have the optional columns yet.
     // Save progressively: full row first, then drop unknown columns.
     const variants: Array<Record<string, unknown>> = [
+      { ...baseRow, main_category: mainCategory, category, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, category, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, rendering_url: generatedImage ?? null },
@@ -251,8 +258,8 @@ export default function Customize() {
         setSavedAssignmentsApplied(true);
         setKnownCategories((prev) => (prev.includes(category) ? prev : [...prev, category].sort()));
         toast.success(generatedImage
-          ? `Saved "${name}" in "${category}" with rendering — reusable next time`
-          : `Saved "${name}" in "${category}"`);
+          ? `Saved "${name}" in ${mainCategory} › ${category} with rendering — reusable next time`
+          : `Saved "${name}" in ${mainCategory} › ${category}`);
         if (missingColumns) {
           toast.warning("Saved, but this server's database is missing the newer columns — run the latest migration to store categories, colours and renderings.");
         }
@@ -268,7 +275,7 @@ export default function Customize() {
     } else {
       toast.error(lastError ?? "Could not save this furniture.");
     }
-  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, savedCategory, generatedImage]);
+  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, savedCategory, savedMainCategory, generatedImage]);
 
   // Load existing categories for the save-category suggestions
   useEffect(() => {
@@ -663,7 +670,7 @@ export default function Customize() {
                   Pick a previously verified furniture and just change its colours.
                 </p>
               </div>
-              <SavedFurniturePicker onSelect={handleSelectSavedFurniture} />
+              <SavedFurniturePicker onSelect={handleSelectSavedFurniture} openMainCategory={libraryMain} />
             </div>
             <UploadArea onImageUpload={handleImageUpload} />
 
@@ -693,6 +700,16 @@ export default function Customize() {
               )}
               {user && detectedParts.length > 0 && (
                 <div className="shrink-0 p-3 border-t border-border bg-card flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <select
+                    value={savedMainCategory}
+                    onChange={(e) => setSavedMainCategory(e.target.value)}
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm sm:w-44"
+                    title="Main category"
+                  >
+                    {MAIN_CATEGORIES.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
                   <Input
                     value={savedCategory}
                     onChange={(e) => setSavedCategory(e.target.value)}

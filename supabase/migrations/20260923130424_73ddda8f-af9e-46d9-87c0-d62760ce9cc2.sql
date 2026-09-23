@@ -1,0 +1,1 @@
+ALTER TABLE public.saved_furniture ADD COLUMN IF NOT EXISTS main_category text NOT NULL DEFAULT 'Uncategorized';

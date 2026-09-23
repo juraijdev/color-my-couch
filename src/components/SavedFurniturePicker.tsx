@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookMarked, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Folder, Loader2, Pencil, RefreshCw, Trash2, X } from "lucide-react";
+import { BookMarked, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Folder, Layers, Loader2, Pencil, RefreshCw, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { patternCategories } from "@/components/PatternPalette";
+import { MAIN_CATEGORIES, UNCATEGORIZED_MAIN, normalizeMainCategory } from "@/lib/furnitureCategories";
 import type { FurniturePart } from "@/components/FurnitureEditor";
 
 
@@ -14,6 +15,7 @@ export interface SavedFurnitureRow {
   id: string;
   name: string;
   category?: string | null;
+  main_category?: string | null;
   image_hash: string;
   image_url: string;
   rendering_url?: string | null;
@@ -24,13 +26,16 @@ export interface SavedFurnitureRow {
 
 interface Props {
   onSelect: (row: SavedFurnitureRow) => void;
+  /** When this changes, the picker opens directly on that main category. */
+  openMainCategory?: string | null;
 }
 
-export function SavedFurniturePicker({ onSelect }: Props) {
+export function SavedFurniturePicker({ onSelect, openMainCategory }: Props) {
   const { isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<SavedFurnitureRow[]>([]);
+  const [activeMain, setActiveMain] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -45,22 +50,36 @@ export function SavedFurniturePicker({ onSelect }: Props) {
     return map;
   }, []);
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, SavedFurnitureRow[]>();
+  // main category -> category -> rows
+  const mainGroups = useMemo(() => {
+    const map = new Map<string, Map<string, SavedFurnitureRow[]>>();
     rows.forEach((r) => {
+      const main = normalizeMainCategory(r.main_category);
       const cat = (r.category ?? "").trim() || "Uncategorized";
-      const list = map.get(cat) ?? [];
+      const cats = map.get(main) ?? new Map<string, SavedFurnitureRow[]>();
+      const list = cats.get(cat) ?? [];
       list.push(r);
-      map.set(cat, list);
+      cats.set(cat, list);
+      map.set(main, cats);
     });
-    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    const order = [...MAIN_CATEGORIES, UNCATEGORIZED_MAIN];
+    return Array.from(map.entries()).sort((a, b) => {
+      const ia = order.indexOf(a[0] as never);
+      const ib = order.indexOf(b[0] as never);
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib) || a[0].localeCompare(b[0]);
+    });
   }, [rows]);
 
-  const visibleRows = useMemo(
-    () => (activeCategory ? grouped.find(([c]) => c === activeCategory)?.[1] ?? [] : []),
-    [grouped, activeCategory],
-  );
+  const categoriesOfMain = useMemo(() => {
+    if (!activeMain) return [];
+    const cats = mainGroups.find(([m]) => m === activeMain)?.[1];
+    return cats ? Array.from(cats.entries()).sort((a, b) => a[0].localeCompare(b[0])) : [];
+  }, [mainGroups, activeMain]);
 
+  const visibleRows = useMemo(
+    () => (activeCategory ? categoriesOfMain.find(([c]) => c === activeCategory)?.[1] ?? [] : []),
+    [categoriesOfMain, activeCategory],
+  );
 
   const downloadRow = useCallback(async (row: SavedFurnitureRow) => {
     const url = row.rendering_url || row.image_url;
@@ -80,15 +99,13 @@ export function SavedFurniturePicker({ onSelect }: Props) {
     }
   }, []);
 
-
-
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("saved_furniture")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(60);
+      .limit(500);
     if (error) {
       console.warn("Saved furniture list unavailable:", error.message);
       setRows([]);
@@ -101,6 +118,15 @@ export function SavedFurniturePicker({ onSelect }: Props) {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Open straight into a main category when requested from the header.
+  useEffect(() => {
+    if (!openMainCategory) return;
+    setActiveMain(openMainCategory);
+    setActiveCategory(null);
+    setOpen(true);
+    load();
+  }, [openMainCategory, load]);
 
   // ---------- admin actions ----------
   const renameDesign = async (row: SavedFurnitureRow) => {
@@ -153,6 +179,12 @@ export function SavedFurniturePicker({ onSelect }: Props) {
     setEditValue(cat);
   };
 
+  const headerLabel = activeCategory
+    ? activeCategory
+    : activeMain
+      ? activeMain
+      : "Main categories";
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -165,42 +197,42 @@ export function SavedFurniturePicker({ onSelect }: Props) {
           <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[340px] p-2">
+      <PopoverContent align="start" className="w-[360px] p-2">
         <div className="flex items-center justify-between px-1 pb-2 gap-1">
-          {activeCategory ? (
-            editingCategory === activeCategory ? (
-              <div className="flex items-center gap-1 min-w-0 flex-1">
-                <Input
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  className="h-7 text-xs"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") renameCategory(activeCategory);
-                    if (e.key === "Escape") setEditingCategory(null);
-                  }}
-                />
-                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={busy}
-                  onClick={() => renameCategory(activeCategory)} title="Save category name">
-                  <Check className="w-3.5 h-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0"
-                  onClick={() => setEditingCategory(null)} title="Cancel">
-                  <X className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setActiveCategory(null)}
-                className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground min-w-0"
-              >
-                <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{activeCategory}</span>
-              </button>
-            )
+          {activeCategory && editingCategory === activeCategory ? (
+            <div className="flex items-center gap-1 min-w-0 flex-1">
+              <Input
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                className="h-7 text-xs"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") renameCategory(activeCategory);
+                  if (e.key === "Escape") setEditingCategory(null);
+                }}
+              />
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={busy}
+                onClick={() => renameCategory(activeCategory)} title="Save category name">
+                <Check className="w-3.5 h-3.5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0"
+                onClick={() => setEditingCategory(null)} title="Cancel">
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          ) : activeMain ? (
+            <button
+              onClick={() => (activeCategory ? setActiveCategory(null) : setActiveMain(null))}
+              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground min-w-0"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">
+                {activeCategory ? `${activeMain} · ${activeCategory}` : activeMain}
+              </span>
+            </button>
           ) : (
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Categories
+              {headerLabel}
             </span>
           )}
           <div className="flex items-center shrink-0">
@@ -224,9 +256,45 @@ export function SavedFurniturePicker({ onSelect }: Props) {
           <p className="p-4 text-sm text-muted-foreground">
             No saved furniture yet. Customize a piece and press “Save design”.
           </p>
+        ) : !activeMain ? (
+          <div className="max-h-96 overflow-y-auto space-y-1">
+            {mainGroups.map(([main, cats]) => {
+              const count = Array.from(cats.values()).reduce((n, l) => n + l.length, 0);
+              const first = Array.from(cats.values())[0]?.[0];
+              return (
+                <button
+                  key={main}
+                  onClick={() => {
+                    setActiveMain(main);
+                    setActiveCategory(null);
+                  }}
+                  className="w-full flex items-center gap-3 rounded-lg p-2 hover:bg-muted transition-colors text-left"
+                >
+                  <div className="w-10 h-10 rounded-md border border-border overflow-hidden shrink-0 bg-white">
+                    {first && (
+                      <img src={first.rendering_url || first.image_url} alt="" className="w-full h-full object-contain" loading="lazy" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium truncate flex items-center gap-1">
+                      <Layers className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      {main}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {cats.size} categor{cats.size === 1 ? "y" : "ies"} · {count} design{count > 1 ? "s" : ""}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                </button>
+              );
+            })}
+          </div>
         ) : !activeCategory ? (
           <div className="max-h-96 overflow-y-auto space-y-1">
-            {grouped.map(([category, items]) => (
+            {categoriesOfMain.length === 0 && (
+              <p className="p-4 text-sm text-muted-foreground">No designs saved in {activeMain} yet.</p>
+            )}
+            {categoriesOfMain.map(([category, items]) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
@@ -246,7 +314,7 @@ export function SavedFurniturePicker({ onSelect }: Props) {
                     {category}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {items.length} design{items.length > 1 ? "s" : ""}
+                    {activeMain} · {items.length} design{items.length > 1 ? "s" : ""}
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -257,7 +325,6 @@ export function SavedFurniturePicker({ onSelect }: Props) {
           <div className="max-h-96 overflow-y-auto space-y-1">
             {visibleRows.map((row) => {
               const assignments = Array.isArray(row.assignments) ? row.assignments : [];
-
               const parts = Array.isArray(row.parts) ? row.parts : [];
               return (
                 <div key={row.id} className="rounded-lg hover:bg-muted transition-colors p-2">
@@ -302,6 +369,9 @@ export function SavedFurniturePicker({ onSelect }: Props) {
                         ) : (
                           <div className="text-sm font-medium truncate">{row.name}</div>
                         )}
+                        <div className="text-[11px] text-muted-foreground truncate">
+                          {normalizeMainCategory(row.main_category)} · {(row.category ?? "").trim() || "Uncategorized"}
+                        </div>
                         <div className="text-xs text-muted-foreground truncate">
                           {parts.length} parts
                           {row.rendering_url ? " · rendering saved" : ""}
@@ -378,7 +448,6 @@ export function SavedFurniturePicker({ onSelect }: Props) {
               );
             })}
           </div>
-
         )}
       </PopoverContent>
     </Popover>
