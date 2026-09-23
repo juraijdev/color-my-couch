@@ -97,18 +97,59 @@ function UsersPanel() {
       <div className="space-y-2">
         {rows.map((u) => {
           const isAdmin = u.roles.includes("admin");
+          const logs = usageFor(u.id);
+          const byFeature = logs.reduce<Record<string, number>>((acc, r) => {
+            acc[r.feature] = (acc[r.feature] ?? 0) + 1; return acc;
+          }, {});
+          const failed = logs.filter((r) => r.status !== "success").length;
+          const last = logs[0];
+          const open = expanded === u.id;
           return (
-            <div key={u.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
-              <div>
-                <div className="font-medium">{u.display_name || u.email}</div>
-                <div className="text-xs text-muted-foreground">{u.email}</div>
+            <div key={u.id} className="p-3 border border-border rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{u.display_name || u.email}</div>
+                  <div className="text-xs text-muted-foreground">{u.email}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={isAdmin ? "default" : "secondary"}>{isAdmin ? "Admin" : "User"}</Badge>
+                  <Button size="sm" variant="outline" onClick={() => toggleAdmin(u.id, isAdmin)}>
+                    {isAdmin ? "Demote" : "Make admin"}
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={isAdmin ? "default" : "secondary"}>{isAdmin ? "Admin" : "User"}</Badge>
-                <Button size="sm" variant="outline" onClick={() => toggleAdmin(u.id, isAdmin)}>
-                  {isAdmin ? "Demote" : "Make admin"}
-                </Button>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <Badge variant="outline">{logs.length} AI actions</Badge>
+                {Object.entries(byFeature).map(([f, n]) => (
+                  <Badge key={f} variant="secondary">{f}: {n}</Badge>
+                ))}
+                {failed > 0 && <Badge variant="destructive">{failed} failed</Badge>}
+                {last && (
+                  <span className="text-muted-foreground">
+                    last: {new Date(last.created_at).toLocaleString()}
+                  </span>
+                )}
+                {logs.length > 0 && (
+                  <Button size="sm" variant="ghost" onClick={() => setExpanded(open ? null : u.id)}>
+                    {open ? "Hide log" : "View log"}
+                  </Button>
+                )}
               </div>
+
+              {open && (
+                <div className="mt-3 max-h-64 overflow-auto text-xs font-mono space-y-1 border-t border-border pt-2">
+                  {logs.slice(0, 200).map((r) => (
+                    <div key={r.id} className="flex justify-between gap-2 border-b border-border/50 py-1">
+                      <span>{new Date(r.created_at).toLocaleString()}</span>
+                      <span>{r.feature}</span>
+                      <span className="text-muted-foreground">{r.model ?? "-"}</span>
+                      <span className={r.status === "success" ? "text-primary" : "text-destructive"}>{r.status}</span>
+                      <span>{r.duration_ms ?? "-"}ms</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
