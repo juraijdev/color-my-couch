@@ -237,6 +237,7 @@ export default function Customize() {
     // Older self-hosted databases may not have the optional columns yet.
     // Save progressively: full row first, then drop unknown columns.
     const variants: Array<Record<string, unknown>> = [
+      { ...baseRow, main_category: mainCategory, category, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, category, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, rendering_url: generatedImage ?? null, assignments: assignmentsPayload },
       { ...baseRow, rendering_url: generatedImage ?? null },
