@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { MAIN_CATEGORIES } from "@/lib/furnitureCategories";
 
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -81,6 +82,25 @@ export function SiteHeader() {
             </DropdownMenu>
           )}
         </nav>
+      </div>
+
+      <div className="border-t border-border bg-muted/30">
+        <div className="max-w-7xl mx-auto flex items-center gap-2 px-6 py-2 overflow-x-auto">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground shrink-0 mr-1">
+            Saved library
+          </span>
+          {MAIN_CATEGORIES.map((m) => (
+            <Button
+              key={m}
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs shrink-0"
+              onClick={() => navigate(`/customize?library=${encodeURIComponent(m)}&t=${Date.now()}`)}
+            >
+              {m}
+            </Button>
+          ))}
+        </div>
       </div>
     </header>
   );
