@@ -669,7 +669,7 @@ export default function Customize() {
                   Pick a previously verified furniture and just change its colours.
                 </p>
               </div>
-              <SavedFurniturePicker onSelect={handleSelectSavedFurniture} />
+              <SavedFurniturePicker onSelect={handleSelectSavedFurniture} openMainCategory={libraryMain} />
             </div>
             <UploadArea onImageUpload={handleImageUpload} />
 
@@ -699,6 +699,16 @@ export default function Customize() {
               )}
               {user && detectedParts.length > 0 && (
                 <div className="shrink-0 p-3 border-t border-border bg-card flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <select
+                    value={savedMainCategory}
+                    onChange={(e) => setSavedMainCategory(e.target.value)}
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm sm:w-44"
+                    title="Main category"
+                  >
+                    {MAIN_CATEGORIES.map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
                   <Input
                     value={savedCategory}
                     onChange={(e) => setSavedCategory(e.target.value)}
