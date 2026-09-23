@@ -16,6 +16,7 @@ import { containImageInTransparentCanvas, flattenToWhiteBackground, forceEdgeBac
 import { hashImage } from "@/lib/imageHash";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { MAIN_CATEGORIES, normalizeMainCategory } from "@/lib/furnitureCategories";
 
 interface Suggestion {
   partId: string;
@@ -33,6 +34,7 @@ export default function Customize() {
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
   const [savedCategory, setSavedCategory] = useState("");
+  const [savedMainCategory, setSavedMainCategory] = useState<string>(MAIN_CATEGORIES[0]);
   const [knownCategories, setKnownCategories] = useState<string[]>([]);
   const [savedRenderingUrl, setSavedRenderingUrl] = useState<string | null>(null);
 
