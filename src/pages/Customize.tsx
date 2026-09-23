@@ -216,6 +216,7 @@ export default function Customize() {
     }
     const name = savedName.trim() || `Furniture ${new Date().toLocaleDateString()}`;
     const category = savedCategory.trim() || "Uncategorized";
+    const mainCategory = normalizeMainCategory(savedMainCategory);
 
     const assignments = furnitureEditorRef.current?.getPatternAssignments() ?? [];
     const assignmentsPayload = assignments.map((pa) => ({
