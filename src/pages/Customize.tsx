@@ -257,8 +257,8 @@ export default function Customize() {
         setSavedAssignmentsApplied(true);
         setKnownCategories((prev) => (prev.includes(category) ? prev : [...prev, category].sort()));
         toast.success(generatedImage
-          ? `Saved "${name}" in "${category}" with rendering — reusable next time`
-          : `Saved "${name}" in "${category}"`);
+          ? `Saved "${name}" in ${mainCategory} › ${category} with rendering — reusable next time`
+          : `Saved "${name}" in ${mainCategory} › ${category}`);
         if (missingColumns) {
           toast.warning("Saved, but this server's database is missing the newer columns — run the latest migration to store categories, colours and renderings.");
         }
@@ -274,7 +274,7 @@ export default function Customize() {
     } else {
       toast.error(lastError ?? "Could not save this furniture.");
     }
-  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, savedCategory, generatedImage]);
+  }, [user, uploadedImage, uploadedImageHash, detectedParts, savedName, savedCategory, savedMainCategory, generatedImage]);
 
   // Load existing categories for the save-category suggestions
   useEffect(() => {
