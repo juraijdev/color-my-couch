@@ -109,6 +109,7 @@ export default function Customize() {
         setPreloadedParts(data.parts as unknown as FurniturePart[]);
         setSavedName(data.name);
         setSavedCategory(((data as { category?: string | null }).category ?? "") || "");
+        setSavedMainCategory(normalizeMainCategory((data as { main_category?: string | null }).main_category));
 
         const rendering = (data as { rendering_url?: string | null }).rendering_url ?? null;
         setSavedRenderingUrl(rendering);
@@ -160,6 +161,7 @@ export default function Customize() {
     setPreloadedParts(Array.isArray(row.parts) ? (row.parts as FurniturePart[]) : null);
     setSavedName(row.name);
     setSavedCategory(row.category ?? "");
+    setSavedMainCategory(normalizeMainCategory(row.main_category));
 
     setSavedRenderingUrl(row.rendering_url ?? null);
     setSavedAssignments(Array.isArray(row.assignments) ? row.assignments : null);
