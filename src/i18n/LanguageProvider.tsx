@@ -23,16 +23,83 @@ const ATTRS = ["placeholder", "title", "aria-label", "alt"];
 const originalText = new WeakMap<Node, string>();
 const originalAttrs = new WeakMap<Element, Record<string, string>>();
 
+/* ---------- AI fallback for dynamic text (saved design names, categories...) ---------- */
+const AI_CACHE_KEY = "lush_ai_tr_v1";
+type AiCache = Record<string, Record<string, string>>;
+let aiCache: AiCache = {};
+try { aiCache = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || "{}"); } catch { aiCache = {}; }
+const aiPending = new Set<string>();
+const aiInFlight = new Set<string>();
+let aiTimer: ReturnType<typeof setTimeout> | null = null;
+let aiListener: (() => void) | null = null;
+
+function aiEligible(s: string) {
+  if (s.length < 2 || s.length > 300) return false;
+  if (!/[A-Za-z]{2,}/.test(s)) return false;
+  if (/@/.test(s) || /^https?:/i.test(s)) return false;
+  // pure codes like "SS02", "ESR-A090-BR9004"
+  if (/^[A-Z0-9][A-Z0-9\-_.#/ ]*$/.test(s) && /\d/.test(s)) return false;
+  return true;
+}
+
+function aiLookup(base: string, lang: Lang): string | null {
+  const key = base.trim();
+  const hit = aiCache[lang]?.[key];
+  if (hit) {
+    const lead = base.match(/^\s*/)?.[0] ?? "";
+    const tail = base.match(/\s*$/)?.[0] ?? "";
+    return `${lead}${hit}${tail}`;
+  }
+  if (aiEligible(key) && !aiInFlight.has(`${lang}|${key}`)) {
+    aiPending.add(`${lang}|${key}`);
+    if (!aiTimer) aiTimer = setTimeout(flushAi, 400);
+  }
+  return null;
+}
+
+async function flushAi() {
+  aiTimer = null;
+  const byLang: Record<string, string[]> = {};
+  aiPending.forEach((k) => {
+    const i = k.indexOf("|");
+    (byLang[k.slice(0, i)] ||= []).push(k.slice(i + 1));
+    aiInFlight.add(k);
+  });
+  aiPending.clear();
+  const { supabase } = await import("@/integrations/supabase/client");
+  for (const [lang, texts] of Object.entries(byLang)) {
+    for (let i = 0; i < texts.length; i += 60) {
+      const chunk = texts.slice(i, i + 60);
+      try {
+        const { data, error } = await supabase.functions.invoke("translate-text", { body: { texts: chunk, lang } });
+        if (error) throw error;
+        const tr = (data?.translations ?? {}) as Record<string, string>;
+        aiCache[lang] = { ...(aiCache[lang] || {}), ...tr };
+        try { localStorage.setItem(AI_CACHE_KEY, JSON.stringify(aiCache)); } catch { /* full */ }
+        aiListener?.();
+      } catch (e) {
+        console.warn("AI translation failed", e);
+      }
+    }
+  }
+}
+
+function translateAny(base: string, lang: Lang): string | null {
+  if (lang === "en") return null;
+  return translatePhrase(base, lang) ?? aiLookup(base, lang);
+}
+
 function applyToTextNode(node: Text, lang: Lang) {
   const parent = node.parentElement;
   if (!parent || SKIP_TAGS.has(parent.tagName)) return;
+  if (parent.closest("[translate='no'],[data-no-translate]")) return;
   let base = originalText.get(node);
   if (base === undefined) {
     base = node.nodeValue ?? "";
     originalText.set(node, base);
   }
   if (!base.trim()) return;
-  const translated = translatePhrase(base, lang);
+  const translated = translateAny(base, lang);
   const next = translated ?? base;
   if (node.nodeValue !== next) node.nodeValue = next;
 }
@@ -48,7 +115,7 @@ function applyToElementAttrs(el: Element, lang: Lang) {
     if (store[attr] === undefined) store[attr] = el.getAttribute(attr) ?? "";
     const base = store[attr];
     if (!base.trim()) continue;
-    const next = translatePhrase(base, lang) ?? base;
+    const next = translateAny(base, lang) ?? base;
     if (el.getAttribute(attr) !== next) el.setAttribute(attr, next);
   }
 }
@@ -89,6 +156,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
 
     translateTree(document.body, lang);
+    aiListener = () => {
+      translateTree(document.body, langRef.current);
+      observer?.takeRecords();
+    };
 
     let frame = 0;
     let observer: MutationObserver;
@@ -136,7 +207,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     };
   }, [lang]);
 
-  const t = useCallback((text: string) => translatePhrase(text, lang) ?? text, [lang]);
+  const t = useCallback((text: string) => translateAny(text, lang) ?? text, [lang]);
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>{children}</LanguageContext.Provider>
