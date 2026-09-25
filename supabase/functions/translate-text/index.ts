@@ -29,7 +29,9 @@ serve(async (req) => {
       method: "POST",
       headers: aiCfg.headers,
       body: JSON.stringify({
-        model: aiCfg.mapModel("google/gemini-2.5-flash"),
+        model: aiCfg.provider === "gemini"
+          ? "gemini-3.8-flash"
+          : aiCfg.mapModel("google/gemini-2.5-flash"),
         temperature: 0.1,
         messages: [
           {
