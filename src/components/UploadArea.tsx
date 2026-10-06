@@ -6,9 +6,11 @@ import { toast } from "sonner";
 
 interface UploadAreaProps {
   onImageUpload: (imageDataUrl: string) => void;
+  imageKind?: "furniture" | "room";
 }
 
-export function UploadArea({ onImageUpload }: UploadAreaProps) {
+export function UploadArea({ onImageUpload, imageKind = "furniture" }: UploadAreaProps) {
+  const isRoom = imageKind === "room";
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,13 +108,13 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
       <div className="text-center mb-8 max-w-lg">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
           <Sparkles className="w-4 h-4" />
-          AI-Powered Furniture Customization
+          {isRoom ? "Suggest Colors from Room" : "AI-Powered Furniture Customization"}
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-          Transform Your Design
+          {isRoom ? "Upload room photo" : "Transform Your Design"}
         </h1>
         <p className="text-muted-foreground text-lg">
-          Upload a photo and our AI will help you visualize different materials and finishes
+          {isRoom ? "Step 1 · Room photo" : "Upload a photo and our AI will help you visualize different materials and finishes"}
         </p>
       </div>
 
@@ -151,7 +153,7 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
 
           <div className="text-center">
             <h3 className="text-xl font-semibold mb-2">
-              {isDragging ? "Drop your image here" : "Drag & drop your furniture image"}
+              {isDragging ? "Drop your image here" : isRoom ? "Drag & drop your room photo" : "Drag & drop your furniture image"}
             </h3>
             <p className="text-muted-foreground">
               or <span className="text-primary font-medium">browse files</span> • paste with Ctrl/Cmd+V • PNG, JPG up to 10MB
@@ -161,7 +163,7 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
           <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
             <Button variant="default" size="lg">
               <Upload className="w-5 h-5 mr-2" />
-              Choose Image
+              {isRoom ? "Choose room photo" : "Choose Image"}
             </Button>
             <Button
               variant="outline"
@@ -179,7 +181,7 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
       </div>
 
       {/* How it works */}
-      <div className="mt-12 w-full max-w-3xl">
+      {!isRoom && <div className="mt-12 w-full max-w-3xl">
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider text-center mb-6">
           How it works
         </h3>
@@ -206,7 +208,7 @@ export function UploadArea({ onImageUpload }: UploadAreaProps) {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

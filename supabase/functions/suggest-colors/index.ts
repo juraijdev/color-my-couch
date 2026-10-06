@@ -1,11 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getAiConfig } from "../_shared/ai.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { z } from "npm:zod@3";
+import { parseSuggestions, suggestionSchema } from "./response.ts";
 
 interface PartInfo {
   id: string;
@@ -29,21 +27,46 @@ interface RequestBody {
   availablePatterns: PatternInfo[];
 }
 
+const requestSchema = z.object({
+  backgroundImage: z.string().max(20_000_000).regex(/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=\s]+$/),
+  parts: z.array(z.object({
+    id: z.string().min(1).max(200), name: z.string().min(1).max(300),
+    material: z.string().max(500).optional(), currentColor: z.string().max(500).optional(),
+    description: z.string().max(2000).optional(),
+  })).min(1).max(100),
+  availablePatterns: z.array(z.object({
+    id: z.string().min(1).max(200), name: z.string().min(1).max(300),
+    code: z.string().max(100).optional(), description: z.string().max(2000).optional(),
+    category: z.string().max(300).optional(),
+  })).min(1).max(1500),
+});
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const aiCfg = getAiConfig();
+    const authorization = req.headers.get("Authorization");
+    const token = authorization?.replace(/^Bearer\s+/i, "");
+    if (!token) return new Response(JSON.stringify({ error: "Please sign in to suggest colors." }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+    const client = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "");
+    const { data: auth, error: authError } = await client.auth.getUser(token);
+    if (authError || !auth.user) return new Response(JSON.stringify({ error: "Please sign in again to suggest colors." }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
 
-    const body = (await req.json()) as RequestBody;
-    if (!body.backgroundImage || !Array.isArray(body.parts) || !Array.isArray(body.availablePatterns)) {
+    const input = requestSchema.safeParse(await req.json().catch(() => null));
+    if (!input.success) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: backgroundImage, parts, availablePatterns" }),
+        JSON.stringify({ error: "Please provide a room photo, furniture parts, and available finishes.", details: input.error.flatten().fieldErrors }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    const body: RequestBody = input.data;
+    const aiCfg = getAiConfig();
 
     const partsList = body.parts
       .map(
@@ -88,16 +111,22 @@ ${partsList}
 AVAILABLE PATTERNS (you must choose from these only):
 ${patternsList}
 
-Return one suggestion per part. Use the exact ids.`;
+Return one suggestion per part. Use the exact ids. Keep each reason under 15 words and rationale under 50 words.`;
 
+    for (let attempt = 0; attempt < 2; attempt++) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 1500));
     const response = await fetch(aiCfg.url, {
       method: "POST",
       headers: aiCfg.headers,
       body: JSON.stringify({
         model: aiCfg.provider === "gemini"
           ? "gemini-3.8-flash"
-          : aiCfg.mapModel("google/gemini-2.5-flash"),
-        temperature: 0.4,
+          : "openai/gpt-6-astra",
+        ...(aiCfg.provider === "gemini" ? { temperature: 0.1, max_tokens: 12000 } : { reasoning_effort: "low" }),
+        response_format: {
+          type: "json_schema",
+          json_schema: { name: "furniture_palette", strict: true, schema: suggestionSchema },
+        },
         messages: [
           { role: "system", content: systemPrompt },
           {
@@ -108,13 +137,13 @@ Return one suggestion per part. Use the exact ids.`;
             ],
           },
         ],
-        max_tokens: 2000,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
+      if (response.status >= 500 && attempt === 0) continue;
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
           status: 429,
@@ -127,36 +156,35 @@ Return one suggestion per part. Use the exact ids.`;
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error("AI suggestion failed");
+      const detail = (() => { try { return JSON.parse(errorText); } catch { return null; } })();
+      const safeMessage = detail?.message ?? detail?.error?.message ?? "AI color suggestion is temporarily unavailable. Please try again later.";
+      return new Response(JSON.stringify({ error: safeMessage }), {
+        status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const aiResult = await response.json();
-    const raw: string = aiResult.choices?.[0]?.message?.content ?? "";
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error("No JSON in AI response:", raw);
-      throw new Error("Could not parse AI suggestions");
+    const choice = aiResult.choices?.[0];
+    if (choice?.message?.refusal || choice?.finish_reason === "content_filter" || choice?.error) {
+      return new Response(JSON.stringify({ error: "The AI could not provide suggestions for this image." }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-    const parsed = JSON.parse(jsonMatch[0]);
-
-    // Validate patternIds exist in availablePatterns; fall back to first match for the part's material if not.
-    const validIds = new Set(body.availablePatterns.map((p) => p.id));
-    const suggestions = (parsed.suggestions ?? [])
-      .filter((s: any) => s && typeof s.partId === "string" && typeof s.patternId === "string")
-      .map((s: any) => ({
-        partId: s.partId,
-        patternId: validIds.has(s.patternId) ? s.patternId : body.availablePatterns[0].id,
-        reason: typeof s.reason === "string" ? s.reason : "",
-      }));
-
+    const raw = choice?.message?.content;
+    if (typeof raw !== "string" || !raw.trim()) throw new Error("The AI returned no color suggestions. Please try again later.");
+    try {
+    const parsed = parseSuggestions(raw, body.parts.map((part) => part.id), body.availablePatterns.map((pattern) => pattern.id));
+    if (choice?.finish_reason === "length") throw new Error("Incomplete suggestion response");
     return new Response(
-      JSON.stringify({
-        palette: parsed.palette ?? "Suggested palette",
-        rationale: parsed.rationale ?? "",
-        suggestions,
-      }),
+      JSON.stringify(parsed),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
     );
+    } catch (parseError) {
+      console.warn("Invalid suggestion response", { attempt, finishReason: choice?.finish_reason, error: String(parseError) });
+      if (attempt === 1) throw new Error("The AI returned incomplete color suggestions. Please try again.");
+    }
+    }
+    throw new Error("Unable to suggest colors. Please try again.");
   } catch (error) {
     console.error("suggest-colors error:", error);
     return new Response(

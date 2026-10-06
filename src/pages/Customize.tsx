@@ -365,15 +365,8 @@ export default function Customize() {
       setSuggestionsApplied(false);
       toast.info("AI is choosing colors that match your room...");
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/suggest-colors`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({
+        const { data, error } = await supabase.functions.invoke("suggest-colors", {
+            body: {
               backgroundImage,
               parts: parts
                 .filter((p) => !/(wheel|caster|castor|roller|tyre|tire)/i.test(`${p.name} ${p.material} ${p.description ?? ""}`))
@@ -393,14 +386,13 @@ export default function Customize() {
                   category: cat.name,
                 })),
               ),
-            }),
-          },
-        );
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(err.error || "Failed to get suggestions");
+            },
+        });
+        if (error) {
+          const details = await error.context?.json?.().catch(() => null);
+          throw new Error(details?.error || error.message || "Failed to get suggestions");
         }
-        const data = await response.json();
+        if (data?.error) throw new Error(data.error);
         setSuggestions(data.suggestions || []);
         setSuggestionMeta({ palette: data.palette ?? "", rationale: data.rationale ?? "" });
         toast.success("AI color suggestion ready!");
@@ -609,13 +601,13 @@ export default function Customize() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
               <Wand2 className="w-3.5 h-3.5" /> Suggest Colors from Room
             </div>
-            <h1 className="font-display text-3xl font-bold mb-2">Step 1 · Upload your room background</h1>
+            <h1 className="font-display text-3xl font-bold mb-2">Step 1 · Upload room photo</h1>
             <p className="text-muted-foreground">
               We'll analyze the room and recommend furniture finishes that match.
             </p>
           </div>
           <div className="w-full max-w-3xl">
-            <UploadArea onImageUpload={(img) => setBackgroundImage(img)} />
+            <UploadArea imageKind="room" onImageUpload={(img) => setBackgroundImage(img)} />
           </div>
         </main>
       </div>

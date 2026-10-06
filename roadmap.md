@@ -1,0 +1,4 @@
+- [x] Fix malformed AI color suggestion responses without changing furniture recoloring.
+- [x] Clearly label room upload first and furniture upload second.
+- [x] Validate suggestion parsing (3 tests) and real AI response (200, complete palette); provide VPS update steps.
+- [ ] Verify signed-in room → furniture → suggestion flow: blocked because no preview account matches the requesting user; preview sign-in needed.
