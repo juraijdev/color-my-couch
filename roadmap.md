@@ -1,0 +1,3 @@
+- [ ] Fix malformed AI color suggestion responses without changing furniture recoloring.
+- [ ] Clearly label room upload first and furniture upload second.
+- [ ] Verify suggestions and provide VPS update steps.
