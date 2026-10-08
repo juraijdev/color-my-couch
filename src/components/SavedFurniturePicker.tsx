@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { BookMarked, Check, ChevronDown, ChevronLeft, ChevronRight, Download, Folder, Layers, Loader2, Pencil, RefreshCw, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,6 +130,7 @@ export function SavedFurniturePicker({ onSelect, openMainCategory }: Props) {
     setActiveMain(openMainCategory);
     setActiveCategory(null);
     setOpen(true);
+    loadedOnce.current = true;
     load();
   }, [openMainCategory, load]);
 
