@@ -492,10 +492,18 @@ function normalizeParts(parts: any[]) {
 // Keep each upstream call bounded, but do not launch duplicate vision requests
 // in parallel. Parallel calls consume quota together and can make a temporary
 // provider overload worse. The VPS proxy allows the bounded fallback sequence.
-const ANALYSIS_ATTEMPT_TIMEOUT_MS = 28_000;
+const ANALYSIS_ATTEMPT_TIMEOUT_MS = 50_000;
 
 // Google retires model ids without notice: a single pinned id starts 400/404-ing
 // overnight and analysis dies. Always walk a chain of known-good text/vision ids.
+// Native Gemini (VPS): retired ids like gemini-2.5-flash fail first, so lead
+// with the model that currently works there.
+const NATIVE_GEMINI_ANALYSIS_MODELS = [
+  "gemini-3.8-flash",
+  "gemini-flash-latest",
+  "gemini-flash-lite-latest",
+];
+
 const ANALYSIS_MODEL_CANDIDATES = [
   "google/gemini-2.5-flash",
   "google/gemini-3.6-flash",
@@ -532,7 +540,7 @@ async function callNativeGeminiAnalysis(model: string, image: string, signal?: A
         }],
         generationConfig: {
           temperature: 0,
-          maxOutputTokens: 4000,
+          maxOutputTokens: 16000,
           responseMimeType: "application/json",
         },
       }),
@@ -603,8 +611,7 @@ async function callAnalysisModel(
 }
 
 async function analyzeFurnitureWithRetry(aiCfg: ReturnType<typeof getAiConfig>, image: string) {
-  const candidates = ANALYSIS_MODEL_CANDIDATES
-    .map((m) => aiCfg.mapModel(m))
+  const candidates = (aiCfg.provider === "gemini" ? NATIVE_GEMINI_ANALYSIS_MODELS : ANALYSIS_MODEL_CANDIDATES.map((m) => aiCfg.mapModel(m)))
     .filter((id, i, all) => all.indexOf(id) === i);
   const failures: Array<{ status: number; error: string }> = [];
 
@@ -645,7 +652,8 @@ async function analyzeFurnitureWithRetry(aiCfg: ReturnType<typeof getAiConfig>, 
       clearTimeout(timeout);
     }
 
-    if (attempt < attemptModels.length - 1) {
+    const lastStatus = failures[failures.length - 1]?.status;
+    if (attempt < attemptModels.length - 1 && lastStatus !== 404 && lastStatus !== 400) {
       await new Promise((resolve) => setTimeout(resolve, 1200));
     }
   }
