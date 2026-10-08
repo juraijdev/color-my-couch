@@ -200,6 +200,17 @@ const GEMINI_NATIVE_IMAGE_FALLBACKS = [
   "gemini-2.0-flash-preview-image-generation",
 ];
 
+// Remember retired model ids across requests (per worker) so every generation
+// does not waste a round-trip re-discovering that they no longer exist.
+const RETIRED_IMAGE_IDS = new Map<string, number>();
+const RETIRED_TTL_MS = 6 * 60 * 60 * 1000;
+function isRetired(id: string) {
+  const at = RETIRED_IMAGE_IDS.get(id);
+  if (!at) return false;
+  if (Date.now() - at > RETIRED_TTL_MS) { RETIRED_IMAGE_IDS.delete(id); return false; }
+  return true;
+}
+
 async function callGeminiNativeImage(
   geminiKey: string,
   mapped: string,
@@ -268,7 +279,8 @@ async function generateImageWithGeminiNative(
   // Two passes: Google's image models regularly return transient 500/503 when
   // overloaded, which is why a retry usually succeeds. Only truly missing ids
   // (404/400) are skipped permanently.
-  const deadIds = new Set<string>();
+  const deadIds = new Set<string>(candidates.filter(isRetired));
+  if (deadIds.size === candidates.length) deadIds.clear();
 
   for (let attempt = 0; attempt < 4; attempt++) {
     for (const candidate of candidates) {
@@ -281,11 +293,16 @@ async function generateImageWithGeminiNative(
       // Quota / auth problems will not be fixed by another model id or a retry.
       if (result.status === 429 || result.status === 401 || result.status === 403) return result;
       // Model id does not exist for this key/region - never try it again.
-      if (result.status === 404 || result.status === 400) deadIds.add(candidate);
+      if (result.status === 404 || result.status === 400) {
+        deadIds.add(candidate);
+        if (result.status === 404 || /not found|not supported|deprecated|retired/i.test(result.error ?? "")) {
+          RETIRED_IMAGE_IDS.set(candidate, Date.now());
+        }
+      }
     }
     if (deadIds.size === candidates.length) break;
     // Back off before retrying transiently-failing ids (1s, 3s, 6s).
-    await new Promise((resolve) => setTimeout(resolve, [1000, 3000, 6000][attempt]));
+    await new Promise((resolve) => setTimeout(resolve, [800, 2000, 4000][attempt]));
   }
 
   return last;
