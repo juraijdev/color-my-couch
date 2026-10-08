@@ -115,9 +115,14 @@ export function SavedFurniturePicker({ onSelect, openMainCategory }: Props) {
     setLoading(false);
   }, []);
 
+  // Only fetch the library when the dropdown is opened, so the page and
+  // furniture analysis are not slowed down by downloading every saved design.
+  const loadedOnce = useRef(false);
   useEffect(() => {
+    if (!open || loadedOnce.current) return;
+    loadedOnce.current = true;
     load();
-  }, [load]);
+  }, [open, load]);
 
   // Open straight into a main category when requested from the header.
   useEffect(() => {
