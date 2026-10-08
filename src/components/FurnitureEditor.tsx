@@ -119,10 +119,12 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
             ? "Furniture analysis is temporarily unavailable. Please try Re-analyze."
             : `Failed to analyze image (${response.status})`);
           throw new Error(message);
-        if (preloadedRef.current && preloadedRef.current.length > 0) return; // saved parts arrived first
-        if (data.parts && data.parts.length > 0) {
+        }
 
         if (!data) throw new Error("The analysis server returned an empty response. Please try Re-analyze.");
+        // Saved (verified) parts arrived while the AI was running — keep them.
+        if (preloadedRef.current && preloadedRef.current.length > 0) return;
+
         
         if (data.parts && data.parts.length > 0) {
           setParts(data.parts);
