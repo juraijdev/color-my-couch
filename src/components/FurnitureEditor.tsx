@@ -40,11 +40,15 @@ interface FurnitureEditorProps {
   onBack?: () => void;
   onPartsDetected?: (parts: FurniturePart[]) => void;
   preloadedParts?: FurniturePart[] | null;
+  /** True while the saved-library lookup for this image is still running. */
+  waitForLibrary?: boolean;
 }
 
 export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorProps>(
-  ({ imageUrl, selectedPattern, onSelectionChange, onBack, onPartsDetected, preloadedParts }, ref) => {
+  ({ imageUrl, selectedPattern, onSelectionChange, onBack, onPartsDetected, preloadedParts, waitForLibrary }, ref) => {
     const [parts, setParts] = useState<FurniturePart[]>([]);
+    const preloadedRef = useRef(preloadedParts);
+    preloadedRef.current = preloadedParts;
     const [patternAssignments, setPatternAssignments] = useState<Map<string, PatternOption>>(new Map());
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
