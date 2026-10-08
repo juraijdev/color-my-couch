@@ -50,24 +50,30 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
     
 
-    useEffect(() => {
-      if (!imageUrl || hasAnalyzed) return;
-      if (preloadedParts && preloadedParts.length > 0) {
-        setParts(preloadedParts);
-        setHasAnalyzed(true);
-        onPartsDetected?.(preloadedParts);
-        toast.success(`Loaded ${preloadedParts.length} verified parts from library`);
-        return;
-      }
-      analyzeImage();
-    }, [imageUrl, preloadedParts]);
-
+    // Reset when the image changes, then either reuse saved (verified) parts
+    // instantly or run AI analysis. Saved parts always win, even if they
+    // arrive a moment after the image.
     useEffect(() => {
       setParts([]);
       setPatternAssignments(new Map());
       setHasAnalyzed(false);
       onSelectionChange?.(false);
     }, [imageUrl]);
+
+    useEffect(() => {
+      if (!imageUrl) return;
+      if (preloadedParts && preloadedParts.length > 0) {
+        setParts(preloadedParts);
+        setHasAnalyzed(true);
+        setIsAnalyzing(false);
+        onPartsDetected?.(preloadedParts);
+        toast.success(`Loaded ${preloadedParts.length} verified parts from library`);
+        return;
+      }
+      if (hasAnalyzed || waitForLibrary) return;
+      analyzeImage();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [imageUrl, preloadedParts, waitForLibrary]);
 
 
     const analyzeImage = async () => {
