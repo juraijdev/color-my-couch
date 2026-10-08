@@ -31,6 +31,7 @@ export default function Customize() {
   const { user } = useAuth();
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [libraryLookupPending, setLibraryLookupPending] = useState(false);
   const [uploadedImageHash, setUploadedImageHash] = useState<string | null>(null);
   const [preloadedParts, setPreloadedParts] = useState<FurniturePart[] | null>(null);
   const [savedName, setSavedName] = useState("");
@@ -79,6 +80,7 @@ export default function Customize() {
   };
 
   const handleImageUpload = useCallback(async (imageDataUrl: string) => {
+    setLibraryLookupPending(true);
     setUploadedImage(imageDataUrl);
     setGeneratedImage(null);
     setHasSelection(false);
@@ -126,6 +128,8 @@ export default function Customize() {
       }
     } catch (e) {
       console.warn("hash lookup failed", e);
+    } finally {
+      setLibraryLookupPending(false);
     }
     toast.success("Image uploaded! AI is analyzing the furniture parts...");
   }, []);
@@ -157,6 +161,7 @@ export default function Customize() {
 
   // Load a furniture straight from the saved library (dropdown on step 1)
   const handleSelectSavedFurniture = useCallback((row: SavedFurnitureRow) => {
+    setLibraryLookupPending(false);
     setUploadedImage(row.image_url);
     setUploadedImageHash(row.image_hash);
     setPreloadedParts(Array.isArray(row.parts) ? (row.parts as FurniturePart[]) : null);
@@ -678,6 +683,7 @@ export default function Customize() {
                 onBack={handleImageClear}
                 onPartsDetected={handlePartsDetected}
                 preloadedParts={preloadedParts}
+                waitForLibrary={libraryLookupPending}
               />
               {savedName && (
                 <div className="shrink-0 px-4 py-2 bg-primary/5 border-t border-border text-xs flex items-center gap-2 flex-wrap">

@@ -1,4 +1,4 @@
-import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
+import { useState, useImperativeHandle, forwardRef, useEffect, useRef } from "react";
 import { Loader2, RefreshCw, Layers, X, MousePointerClick, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -40,34 +40,44 @@ interface FurnitureEditorProps {
   onBack?: () => void;
   onPartsDetected?: (parts: FurniturePart[]) => void;
   preloadedParts?: FurniturePart[] | null;
+  /** True while the saved-library lookup for this image is still running. */
+  waitForLibrary?: boolean;
 }
 
 export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorProps>(
-  ({ imageUrl, selectedPattern, onSelectionChange, onBack, onPartsDetected, preloadedParts }, ref) => {
+  ({ imageUrl, selectedPattern, onSelectionChange, onBack, onPartsDetected, preloadedParts, waitForLibrary }, ref) => {
     const [parts, setParts] = useState<FurniturePart[]>([]);
+    const preloadedRef = useRef(preloadedParts);
+    preloadedRef.current = preloadedParts;
     const [patternAssignments, setPatternAssignments] = useState<Map<string, PatternOption>>(new Map());
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
     
 
-    useEffect(() => {
-      if (!imageUrl || hasAnalyzed) return;
-      if (preloadedParts && preloadedParts.length > 0) {
-        setParts(preloadedParts);
-        setHasAnalyzed(true);
-        onPartsDetected?.(preloadedParts);
-        toast.success(`Loaded ${preloadedParts.length} verified parts from library`);
-        return;
-      }
-      analyzeImage();
-    }, [imageUrl, preloadedParts]);
-
+    // Reset when the image changes, then either reuse saved (verified) parts
+    // instantly or run AI analysis. Saved parts always win, even if they
+    // arrive a moment after the image.
     useEffect(() => {
       setParts([]);
       setPatternAssignments(new Map());
       setHasAnalyzed(false);
       onSelectionChange?.(false);
     }, [imageUrl]);
+
+    useEffect(() => {
+      if (!imageUrl) return;
+      if (preloadedParts && preloadedParts.length > 0) {
+        setParts(preloadedParts);
+        setHasAnalyzed(true);
+        setIsAnalyzing(false);
+        onPartsDetected?.(preloadedParts);
+        toast.success(`Loaded ${preloadedParts.length} verified parts from library`);
+        return;
+      }
+      if (hasAnalyzed || waitForLibrary) return;
+      analyzeImage();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [imageUrl, preloadedParts, waitForLibrary]);
 
 
     const analyzeImage = async () => {
@@ -112,6 +122,9 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
         }
 
         if (!data) throw new Error("The analysis server returned an empty response. Please try Re-analyze.");
+        // Saved (verified) parts arrived while the AI was running — keep them.
+        if (preloadedRef.current && preloadedRef.current.length > 0) return;
+
         
         if (data.parts && data.parts.length > 0) {
           setParts(data.parts);
