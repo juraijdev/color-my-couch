@@ -1,4 +1,4 @@
-import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
+import { useState, useImperativeHandle, forwardRef, useEffect, useRef } from "react";
 import { Loader2, RefreshCw, Layers, X, MousePointerClick, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -119,7 +119,8 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
             ? "Furniture analysis is temporarily unavailable. Please try Re-analyze."
             : `Failed to analyze image (${response.status})`);
           throw new Error(message);
-        }
+        if (preloadedRef.current && preloadedRef.current.length > 0) return; // saved parts arrived first
+        if (data.parts && data.parts.length > 0) {
 
         if (!data) throw new Error("The analysis server returned an empty response. Please try Re-analyze.");
         
