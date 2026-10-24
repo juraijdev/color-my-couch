@@ -5,6 +5,7 @@ import { Wand2, Check, X, Loader2, Image as ImageIcon, BookmarkPlus, ShieldCheck
 import { FurnitureEditor, FurnitureEditorRef, FurniturePart, PartPatternAssignment } from "@/components/FurnitureEditor";
 import { PatternGrid } from "@/components/PatternGrid";
 import { GeneratePanel } from "@/components/GeneratePanel";
+import { DesignFixChat } from "@/components/DesignFixChat";
 import { PatternOption, patternCategories } from "@/components/PatternPalette";
 import { UploadArea } from "@/components/UploadArea";
 import { StepIndicator } from "@/components/StepIndicator";
@@ -596,6 +597,23 @@ export default function Customize() {
   const canGenerate = Boolean(uploadedImage && hasSelection && !isGenerating);
   const assignmentCount = furnitureEditorRef.current?.getPatternAssignments().length || 0;
 
+  // AI fix-chat: replace the current design with the improved version
+  const handleDesignImproved = useCallback((improved: string) => {
+    setGeneratedImage((prev) => {
+      setAllFurnitureImages((images) => {
+        const idx = prev ? images.indexOf(prev) : -1;
+        if (idx >= 0) {
+          const next = [...images];
+          next[idx] = improved;
+          return next;
+        }
+        return images.includes(improved) ? images : [...images, improved];
+      });
+      return improved;
+    });
+    toast.success("Design improved by AI!");
+  }, []);
+
   // -------------- Suggest mode: background upload step --------------
   if (isSuggestMode && !backgroundImage) {
     return (
@@ -828,6 +846,16 @@ export default function Customize() {
                   initialBackgroundImage={backgroundImage}
                   autoOpenPlacer={autoOpenPlacerAfterGen}
                 />
+                {generatedImage && (
+                  <div className="mt-3">
+                    <DesignFixChat
+                      currentImage={generatedImage}
+                      originalImage={uploadedImage}
+                      onDesignImproved={handleDesignImproved}
+                      disabled={isGenerating}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

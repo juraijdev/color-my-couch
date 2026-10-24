@@ -2,3 +2,5 @@
 - [x] Clearly label room upload first and furniture upload second.
 - [x] Validate suggestion parsing (3 tests) and real AI response (200, complete palette); provide VPS update steps.
 - [ ] Verify signed-in room → furniture → suggestion flow: blocked because no preview account matches the requesting user; preview sign-in needed.
+- [x] Add ChatGPT-like "fix my design" chat after generation (fix-design function + DesignFixChat panel); feedback logged to ai_usage_log for admin review.
+- [ ] Verify fix-design end-to-end with a real generated image (needs signed-in preview session).
