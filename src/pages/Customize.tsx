@@ -847,7 +847,7 @@ export default function Customize() {
                   autoOpenPlacer={autoOpenPlacerAfterGen}
                 />
                 {generatedImage && (
-                  <div className="mt-3">
+                  <div className="fixed bottom-4 right-4 z-40 w-[360px] max-w-[calc(100vw-2rem)] shadow-xl rounded-xl">
                     <DesignFixChat
                       currentImage={generatedImage}
                       originalImage={uploadedImage}

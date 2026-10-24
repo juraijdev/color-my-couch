@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DesignFixChat } from "@/components/DesignFixChat";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { resizeTransparentPng } from "@/lib/imageUtils";
@@ -320,6 +321,13 @@ export function BackgroundPlacer({
                 />
               ) : null}
             </div>
+            {compositedImage && !isProcessing && (
+              <DesignFixChat
+                currentImage={compositedImage}
+                originalImage={furnitureImages[0] ?? null}
+                onDesignImproved={setCompositedImage}
+              />
+            )}
           </div>
         )}
       </div>
