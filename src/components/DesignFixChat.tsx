@@ -122,7 +122,7 @@ export function DesignFixChat({ currentImage, originalImage, onDesignImproved, d
         onClick={() => setIsOpen((v) => !v)}
         className="w-full flex items-center gap-2 p-3 text-left hover:bg-muted/40 transition-colors"
       >
-        <MessageSquareWand className="w-4 h-4 text-primary shrink-0" />
+        <MessageSquare className="w-4 h-4 text-primary shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold">Something wrong? Tell the AI</p>
           <p className="text-xs text-muted-foreground truncate">
