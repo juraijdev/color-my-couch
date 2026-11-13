@@ -619,7 +619,7 @@ export default function Customize() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <SiteHeader />
-        <main className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
           <div className="max-w-2xl w-full text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
               <Wand2 className="w-3.5 h-3.5" /> Suggest Colors from Room
@@ -667,7 +667,7 @@ export default function Customize() {
         </div>
       )}
 
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="min-w-0 flex-1 flex flex-col overflow-hidden">
         {!uploadedImage ? (
           <div className="flex-1 overflow-auto">
             {isSuggestMode && (
@@ -691,8 +691,8 @@ export default function Customize() {
 
           </div>
         ) : (
-          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="min-w-0 flex-1 flex flex-col lg:flex-row overflow-hidden">
+            <div className="min-w-0 flex-1 flex flex-col min-h-0 overflow-hidden">
               <FurnitureEditor
                 ref={furnitureEditorRef}
                 imageUrl={uploadedImage}
@@ -715,11 +715,11 @@ export default function Customize() {
                 </div>
               )}
               {user && detectedParts.length > 0 && (
-                <div className="shrink-0 p-3 border-t border-border bg-card flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="shrink-0 p-3 border-t border-border bg-card grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row items-stretch lg:items-center gap-2">
                   <select
                     value={savedMainCategory}
                     onChange={(e) => setSavedMainCategory(e.target.value)}
-                    className="h-9 rounded-md border border-input bg-background px-2 text-sm sm:w-44"
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm w-full min-w-0 lg:w-44"
                     title="Main category"
                   >
                     {MAIN_CATEGORIES.map((m) => (
@@ -731,7 +731,7 @@ export default function Customize() {
                     onChange={(e) => setSavedCategory(e.target.value)}
                     placeholder="Category (e.g. Buffet Tables)"
                     list="saved-furniture-categories"
-                    className="h-9 text-sm sm:w-52"
+                    className="h-9 text-sm min-w-0 lg:w-52"
                   />
                   <datalist id="saved-furniture-categories">
                     {knownCategories.map((c) => (
@@ -755,7 +755,7 @@ export default function Customize() {
             </div>
 
 
-            <div className="w-full lg:w-[420px] xl:w-[480px] border-t lg:border-t-0 lg:border-l border-border flex flex-col overflow-hidden bg-card/50">
+            <div className="w-full min-w-0 lg:shrink-0 lg:w-[420px] xl:w-[480px] border-t lg:border-t-0 lg:border-l border-border flex flex-col overflow-hidden bg-card/50">
               {/* Suggestions panel */}
               {isSuggestMode && (isSuggesting || (suggestions && !suggestionsApplied)) && (
                 <div className="shrink-0 p-4 border-b border-border bg-primary/5">
@@ -825,7 +825,7 @@ export default function Customize() {
                 </div>
               )}
 
-              <div className="flex-1 min-h-0 p-4 overflow-hidden">
+              <div className="h-[520px] sm:h-[600px] lg:h-auto lg:flex-1 min-h-0 p-3 sm:p-4 overflow-hidden">
                 <PatternGrid
                   selectedPattern={selectedPattern}
                   onPatternSelect={handlePatternSelect}
@@ -847,7 +847,7 @@ export default function Customize() {
                   autoOpenPlacer={autoOpenPlacerAfterGen}
                 />
                 {generatedImage && (
-                  <div className="fixed bottom-4 right-4 z-40 w-[360px] max-w-[calc(100vw-2rem)] shadow-xl rounded-xl">
+                  <div className="mt-4 lg:mt-0 lg:fixed lg:bottom-4 lg:right-4 z-40 w-full lg:w-[360px] max-w-[calc(100vw-2rem)] shadow-xl rounded-xl">
                     <DesignFixChat
                       currentImage={generatedImage}
                       originalImage={uploadedImage}

@@ -164,3 +164,25 @@
     border-radius: 3px;
   }
 }
+
+/* Mobile containment complements each page's wrapping and stacked layout. */
+@media (max-width: 767px) {
+  #root {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #root :where(main, section, nav, header, footer, form, div) {
+    min-width: 0;
+  }
+
+  #root :where(h1, h2, h3, h4, p, blockquote) {
+    overflow-wrap: anywhere;
+  }
+
+  #root button, #root a[role="button"] {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

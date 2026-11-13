@@ -20,17 +20,17 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-6">
+      <div className="max-w-7xl mx-auto flex min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-3 sm:h-16 sm:flex-nowrap sm:px-6 sm:py-0">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">L</span>
           </div>
-          <span className="font-display text-xl font-bold tracking-tight text-foreground">
+          <span className="font-display text-xl font-bold tracking-normal text-foreground">
             LUSH<span className="font-normal text-muted-foreground">by</span>GESIGN
           </span>
         </Link>
 
-        <nav className="flex items-center gap-6">
+        <nav className="flex w-full flex-wrap items-center gap-x-4 gap-y-3 sm:w-auto sm:gap-6">
           <Link to="/" className={cn("text-sm font-medium hover:text-primary transition-colors",
             location.pathname === "/" ? "text-primary" : "text-muted-foreground")}>
             Home
@@ -64,9 +64,9 @@ export function SiteHeader() {
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="w-9 h-9 rounded-full bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center hover:opacity-90">
+                <Button size="icon" aria-label="Account menu" className="h-9 w-9 shrink-0 rounded-full font-semibold text-sm">
                   {initial}
-                </button>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
@@ -85,8 +85,8 @@ export function SiteHeader() {
       </div>
 
       <div className="border-t border-border bg-muted/30">
-        <div className="max-w-7xl mx-auto flex items-center gap-2 px-6 py-2 overflow-x-auto">
-          <span className="text-xs uppercase tracking-wider text-muted-foreground shrink-0 mr-1">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 px-4 py-2 sm:flex-nowrap sm:px-6 sm:overflow-x-auto">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground w-full shrink-0 mr-1 sm:w-auto">
             Saved library
           </span>
           {MAIN_CATEGORIES.map((m) => (

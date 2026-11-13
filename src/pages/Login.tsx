@@ -57,8 +57,8 @@ export default function Login() {
         <div className="absolute top-1/3 -right-16 w-64 h-64 rounded-full bg-primary-foreground/5" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative">
-        <div className="absolute top-6 right-6">
+      <div className="flex-1 flex items-center justify-center px-4 pb-8 pt-20 sm:p-6 lg:p-12 relative">
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
           <LanguageSwitcher />
         </div>
         <div className="w-full max-w-md">

@@ -208,9 +208,9 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
     }));
 
     return (
-      <div className="h-full flex flex-col">
+      <div className="min-w-0 h-full flex flex-col">
         {/* Top toolbar */}
-        <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+        <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4 border-b border-border bg-card">
           {onBack && (
             <Button variant="ghost" onClick={onBack} className="gap-2">
               <ArrowLeft className="w-4 h-4" />
@@ -237,10 +237,10 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <div className="min-w-0 flex-1 flex flex-col lg:flex-row overflow-hidden">
           {/* Image view */}
-          <div className="flex-1 flex items-center justify-center p-4 lg:p-8 bg-muted/20 overflow-auto">
-            <div className="relative max-w-full">
+          <div className="min-w-0 flex-1 flex items-center justify-center p-4 lg:p-8 bg-muted/20 overflow-auto">
+            <div className="relative max-w-full min-w-0">
               <img
                 src={imageUrl}
                 alt="Furniture to customize"
@@ -304,7 +304,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
                     {/* Label */}
                     <span 
                       className={cn(
-                        "absolute left-1/2 -translate-x-1/2 text-[10px] leading-tight px-2 py-0.5 rounded whitespace-nowrap font-semibold shadow-md z-10 pointer-events-none",
+                        "absolute left-1/2 -translate-x-1/2 text-[10px] leading-tight px-2 py-0.5 rounded max-w-[160px] whitespace-normal break-words text-center lg:max-w-none lg:whitespace-nowrap font-semibold shadow-md z-10 pointer-events-none",
                         labelAbove ? "-top-6" : "-bottom-6",
                         assignedPattern
                           ? "bg-primary text-primary-foreground"
@@ -321,7 +321,7 @@ export const FurnitureEditor = forwardRef<FurnitureEditorRef, FurnitureEditorPro
           </div>
 
           {/* Parts panel */}
-          <div className="lg:w-80 xl:w-96 border-t lg:border-t-0 lg:border-l border-border bg-card overflow-auto">
+          <div className="w-full min-w-0 lg:w-80 lg:shrink-0 xl:w-96 border-t lg:border-t-0 lg:border-l border-border bg-card overflow-auto">
             <div className="p-4">
               <h3 className="font-semibold text-lg mb-2">Furniture Parts</h3>
               <p className="text-sm text-muted-foreground mb-4">

@@ -4,3 +4,6 @@
 - [ ] Verify signed-in room → furniture → suggestion flow: blocked because no preview account matches the requesting user; preview sign-in needed.
 - [x] Add ChatGPT-like "fix my design" chat after generation (fix-design function + DesignFixChat panel); feedback logged to ai_usage_log for admin review.
 - [ ] Verify fix-design end-to-end with a real generated image (needs signed-in preview session).
+- [x] Contain and organize all mobile pages without changing desktop design or AI behavior.
+- [x] Check sample layout states at 320, 375, 768, and 1280px: zero page-wide horizontal overflow; mobile customization/chat/background controls exercised.
+- [ ] Verify mobile flows against a real signed-in account on live: preview session mint failed because the backend is unavailable; VPS access is not available.

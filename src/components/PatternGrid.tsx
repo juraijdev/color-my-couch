@@ -36,7 +36,7 @@ export function PatternGrid({ selectedPattern, onPatternSelect, disabled }: Patt
 
   return (
     <div className={cn(
-      "flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden",
+      "min-w-0 flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden",
       disabled && "opacity-50 pointer-events-none"
     )}>
       {/* Header */}
@@ -75,8 +75,8 @@ export function PatternGrid({ selectedPattern, onPatternSelect, disabled }: Patt
       </div>
 
       {/* Category tabs */}
-      <div className="border-b border-border overflow-x-auto scrollbar-thin">
-        <div className="flex gap-1 p-2 min-w-max">
+      <div className="border-b border-border max-h-36 overflow-y-auto sm:max-h-none sm:overflow-x-auto scrollbar-thin">
+        <div className="flex flex-wrap gap-1 p-2 sm:min-w-max sm:flex-nowrap">
             <button
               onClick={() => setActiveCategory("all")}
               className={cn(
@@ -106,10 +106,10 @@ export function PatternGrid({ selectedPattern, onPatternSelect, disabled }: Patt
       </div>
 
       {/* Pattern grid */}
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="min-h-0 min-w-0 flex-1 p-3 sm:p-4">
         <div className={cn(
           "grid gap-3",
-          gridSize === "large" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" : "grid-cols-4 sm:grid-cols-5 lg:grid-cols-6"
+          gridSize === "large" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" : "grid-cols-3 sm:grid-cols-5 lg:grid-cols-6"
         )}>
           <TooltipProvider delayDuration={200}>
             {filteredPatterns.map((pattern) => (
@@ -118,7 +118,7 @@ export function PatternGrid({ selectedPattern, onPatternSelect, disabled }: Patt
                   <button
                     onClick={() => onPatternSelect(pattern)}
                     className={cn(
-                      "group relative flex flex-col rounded-lg overflow-hidden border-2 bg-card transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
+                      "group relative min-w-0 flex flex-col rounded-lg overflow-hidden border-2 bg-card transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background",
                       selectedPattern?.id === pattern.id 
                         ? "border-primary ring-2 ring-primary/50 scale-105" 
                         : "border-border hover:border-primary/50"
@@ -142,7 +142,7 @@ export function PatternGrid({ selectedPattern, onPatternSelect, disabled }: Patt
                       </div>
                     </div>
 
-                    <div className="relative flex-1 aspect-square">
+                    <div className="relative w-full aspect-square">
                       <img 
                         src={pattern.imageUrl} 
                         alt={pattern.name}

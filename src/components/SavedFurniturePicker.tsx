@@ -203,7 +203,7 @@ export function SavedFurniturePicker({ onSelect, openMainCategory }: Props) {
           <ChevronDown className="w-4 h-4 ml-2" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[360px] p-2">
+      <PopoverContent align="start" className="w-[360px] max-w-[calc(100vw-2rem)] p-2">
         <div className="flex items-center justify-between px-1 pb-2 gap-1">
           {activeCategory && editingCategory === activeCategory ? (
             <div className="flex items-center gap-1 min-w-0 flex-1">
@@ -334,13 +334,13 @@ export function SavedFurniturePicker({ onSelect, openMainCategory }: Props) {
               const parts = Array.isArray(row.parts) ? row.parts : [];
               return (
                 <div key={row.id} className="rounded-lg hover:bg-muted transition-colors p-2">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
                     <button
                       onClick={() => {
                         onSelect(row);
                         setOpen(false);
                       }}
-                      className="flex items-center gap-3 text-left min-w-0 flex-1"
+                      className="flex items-center gap-3 text-left min-w-0 w-full sm:w-auto sm:flex-1"
                     >
                       <div className="w-14 h-14 rounded-md border border-border overflow-hidden shrink-0 bg-white">
                         <img

@@ -173,9 +173,9 @@ export function BackgroundPlacer({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="min-w-0 flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="flex items-start justify-between gap-2 p-3 sm:p-4 border-b border-border">
         <div>
           <h2 className="font-semibold text-lg">Place in Background</h2>
           <p className="text-sm text-muted-foreground">
@@ -196,7 +196,7 @@ export function BackgroundPlacer({
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Your Furniture ({furnitureImages.length})
           </label>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex flex-wrap gap-2 pb-1 sm:flex-nowrap sm:overflow-x-auto">
             {furnitureImages.map((img, idx) => (
               <div
                 key={idx}
@@ -217,7 +217,7 @@ export function BackgroundPlacer({
                       toast.success("Furniture removed");
                     }}
                     title="Remove this furniture"
-                    className="absolute top-1 right-1 p-0.5 rounded-full bg-background/90 hover:bg-destructive hover:text-destructive-foreground shadow-sm transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute top-1 right-1 p-0.5 rounded-full bg-background/90 hover:bg-destructive hover:text-destructive-foreground shadow-sm transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -251,7 +251,7 @@ export function BackgroundPlacer({
               />
               <button
                 onClick={clearBackground}
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 hover:bg-destructive/20 transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute top-2 right-2 p-1.5 rounded-full bg-background/80 hover:bg-destructive/20 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
               >
                 <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
               </button>
@@ -364,7 +364,7 @@ export function BackgroundPlacer({
             {satisfaction === "pending" && !isProcessing && (
               <div className="space-y-2 p-3 rounded-lg bg-secondary/50 animate-fade-in">
                 <p className="text-sm font-medium text-center">Are you satisfied with the design?</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <Button
                     variant="default"
                     className="w-full"

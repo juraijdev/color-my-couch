@@ -57,7 +57,7 @@ export function StepIndicator({ currentStep, hasImage, hasPatternAssigned }: Ste
             return (
               <div 
                 key={step.id} 
-                className="relative flex flex-col items-center z-10"
+                className="relative min-w-0 w-1/3 sm:w-auto flex flex-col items-center z-10"
               >
                 {/* Step circle */}
                 <div
@@ -78,7 +78,7 @@ export function StepIndicator({ currentStep, hasImage, hasPatternAssigned }: Ste
                 {/* Step label */}
                 <div className="mt-3 text-center">
                   <p className={cn(
-                    "font-medium text-sm transition-colors",
+                    "font-medium text-xs sm:text-sm transition-colors",
                     status === "current" ? "text-primary" : 
                     status === "completed" ? "text-foreground" : "text-muted-foreground"
                   )}>

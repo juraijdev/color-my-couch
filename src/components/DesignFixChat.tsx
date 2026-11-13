@@ -116,7 +116,7 @@ export function DesignFixChat({ currentImage, originalImage, onDesignImproved, d
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="min-w-0 bg-card rounded-xl border border-border overflow-hidden">
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
@@ -145,7 +145,7 @@ export function DesignFixChat({ currentImage, originalImage, onDesignImproved, d
                         : "max-w-[85%] rounded-lg bg-muted px-3 py-2 text-xs"
                     }
                   >
-                    <p className="whitespace-pre-wrap">{m.text}</p>
+                    <p className="whitespace-pre-wrap break-words">{m.text}</p>
                     {m.image && (
                       <img src={m.image} alt="Improved design" className="mt-2 rounded-md max-h-28 object-contain bg-white" />
                     )}
@@ -184,7 +184,7 @@ export function DesignFixChat({ currentImage, originalImage, onDesignImproved, d
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder='e.g. "The top surface color is too dark" or "the leg shape changed"'
-              className="min-h-[40px] max-h-28 text-sm resize-none"
+              className="min-w-0 min-h-[40px] max-h-28 text-sm resize-none"
               disabled={isFixing || disabled}
               maxLength={1000}
             />

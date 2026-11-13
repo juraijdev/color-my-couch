@@ -26,14 +26,14 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SiteHeader />
-      <main className="max-w-6xl mx-auto w-full px-6 py-8 flex-1">
+      <main className="max-w-6xl mx-auto min-w-0 w-full px-4 sm:px-6 py-6 sm:py-8 flex-1">
         <div className="flex items-center gap-2 mb-6">
           <ShieldCheck className="w-6 h-6 text-primary" />
           <h1 className="font-display text-3xl font-bold">Admin Dashboard</h1>
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setParams({ tab: v })}>
-          <TabsList className="grid grid-cols-4 max-w-2xl">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-4 h-auto max-w-2xl">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="chat">AI Chat</TabsTrigger>
             <TabsTrigger value="saved">Saved Furniture</TabsTrigger>
@@ -106,10 +106,10 @@ function UsersPanel() {
           const open = expanded === u.id;
           return (
             <div key={u.id} className="p-3 border border-border rounded-lg">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <div className="font-medium">{u.display_name || u.email}</div>
-                  <div className="text-xs text-muted-foreground">{u.email}</div>
+                  <div className="font-medium break-words">{u.display_name || u.email}</div>
+                  <div className="text-xs text-muted-foreground break-all">{u.email}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={isAdmin ? "default" : "secondary"}>{isAdmin ? "Admin" : "User"}</Badge>
@@ -140,7 +140,7 @@ function UsersPanel() {
               {open && (
                 <div className="mt-3 max-h-64 overflow-auto text-xs font-mono space-y-1 border-t border-border pt-2">
                   {logs.slice(0, 200).map((r) => (
-                    <div key={r.id} className="flex justify-between gap-2 border-b border-border/50 py-1">
+                    <div key={r.id} className="grid grid-cols-2 sm:flex sm:justify-between gap-2 break-words border-b border-border/50 py-1">
                       <span>{new Date(r.created_at).toLocaleString()}</span>
                       <span>{r.feature}</span>
                       <span className="text-muted-foreground">{r.model ?? "-"}</span>
@@ -212,13 +212,13 @@ function ChatPanel() {
 
   return (
     <Card className="p-4 flex flex-col h-[70vh]">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Sparkles className="w-4 h-4 text-primary" /> AI Assistant (admin-only)
         </div>
         <Button size="sm" variant="ghost" onClick={clear}><Trash2 className="w-4 h-4 mr-1" /> Clear</Button>
       </div>
-      <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+      <div className="min-w-0 flex-1 overflow-y-auto break-words space-y-4 pr-2">
         {messages.length === 0 && (
           <p className="text-sm text-muted-foreground">
             Ask the assistant about a bad customization, why a part was mis-detected, or how to word a better prompt.
@@ -270,13 +270,13 @@ function SavedPanel() {
         Verified furniture analyses. When someone uploads the same photo, the app reuses the saved parts instead of re-running AI segmentation.
       </p>
       {rows.length === 0 && <p className="text-sm text-muted-foreground">Nothing saved yet. In the Customizer, after a correct customization, click <strong>Save as verified</strong>.</p>}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {rows.map((r) => {
           const partCount = Array.isArray(r.parts) ? (r.parts as unknown[]).length : 0;
           return (
             <div key={r.id} className="border border-border rounded-lg overflow-hidden">
               <img src={r.image_url} alt={r.name} className="w-full h-32 object-cover" />
-              <div className="p-2 flex items-center justify-between">
+              <div className="p-2 flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-sm font-medium truncate">{r.name}</div>
                   <div className="text-xs text-muted-foreground">{partCount} parts</div>
@@ -304,7 +304,7 @@ function UsagePanel() {
   return (
     <div className="space-y-4">
       <Card className="p-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <h3 className="font-semibold">Credits & Top-up</h3>
           <a href="https://lovable.dev/pricing" target="_blank" rel="noreferrer"
              className="text-sm text-primary hover:underline flex items-center gap-1">
@@ -322,7 +322,7 @@ function UsagePanel() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {Object.entries(byFeature).map(([f, n]) => (
             <div key={f} className="p-3 rounded border border-border">
-              <div className="text-xs uppercase text-muted-foreground">{f}</div>
+              <div className="text-xs uppercase break-words text-muted-foreground">{f}</div>
               <div className="text-2xl font-bold">{n}</div>
             </div>
           ))}
@@ -334,7 +334,7 @@ function UsagePanel() {
         <h3 className="font-semibold mb-3">Recent activity</h3>
         <div className="space-y-1 max-h-80 overflow-auto text-xs font-mono">
           {rows.slice(0, 100).map((r) => (
-            <div key={r.id} className="flex justify-between border-b border-border/50 py-1">
+            <div key={r.id} className="grid grid-cols-2 sm:flex sm:justify-between gap-2 break-words border-b border-border/50 py-1">
               <span>{new Date(r.created_at).toLocaleString()}</span>
               <span>{r.feature}</span>
               <span className="text-muted-foreground">{r.model ?? "-"}</span>

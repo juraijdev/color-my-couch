@@ -103,7 +103,7 @@ export function UploadArea({ onImageUpload, imageKind = "furniture" }: UploadAre
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-8 sm:p-8">
       {/* Welcome message */}
       <div className="text-center mb-8 max-w-lg">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
@@ -121,7 +121,7 @@ export function UploadArea({ onImageUpload, imageKind = "furniture" }: UploadAre
       {/* Upload zone */}
       <div
         className={cn(
-          "w-full max-w-2xl rounded-2xl border-2 border-dashed p-8 sm:p-12 transition-all duration-300 cursor-pointer",
+          "w-full max-w-2xl rounded-2xl border-2 border-dashed p-4 sm:p-12 transition-all duration-300 cursor-pointer",
           isDragging 
             ? "border-primary bg-primary/5 shadow-[0_0_30px_hsl(var(--primary)/0.3)]" 
             : "border-border bg-card/50 hover:border-primary/50 hover:bg-card"
@@ -160,7 +160,7 @@ export function UploadArea({ onImageUpload, imageKind = "furniture" }: UploadAre
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+          <div className="flex w-full flex-col items-stretch justify-center gap-3 mt-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
             <Button variant="default" size="lg">
               <Upload className="w-5 h-5 mr-2" />
               {isRoom ? "Choose room photo" : "Choose Image"}

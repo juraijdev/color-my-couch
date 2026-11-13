@@ -105,7 +105,7 @@ export function GeneratePanel({
   // If background placer is active, show it instead
   if (showBackgroundPlacer && furnitureForPlacement.length > 0) {
     return (
-      <div className="h-full bg-card rounded-xl border border-border overflow-hidden">
+      <div className="min-w-0 h-full bg-card rounded-xl border border-border overflow-hidden">
         <BackgroundPlacer
           furnitureImages={furnitureForPlacement}
           onClose={() => setShowBackgroundPlacer(false)}
@@ -118,7 +118,7 @@ export function GeneratePanel({
   }
 
   return (
-    <div className="h-full flex flex-col bg-card rounded-xl border border-border overflow-hidden">
+    <div className="min-w-0 h-full flex flex-col bg-card rounded-xl border border-border overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-border">
         <h2 className="font-semibold text-lg">Preview & Generate</h2>
@@ -243,7 +243,7 @@ export function GeneratePanel({
             {onAddMoreFurniture && (
               <Button
                 variant="outline"
-                className="w-full border-accent/30 hover:bg-accent/10"
+                className="w-full h-auto min-h-10 whitespace-normal border-accent/30 hover:bg-accent/10"
                 onClick={onAddMoreFurniture}
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -254,7 +254,7 @@ export function GeneratePanel({
             {/* Place in Background button */}
             <Button
               variant="outline"
-              className="w-full border-primary/30 text-primary hover:bg-primary/10"
+              className="w-full h-auto min-h-10 whitespace-normal border-primary/30 text-primary hover:bg-primary/10"
               onClick={() => setShowBackgroundPlacer(true)}
             >
               <ImageIconLucide className="w-4 h-4 mr-2" />
@@ -266,7 +266,7 @@ export function GeneratePanel({
 
             <Button
               variant="outline"
-              className="w-full border-primary/30 text-primary hover:bg-primary/10"
+              className="w-full h-auto min-h-10 whitespace-normal border-primary/30 text-primary hover:bg-primary/10"
               onClick={handleCopyToClipboard}
             >
               <Copy className="w-4 h-4 mr-2" />
